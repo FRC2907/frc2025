@@ -4,18 +4,40 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class DriveSubsystem extends SubsystemBase {
-  /** Creates a new ExampleSubsystem. */
-  public DriveSubsystem() {}
+import frc.robot.constants.Ports;
 
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
+public class DriveSubsystem extends SubsystemBase {
+
+  private SparkMax frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor;
+  private SparkMaxConfig config;
+
+  public DriveSubsystem() {
+    frontLeftMotor = new SparkMax(Ports.drivetrain.FRONT_LEFT, MotorType.kBrushless);
+    frontRightMotor = new SparkMax(Ports.drivetrain.FRONT_RIGHT, MotorType.kBrushless);
+    rearLeftMotor = new SparkMax(Ports.drivetrain.REAR_LEFT, MotorType.kBrushless);
+    rearRightMotor = new SparkMax(Ports.drivetrain.REAR_RIGHT, MotorType.kBrushless);
+
+    config = new SparkMaxConfig();
+    config.smartCurrentLimit(10)
+          .idleMode(IdleMode.kBrake)
+          .closedLoop.maxMotion.maxAcceleration(500)
+                               .maxVelocity(4000);
+    frontLeftMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    frontRightMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    rearLeftMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    rearRightMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+  }
+
   public Command exampleMethodCommand() {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
