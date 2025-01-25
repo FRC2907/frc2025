@@ -28,8 +28,11 @@ public class Util {
         return value;
     }
 
-    public static boolean checkDriverDeadband(double value){
-        return Math.abs(value) > Control.kDriverDeadband;
+    public static boolean checkDriverDeadband(PS5Controller input){
+        return Math.abs(input.getLeftY()) >  Control.kDriverDeadband
+            || Math.abs(input.getLeftX()) >  Control.kDriverDeadband
+            || Math.abs(input.getRightY()) > Control.kDriverDeadband
+            || Math.abs(input.getRightX()) > Control.kDriverDeadband;
     }
     public static double getLeftMagnitude(PS5Controller input){
         return Math.sqrt(Math.pow(input.getLeftX(), 2.0) + Math.pow(input.getLeftY(), 2.0));

@@ -6,16 +6,20 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
+import frc.robot.commands.CoralPoop;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.constants.Control;
 import frc.robot.constants.Ports;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.PoopSubsystem;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.PS5Controller;
+import edu.wpi.first.wpilibj.PS5Controller.Button;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -28,6 +32,8 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final DriveSubsystem driveSubsystem = new DriveSubsystem();
+  private final PoopSubsystem poopSubsystem = new PoopSubsystem();
+
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final PS5Controller driver = new PS5Controller(Ports.HID.DRIVER);
@@ -49,8 +55,8 @@ public class RobotContainer {
             - yLimiter.calculate(driver.getLeftY()) * Control.drivetrain.kMaxVelMeters,
             - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMeters,
             - rotLimiter.calculate(driver.getRightX()) * Control.drivetrain.kMaxAngularVel,
-            false
-          )
+            false),
+            driveSubsystem
       )
     );
   }
@@ -66,8 +72,11 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_exampleSubsystem::exampleCondition)
+    /*new Trigger(m_exampleSubsystem::exampleCondition)
         .onTrue(new ExampleCommand(m_exampleSubsystem));
+    new Trigger(driver::getR2Button)
+        .whileTrue(new CoralPoop(poopSubsystem));*/
+    new JoystickButton(driver, Button.kR2.value).whileTrue(new CoralPoop(poopSubsystem));
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.

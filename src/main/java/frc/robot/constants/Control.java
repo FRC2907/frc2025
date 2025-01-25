@@ -1,5 +1,7 @@
 package frc.robot.constants;
 
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.util.Units;
@@ -18,6 +20,7 @@ public class Control {
         public static final Translation2d REAR_RIGHT_LOCATION = new Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2);
         public static final MecanumDriveKinematics kinematics = new MecanumDriveKinematics(
             FRONT_LEFT_LOCATION, FRONT_RIGHT_LOCATION, REAR_LEFT_LOCATION, REAR_RIGHT_LOCATION);
+        public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
 
         public static final double kMaxAcceleration = 4000; //rpm / s
         public static final double kMaxVelRPM = 4000; // rpm
@@ -33,5 +36,11 @@ public class Control {
         public static final double kP = 4e-7,
                                    kI = 1e-7,
                                    kD = 3;
+    }
+
+    public class manipulator {
+        public static final MotorType MOTOR_TYPE = MotorType.kBrushed;
+
+        public static final double kShootSpeed = 0.3;
     }
 }
