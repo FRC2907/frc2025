@@ -7,8 +7,14 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.constants.Control;
+import frc.robot.constants.Ports;
+import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
+import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -21,15 +27,32 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+  private final DriveSubsystem driveSubsystem = new DriveSubsystem();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  private final PS5Controller driver = new PS5Controller(Ports.HID.DRIVER);
+  private final PS5Controller operator = new PS5Controller(Ports.HID.OPERATOR);
+
+  private static final SlewRateLimiter xLimiter = new SlewRateLimiter(10);
+  private static final SlewRateLimiter yLimiter = new SlewRateLimiter(10);
+  private static final SlewRateLimiter rotLimiter = new SlewRateLimiter(10);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
+
+    driveSubsystem.setDefaultCommand(
+      new RunCommand(
+        () ->
+          driveSubsystem.drive(
+            - yLimiter.calculate(driver.getLeftY()) * Control.drivetrain.kMaxVelMeters,
+            - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMeters,
+            - rotLimiter.calculate(driver.getRightX()) * Control.drivetrain.kMaxAngularVel,
+            false
+          )
+      )
+    );
   }
 
   /**
@@ -48,7 +71,6 @@ public class RobotContainer {
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
-    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
   }
 
   /**
