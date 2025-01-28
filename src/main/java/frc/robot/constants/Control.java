@@ -18,14 +18,14 @@ public class Control {
         public static final Translation2d FRONT_RIGHT_LOCATION = new Translation2d(WHEEL_BASE / 2, - TRACK_WIDTH / 2);
         public static final Translation2d REAR_LEFT_LOCATION = new Translation2d(-WHEEL_BASE / 2, TRACK_WIDTH / 2);
         public static final Translation2d REAR_RIGHT_LOCATION = new Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2);
-        public static final MecanumDriveKinematics kinematics = new MecanumDriveKinematics(
+        public static final MecanumDriveKinematics DRIVE_KINEMATICS = new MecanumDriveKinematics(
             FRONT_LEFT_LOCATION, FRONT_RIGHT_LOCATION, REAR_LEFT_LOCATION, REAR_RIGHT_LOCATION);
         public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
 
         public static final double kMaxAcceleration = 4000; //rpm / s
         public static final double kMaxVelRPM = 4000; // rpm
         public static final double kMaxVelMeters = 14; // m/s
-        public static final double kMaxAngularVel = 10;
+        public static final double kMaxAngularVel = 14;
         public static final double kAllowedError = 0.005;
         public static final double kRampRate = 0.1;
 

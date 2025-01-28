@@ -13,9 +13,16 @@ import frc.robot.constants.Ports;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.PoopSubsystem;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.PS5Controller.Button;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -30,9 +37,9 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-  private final DriveSubsystem driveSubsystem = new DriveSubsystem();
-  private final PoopSubsystem poopSubsystem = new PoopSubsystem();
+
+  private final DriveSubsystem driveSubsystem;
+  private final PoopSubsystem poopSubsystem;
 
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -43,22 +50,40 @@ public class RobotContainer {
   private static final SlewRateLimiter yLimiter = new SlewRateLimiter(10);
   private static final SlewRateLimiter rotLimiter = new SlewRateLimiter(10);
 
+  private PathPlannerAuto test;
+
+  private final SendableChooser<Command> autoChooser;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Configure the trigger bindings
-    configureBindings();
+    driveSubsystem = new DriveSubsystem();
+    poopSubsystem = new PoopSubsystem();
 
-    driveSubsystem.setDefaultCommand(
-      new RunCommand(
-        () ->
+    NamedCommands.registerCommand("CoralPoop", new CoralPoop(poopSubsystem));
+
+    test = new PathPlannerAuto("Test");
+
+    autoChooser = AutoBuilder.buildAutoChooser();
+
+    RunCommand drive = new RunCommand(
+      () -> {
+        if (Util.checkDriverDeadband(driver)) 
           driveSubsystem.drive(
             - yLimiter.calculate(driver.getLeftY()) * Control.drivetrain.kMaxVelMeters,
             - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMeters,
             - rotLimiter.calculate(driver.getRightX()) * Control.drivetrain.kMaxAngularVel,
-            false),
+            true);
+        else 
+            driveSubsystem.stop(); },
             driveSubsystem
-      )
-    );
+      );
+
+    driveSubsystem.setDefaultCommand(drive);
+
+    configureBindings();
+
+    // Configure the trigger bindings
+    SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
   /**
@@ -89,6 +114,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return Autos.exampleAuto(m_exampleSubsystem);
+    return autoChooser.getSelected();
   }
 }

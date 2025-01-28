@@ -59,6 +59,9 @@ public class Util {
     public static double metersPerSecondToRPM(double speed, double diameter){
         return (speed / (diameter * Math.PI)) * 60;
     }
+    public static double revolutionsToMeters(double revolutions, double diameter){
+        return revolutions * diameter * Math.PI;
+    }
     public static double RPMToMetersPerSecond(double rpm, double diameter){
         return rpm * diameter * Math.PI / 60;
     }

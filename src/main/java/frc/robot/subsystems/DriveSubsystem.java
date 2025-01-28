@@ -4,6 +4,10 @@
 
 package frc.robot.subsystems;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -15,8 +19,15 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
+import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,11 +39,15 @@ import frc.robot.constants.Ports;
 public class DriveSubsystem extends SubsystemBase {
 
   private double frontLeftSpeed, frontRightSpeed, rearLeftSpeed, rearRightSpeed;
+  private double wheelDiameter;
   private SparkMax frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor;
   private SparkMaxConfig config;
   private RelativeEncoder frontLeftEnc, frontRightEnc, rearLeftEnc, rearRightEnc;
   private MecanumDrive dt;
   private AHRS gyro;
+  private MecanumDrivePoseEstimator poseEstimator;
+  private MecanumDriveKinematics kinematics;
+  private RobotConfig robotConfig;
 
   public DriveSubsystem() {
     frontLeftMotor =  new SparkMax(Ports.drivetrain.FRONT_LEFT,  MotorType.kBrushless);
@@ -55,11 +70,32 @@ public class DriveSubsystem extends SubsystemBase {
     rearLeftSpeed = 0;
     rearRightSpeed = 0;
 
+    wheelDiameter = Control.drivetrain.WHEEL_DIAMETER;
+
     configure();
 
     //dt = new MecanumDrive(frontLeftMotor::set, rearLeftMotor::set, frontRightMotor::set, rearRightMotor::set);
 
     gyro = new AHRS(NavXComType.kMXP_SPI);
+    kinematics = Control.drivetrain.DRIVE_KINEMATICS;
+
+    poseEstimator = new MecanumDrivePoseEstimator(
+      kinematics,
+      gyro.getRotation2d(),
+      getWheelPositions(),
+      new Pose2d(),
+      VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)),
+      VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))
+    );
+
+
+    try{
+      robotConfig = RobotConfig.fromGUISettings();
+    } catch (Exception e) {
+      // Handle exception as needed
+      e.printStackTrace();
+    }
+    autoBuilderThing();
   }
 
   public void stop(){
@@ -71,16 +107,16 @@ public class DriveSubsystem extends SubsystemBase {
 
   public void drive(double xSpeed, double ySpeed, double zRotation, boolean fieldRelative){
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, zRotation);
-    MecanumDriveWheelSpeeds wheelSpeeds = Control.drivetrain.kinematics.toWheelSpeeds(
+    MecanumDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(
       fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, gyro.getRotation2d())
                     : chassisSpeeds
     );
     wheelSpeeds.desaturate(Control.drivetrain.kMaxVelMeters);
 
-    frontLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontLeftMetersPerSecond, Control.drivetrain.WHEEL_DIAMETER);
-    frontRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontRightMetersPerSecond, Control.drivetrain.WHEEL_DIAMETER);
-    rearLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearLeftMetersPerSecond, Control.drivetrain.WHEEL_DIAMETER);
-    rearRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearRightMetersPerSecond, Control.drivetrain.WHEEL_DIAMETER);
+    frontLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontLeftMetersPerSecond, wheelDiameter);
+    frontRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontRightMetersPerSecond, wheelDiameter);
+    rearLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearLeftMetersPerSecond, wheelDiameter);
+    rearRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearRightMetersPerSecond, wheelDiameter);
 
     if (Math.abs(xSpeed) < 2.8 && Math.abs(ySpeed) > 3.5){
       frontRightSpeed = - frontLeftSpeed;
@@ -91,6 +127,33 @@ public class DriveSubsystem extends SubsystemBase {
       frontRightSpeed = frontLeftSpeed;
       rearLeftSpeed = rearRightSpeed;
     }
+  }
+
+  public void drive(ChassisSpeeds chassisSpeeds){
+    MecanumDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(chassisSpeeds);
+    wheelSpeeds.desaturate(Control.drivetrain.kMaxVelMeters);
+
+    frontLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontLeftMetersPerSecond, wheelDiameter);
+    frontRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontRightMetersPerSecond, wheelDiameter);
+    rearLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearLeftMetersPerSecond, wheelDiameter);
+    rearRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearRightMetersPerSecond, wheelDiameter);
+  }
+
+  private MecanumDriveWheelPositions getWheelPositions(){
+    return new MecanumDriveWheelPositions(
+      Util.revolutionsToMeters(frontLeftEnc .getPosition(), wheelDiameter) / 5.95,
+      Util.revolutionsToMeters(frontRightEnc.getPosition(), wheelDiameter) / 5.95,
+      Util.revolutionsToMeters(rearLeftEnc  .getPosition(), wheelDiameter) / 5.95,
+      Util.revolutionsToMeters(rearRightEnc .getPosition(), wheelDiameter) / 5.95);
+  }
+
+  private ChassisSpeeds getChassisSpeeds(){
+    return kinematics.toChassisSpeeds(
+      new MecanumDriveWheelSpeeds(
+        Util.RPMToMetersPerSecond(frontLeftEnc .getVelocity(), wheelDiameter), 
+        Util.RPMToMetersPerSecond(frontRightEnc.getVelocity(), wheelDiameter), 
+        Util.RPMToMetersPerSecond(rearLeftEnc  .getVelocity(), wheelDiameter), 
+        Util.RPMToMetersPerSecond(rearRightEnc .getVelocity(), wheelDiameter)));
   }
 
   public Command exampleMethodCommand() {
@@ -108,6 +171,8 @@ public class DriveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    poseEstimator.update(gyro.getRotation2d(), getWheelPositions());
+
     frontLeftMotor .getClosedLoopController().setReference(frontLeftSpeed,  ControlType.kMAXMotionVelocityControl);
     frontRightMotor.getClosedLoopController().setReference(frontRightSpeed, ControlType.kMAXMotionVelocityControl);
     rearLeftMotor  .getClosedLoopController().setReference(rearLeftSpeed,   ControlType.kMAXMotionVelocityControl);
@@ -153,5 +218,32 @@ public class DriveSubsystem extends SubsystemBase {
 
     config.apply(new SparkMaxConfig().closedLoop.pidf(Control.drivetrain.kP, Control.drivetrain.kI, Control.drivetrain.kD, Control.drivetrain.krrFF));
     rearRightMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+  }
+
+  private void autoBuilderThing(){
+    // Configure AutoBuilder last
+    AutoBuilder.configure(
+            poseEstimator::getEstimatedPosition, // Robot pose supplier
+            poseEstimator::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
+            this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            (speeds, feedforwards) -> drive(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+            new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+            ),
+            robotConfig, // The robot configuration
+            () -> {
+              // Boolean supplier that controls when the path will be mirrored for the red alliance
+              // This will flip the path being followed to the red side of the field.
+              // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+              var alliance = DriverStation.getAlliance();
+              if (alliance.isPresent()) {
+                return alliance.get() == DriverStation.Alliance.Red;
+              }
+              return false;
+            },
+            this // Reference to this subsystem to set requirements
+    );
   }
 }
