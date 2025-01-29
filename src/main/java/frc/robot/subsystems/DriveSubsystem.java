@@ -22,6 +22,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
@@ -99,10 +100,10 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void stop(){
-    frontLeftMotor. stopMotor();
-    frontRightMotor.stopMotor();
-    rearLeftMotor.  stopMotor();
-    rearRightMotor. stopMotor();
+    frontLeftSpeed = 0;
+    frontRightSpeed = 0;
+    rearLeftSpeed = 0;
+    rearRightSpeed = 0;
   }
 
   public void drive(double xSpeed, double ySpeed, double zRotation, boolean fieldRelative){
@@ -171,21 +172,28 @@ public class DriveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    poseEstimator.update(gyro.getRotation2d(), getWheelPositions());
+    poseEstimator.update(new Rotation2d(0), getWheelPositions());
 
     frontLeftMotor .getClosedLoopController().setReference(frontLeftSpeed,  ControlType.kMAXMotionVelocityControl);
     frontRightMotor.getClosedLoopController().setReference(frontRightSpeed, ControlType.kMAXMotionVelocityControl);
     rearLeftMotor  .getClosedLoopController().setReference(rearLeftSpeed,   ControlType.kMAXMotionVelocityControl);
     rearRightMotor .getClosedLoopController().setReference(rearRightSpeed,  ControlType.kMAXMotionVelocityControl);
 
-    SmartDashboard.putNumber("flVel", frontLeftMotor.getEncoder().getVelocity());
-    SmartDashboard.putNumber("flVel", frontRightMotor.getEncoder().getVelocity());
-    SmartDashboard.putNumber("rlVel", rearLeftMotor.getEncoder().getVelocity());
-    SmartDashboard.putNumber("rrVel", rearRightMotor.getEncoder().getVelocity());
+    SmartDashboard.putNumber("flVel", frontLeftEnc.getVelocity());
+    SmartDashboard.putNumber("flVel", frontRightEnc.getVelocity());
+    SmartDashboard.putNumber("rlVel", rearLeftEnc.getVelocity());
+    SmartDashboard.putNumber("rrVel", rearRightEnc.getVelocity());
+    SmartDashboard.putNumber("flPosition", Util.revolutionsToMeters(frontLeftEnc.getPosition() / 5.95, wheelDiameter));
+    SmartDashboard.putNumber("frPosition", Util.revolutionsToMeters(frontRightEnc.getPosition() / 5.95, wheelDiameter));
+    SmartDashboard.putNumber("rlPosition", Util.revolutionsToMeters(rearLeftEnc.getPosition() / 5.95, wheelDiameter));
+    SmartDashboard.putNumber("rrPosition", Util.revolutionsToMeters(rearRightEnc.getPosition() / 5.95, wheelDiameter));
+    SmartDashboard.putNumber("PoseX", poseEstimator.getEstimatedPosition().getX());
+    SmartDashboard.putNumber("PoseY", poseEstimator.getEstimatedPosition().getY());
     SmartDashboard.putNumber("flSetPoint", frontLeftSpeed);
     SmartDashboard.putNumber("frSetPoint", frontRightSpeed);
     SmartDashboard.putNumber("rlSetPoint", rearLeftSpeed);
     SmartDashboard.putNumber("rrSetPoint", rearRightSpeed);
+    SmartDashboard.putNumber("heading", gyro.getAngle());
   }
 
   @Override
@@ -228,8 +236,8 @@ public class DriveSubsystem extends SubsystemBase {
             this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             (speeds, feedforwards) -> drive(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
             new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+                    new PIDConstants(31.0, 0.0, 1.0), // Translation PID constants
+                    new PIDConstants(2.5, 0.0, 0.0) // Rotation PID constants
             ),
             robotConfig, // The robot configuration
             () -> {
