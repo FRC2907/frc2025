@@ -17,6 +17,7 @@ import frc.robot.subsystems.PoopSubsystem;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindingCommand;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.PS5Controller;
@@ -59,7 +60,7 @@ public class RobotContainer {
     driveSubsystem = new DriveSubsystem();
     poopSubsystem = new PoopSubsystem();
 
-    NamedCommands.registerCommand("CoralPoop", new CoralPoop(poopSubsystem));
+    NamedCommands.registerCommand("Coral Poop", new CoralPoop(poopSubsystem));
 
     test = new PathPlannerAuto("Test");
 
@@ -82,6 +83,7 @@ public class RobotContainer {
 
     configureBindings();
 
+    //PathfindingCommand.warmupCommand().schedule();
     // Configure the trigger bindings
     SmartDashboard.putData("Auto Chooser", autoChooser);
   }

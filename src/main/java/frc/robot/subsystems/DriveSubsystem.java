@@ -4,10 +4,14 @@
 
 package frc.robot.subsystems;
 
+import java.util.*;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.Waypoint;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -78,6 +82,9 @@ public class DriveSubsystem extends SubsystemBase {
     //dt = new MecanumDrive(frontLeftMotor::set, rearLeftMotor::set, frontRightMotor::set, rearRightMotor::set);
 
     gyro = new AHRS(NavXComType.kMXP_SPI);
+    gyro.reset();
+    gyro.resetDisplacement();
+    
     kinematics = Control.drivetrain.DRIVE_KINEMATICS;
 
     poseEstimator = new MecanumDrivePoseEstimator(
@@ -140,6 +147,11 @@ public class DriveSubsystem extends SubsystemBase {
     rearRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearRightMetersPerSecond, wheelDiameter);
   }
 
+  /*public void driveToPose(List<Waypoint> waypoints){
+    PathConstraints constraints = new PathConstraints(
+      Control.drivetrain.kMaxVelMeters, rearLeftSpeed, frontRightSpeed, frontLeftSpeed);
+  }*/
+
   private MecanumDriveWheelPositions getWheelPositions(){
     return new MecanumDriveWheelPositions(
       Util.revolutionsToMeters(frontLeftEnc .getPosition(), wheelDiameter) / 5.95,
@@ -155,6 +167,11 @@ public class DriveSubsystem extends SubsystemBase {
         Util.RPMToMetersPerSecond(frontRightEnc.getVelocity(), wheelDiameter), 
         Util.RPMToMetersPerSecond(rearLeftEnc  .getVelocity(), wheelDiameter), 
         Util.RPMToMetersPerSecond(rearRightEnc .getVelocity(), wheelDiameter)));
+  }
+
+  public double getHeading(){
+    double heading = gyro.getRotation2d().getDegrees();
+    return heading < 0 ? heading % 360 + 360 : heading % 360;
   }
 
   public Command exampleMethodCommand() {
@@ -236,7 +253,7 @@ public class DriveSubsystem extends SubsystemBase {
             this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             (speeds, feedforwards) -> drive(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
             new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                    new PIDConstants(31.0, 0.0, 1.0), // Translation PID constants
+                    new PIDConstants(35.0, 2.0, 2.5), // Translation PID constants
                     new PIDConstants(2.5, 0.0, 0.0) // Rotation PID constants
             ),
             robotConfig, // The robot configuration
