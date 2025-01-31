@@ -38,9 +38,19 @@ public class Control {
                                    kD = 3;
     }
 
-    public class manipulator {
+    public class coralManipulator {
         public static final MotorType MOTOR_TYPE = MotorType.kBrushed;
 
         public static final double kShootSpeed = 0.3;
+    }
+
+    public class algaeManipulator {
+        public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
+        public static final double GEAR_RATIO = 1; //TODO find
+
+        public static final double armConversionFactor = GEAR_RATIO / 360;
+        public static final double armDownLimit = 30; //TODO find
+        public static final double armUpLimit = 135; //TODO find
+        public static final double shootAngle = 100; //TODO find
     }
 }

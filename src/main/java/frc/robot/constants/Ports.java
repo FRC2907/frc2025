@@ -10,6 +10,10 @@ public class Ports {
 
     public class manipulator {
         public static final int CORAL_SHOOTER = 14;
+
+        public static final int ALGAE_ARM = 2;
+        public static final int ALGAE_SHOOT_LEADER = 3;
+        public static final int ALGAE_SHOOT_FOLLOWER = 5;
     }
 
     public class HID {

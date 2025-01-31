@@ -14,6 +14,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.Waypoint;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.studica.frc.AHRS;
@@ -222,9 +223,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void simulationPeriodic() {
-    
-  }
+  public void simulationPeriodic() {}
 
   private void configure(){
     config = new SparkMaxConfig();
@@ -237,8 +236,8 @@ public class DriveSubsystem extends SubsystemBase {
           .closedLoop.pidf(Control.drivetrain.kP, Control.drivetrain.kI, Control.drivetrain.kD, Control.drivetrain.kflFF)
                      .maxMotion.maxAcceleration(Control.drivetrain.kMaxAcceleration)
                                .maxVelocity(Control.drivetrain.kMaxVelRPM)
-                               .allowedClosedLoopError(Control.drivetrain.kAllowedError);
-                               //.positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal); 
+                               .allowedClosedLoopError(Control.drivetrain.kAllowedError)
+                               .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal); 
     frontLeftMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     config.apply(new SparkMaxConfig().closedLoop.pidf(Control.drivetrain.kP, Control.drivetrain.kI, Control.drivetrain.kD, Control.drivetrain.krlFF));
@@ -262,7 +261,7 @@ public class DriveSubsystem extends SubsystemBase {
             (speeds, feedforwards) -> drive(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
             new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
                     new PIDConstants(17.5, 0.0, 2.5), // Translation PID constants
-                    new PIDConstants(10.0, 0.0, 0.0) // Rotation PID constants
+                    new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
             ),
             robotConfig, // The robot configuration
             () -> {
