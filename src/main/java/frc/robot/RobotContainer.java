@@ -7,6 +7,7 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.CoralPoop;
+import frc.robot.commands.EndPoop;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.constants.Control;
 import frc.robot.constants.Ports;
@@ -61,12 +62,13 @@ public class RobotContainer {
     poopSubsystem = new PoopSubsystem();
 
     NamedCommands.registerCommand("Coral Poop", new CoralPoop(poopSubsystem));
+    NamedCommands.registerCommand("End Poop", new EndPoop(poopSubsystem));
 
     test = new PathPlannerAuto("Test");
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
-    RunCommand drive = new RunCommand(
+    /*RunCommand drive = new RunCommand(
       () -> {
         if (Util.checkDriverDeadband(driver)) 
           driveSubsystem.drive(
@@ -77,9 +79,20 @@ public class RobotContainer {
         else 
             driveSubsystem.stop(); },
             driveSubsystem
-      );
+      );*/
 
-    driveSubsystem.setDefaultCommand(drive);
+    driveSubsystem.setDefaultCommand(new RunCommand(
+      () -> {
+        if (Util.checkDriverDeadband(driver)) 
+          driveSubsystem.drive(
+            - yLimiter.calculate(driver.getLeftY()) * Control.drivetrain.kMaxVelMeters,
+            - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMeters,
+            - rotLimiter.calculate(driver.getRightX()) * Control.drivetrain.kMaxAngularVel,
+            false);
+        else 
+            driveSubsystem.stop(); },
+            driveSubsystem
+    ));
 
     configureBindings();
 
