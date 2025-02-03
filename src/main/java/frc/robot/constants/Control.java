@@ -52,5 +52,11 @@ public class Control {
         public static final double armDownLimit = 30; //TODO find
         public static final double armUpLimit = 135; //TODO find
         public static final double shootAngle = 100; //TODO find
+        public static final double intakeAngle = 90;
+        public static final double groundIntakeAngle = 35;
+        public static final double intakeSpeed = 0.1;
+        public static final double fixedShootSpeed = 1000;
+
+        public static final double proximityBand = 1000; //TODO tune
     }
 }

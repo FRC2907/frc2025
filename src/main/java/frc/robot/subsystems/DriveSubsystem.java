@@ -25,6 +25,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -57,6 +58,7 @@ public class DriveSubsystem extends SubsystemBase {
   private MecanumDrivePoseEstimator poseEstimator;
   private MecanumDriveKinematics kinematics;
   private RobotConfig robotConfig;
+  private HolonomicDriveController driveController;
 
   public DriveSubsystem() {
     frontLeftMotor =  new SparkMax(Ports.drivetrain.FRONT_LEFT,  MotorType.kBrushless);
