@@ -36,6 +36,20 @@ public class Control {
         public static final double kP = 4e-7,
                                    kI = 1e-7,
                                    kD = 3;
+        
+        public class driveController {
+            public static final double xP = 0;
+            public static final double xI = 0;
+            public static final double xD = 0;
+
+            public static final double yP = 0;
+            public static final double yI = 0;
+            public static final double yD = 0;
+
+            public static final double rotP = 0;
+            public static final double rotI = 0;
+            public static final double rotD = 0;
+        }
     }
 
     public class coralManipulator {
@@ -57,6 +71,6 @@ public class Control {
         public static final double intakeSpeed = 0.1;
         public static final double fixedShootSpeed = 1000;
 
-        public static final double proximityBand = 1000; //TODO tune
+        public static final double proximityBand = 500; //TODO tune
     }
 }

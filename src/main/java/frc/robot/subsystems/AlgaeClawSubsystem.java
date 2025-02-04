@@ -16,6 +16,7 @@ import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.wpilibj.I2C.Port;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.Control;
@@ -60,14 +61,14 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     
 
 
-    colorSensor = new ColorSensorV3(Port.kMXP);
+    colorSensor = new ColorSensorV3(Port.kOnboard);
   }
 
   public static void armSetSetpoint(double angle){
     armSetPoint = angle;
   }
   public static void shootSetSetPoint(double velRPM){
-    shootSetPoint = velRPM;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    shootSetPoint = velRPM;
   }
   public static void shoot(){
     armSetSetpoint(135);
@@ -100,8 +101,11 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    arm.getClosedLoopController().setReference(armSetPoint, ControlType.kMAXMotionPositionControl);
-    shootLeader.getClosedLoopController().setReference(shootSetPoint, ControlType.kMAXMotionVelocityControl);
+    //arm.getClosedLoopController().setReference(armSetPoint, ControlType.kMAXMotionPositionControl);
+    //shootLeader.getClosedLoopController().setReference(shootSetPoint, ControlType.kMAXMotionVelocityControl);
+
+
+    SmartDashboard.putBoolean("algae", hasAlgae());
   }
 
   @Override

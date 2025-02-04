@@ -11,6 +11,7 @@ import frc.robot.commands.EndPoop;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.constants.Control;
 import frc.robot.constants.Ports;
+import frc.robot.subsystems.AlgaeClawSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.PoopSubsystem;
@@ -42,6 +43,7 @@ public class RobotContainer {
 
   private final DriveSubsystem driveSubsystem;
   private final PoopSubsystem poopSubsystem;
+  //private final AlgaeClawSubsystem algaeClawSubsystem;
 
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -60,6 +62,7 @@ public class RobotContainer {
   public RobotContainer() {
     driveSubsystem = new DriveSubsystem();
     poopSubsystem = new PoopSubsystem();
+    //algaeClawSubsystem = new AlgaeClawSubsystem();
 
     NamedCommands.registerCommand("Coral Poop", new CoralPoop(poopSubsystem));
     NamedCommands.registerCommand("End Poop", new EndPoop(poopSubsystem));
