@@ -25,7 +25,8 @@ public class Control {
         public static final double kMaxAcceleration = 4000; //rpm / s
         public static final double kMaxVelRPM = 4000; // rpm
         public static final double kMaxVelMeters = 14; // m/s
-        public static final double kMaxAngularVel = 14;
+        public static final double kMaxAngularVelRad = 6 * Math.PI; // radians per second
+        public static final double kMaxAngularAccel = 10 * Math.PI; //radians per second per second
         public static final double kAllowedError = 0.005;
         public static final double kRampRate = 0.1;
 
@@ -36,20 +37,10 @@ public class Control {
         public static final double kP = 4e-7,
                                    kI = 1e-7,
                                    kD = 3;
-        
-        public class driveController {
-            public static final double xP = 0;
-            public static final double xI = 0;
-            public static final double xD = 0;
-
-            public static final double yP = 0;
-            public static final double yI = 0;
-            public static final double yD = 0;
-
-            public static final double rotP = 0;
-            public static final double rotI = 0;
-            public static final double rotD = 0;
-        }
+        public static final double rotP = 7.5,
+                                   rotI = 0,
+                                   rotD = 0;
+        public static double kMaxAngularVel;
     }
 
     public class coralManipulator {

@@ -10,8 +10,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.path.Waypoint;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
@@ -35,7 +33,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -44,8 +43,10 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.LimelightHelpers;
 import frc.robot.Util;
 import frc.robot.constants.Control;
+import frc.robot.constants.FieldConstraints;
 import frc.robot.constants.Ports;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -62,6 +63,8 @@ public class DriveSubsystem extends SubsystemBase {
   private MecanumDrivePoseEstimator poseEstimator;
   private MecanumDriveKinematics kinematics;
   private RobotConfig robotConfig;
+  private String limelight;
+  private LimelightHelpers.PoseEstimate limelightMeasurement;
   private HolonomicDriveController driveController;
 
   public DriveSubsystem() {
@@ -107,9 +110,12 @@ public class DriveSubsystem extends SubsystemBase {
     );
 
     driveController = new HolonomicDriveController(
-        new PIDController(0, 0, 0), 
-        new PIDController(0, 0, 0),
-        new ProfiledPIDController(0, 0, 0, new Constraints(0, 0)));
+      new PIDController(18.5, 0, 2.5), 
+      new PIDController(25.0, 0, 2.5),
+      new ProfiledPIDController(Control.drivetrain.rotP, Control.drivetrain.rotI, Control.drivetrain.rotD,
+          new Constraints(Control.drivetrain.kMaxAngularVelRad, Control.drivetrain.kMaxAngularAccel)));
+
+    limelight = "";
 
     try{
       robotConfig = RobotConfig.fromGUISettings();
@@ -163,6 +169,30 @@ public class DriveSubsystem extends SubsystemBase {
     rearRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearRightMetersPerSecond, wheelDiameter);
   }
 
+  public void lockDrive(double xSpeed, double ySpeed, Pose2d point){
+    ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, 
+      FieldConstraints.Reef.centerFaces[1].minus(getPosition()).getTranslation().rotateBy(getPosition().getRotation()).getAngle().getRadians()*0.5);
+    MecanumDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(
+      ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, gyro.getRotation2d())
+    );
+    wheelSpeeds.desaturate(Control.drivetrain.kMaxVelMeters);
+
+    frontLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontLeftMetersPerSecond, wheelDiameter);
+    frontRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontRightMetersPerSecond, wheelDiameter);
+    rearLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearLeftMetersPerSecond, wheelDiameter);
+    rearRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearRightMetersPerSecond, wheelDiameter);
+
+    if (Math.abs(xSpeed) < 2.8 && Math.abs(ySpeed) > 3.5){
+      frontRightSpeed = - frontLeftSpeed;
+      rearLeftSpeed = - rearRightSpeed;
+    }
+
+    if (Math.abs(ySpeed) < 2.1 && Math.abs(xSpeed) > 3.5){
+      frontRightSpeed = frontLeftSpeed;
+      rearLeftSpeed = rearRightSpeed;
+    }
+  }
+
   /*public void driveToPose(List<Waypoint> waypoints){
     PathConstraints constraints = new PathConstraints(
       Control.drivetrain.kMaxVelMeters, rearLeftSpeed, frontRightSpeed, frontLeftSpeed);
@@ -185,9 +215,12 @@ public class DriveSubsystem extends SubsystemBase {
         Util.RPMToMetersPerSecond(rearRightEnc .getVelocity(), wheelDiameter)));
   }
 
-  public double getHeading(){
-    double heading = gyro.getRotation2d().getDegrees();
-    return heading < 0 ? heading % 360 + 360 : heading % 360;
+  public double getHeadingDeg(){
+    return gyro.getRotation2d().getDegrees();
+  }
+
+  public Pose2d getPosition(){
+    return poseEstimator.getEstimatedPosition();
   }
 
   public Command exampleMethodCommand() {
@@ -205,7 +238,15 @@ public class DriveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    LimelightHelpers.SetRobotOrientation(limelight, gyro.getYaw(), 0, 0, 0, 0, 0);
+    if (Util.isBlue())
+      limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelight);
+    else 
+      limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiRed(limelight);
     poseEstimator.update(Rotation2d.fromDegrees(90), getWheelPositions());
+    poseEstimator.addVisionMeasurement(limelightMeasurement.pose, 
+                                       limelightMeasurement.timestampSeconds, 
+                                       VecBuilder.fill(0.7, 0.7, 0.7));
 
     frontLeftMotor .getClosedLoopController().setReference(frontLeftSpeed,  ControlType.kMAXMotionVelocityControl);
     frontRightMotor.getClosedLoopController().setReference(frontRightSpeed, ControlType.kMAXMotionVelocityControl);
