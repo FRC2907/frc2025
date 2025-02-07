@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.*;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -22,10 +20,8 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.controller.HolonomicDriveController;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -33,9 +29,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.Trajectory.State;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
@@ -65,7 +58,7 @@ public class DriveSubsystem extends SubsystemBase {
   private RobotConfig robotConfig;
   private String limelight;
   private LimelightHelpers.PoseEstimate limelightMeasurement;
-  private HolonomicDriveController driveController;
+  //private HolonomicDriveController driveController;
 
   public DriveSubsystem() {
     frontLeftMotor =  new SparkMax(Ports.drivetrain.FRONT_LEFT,  MotorType.kBrushless);
@@ -109,13 +102,13 @@ public class DriveSubsystem extends SubsystemBase {
       VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))
     );
 
-    driveController = new HolonomicDriveController(
+    /*driveController = new HolonomicDriveController(
       new PIDController(18.5, 0, 2.5), 
       new PIDController(25.0, 0, 2.5),
       new ProfiledPIDController(Control.drivetrain.rotP, Control.drivetrain.rotI, Control.drivetrain.rotD,
-          new Constraints(Control.drivetrain.kMaxAngularVelRad, Control.drivetrain.kMaxAngularAccel)));
+          new Constraints(Control.drivetrain.kMaxAngularVelRad, Control.drivetrain.kMaxAngularAccel))); */
 
-    limelight = "";
+    limelight = Control.LIMELIGHT_NAME;
 
     try{
       robotConfig = RobotConfig.fromGUISettings();
@@ -200,10 +193,10 @@ public class DriveSubsystem extends SubsystemBase {
 
   private MecanumDriveWheelPositions getWheelPositions(){
     return new MecanumDriveWheelPositions(
-      Util.revolutionsToMeters(frontLeftEnc .getPosition(), wheelDiameter) / 5.95,
-      Util.revolutionsToMeters(frontRightEnc.getPosition(), wheelDiameter) / 5.95,
-      Util.revolutionsToMeters(rearLeftEnc  .getPosition(), wheelDiameter) / 5.95,
-      Util.revolutionsToMeters(rearRightEnc .getPosition(), wheelDiameter) / 5.95);
+      Util.revolutionsToMeters(frontLeftEnc .getPosition(), wheelDiameter) / Control.drivetrain.GEAR_RATIO,
+      Util.revolutionsToMeters(frontRightEnc.getPosition(), wheelDiameter) / Control.drivetrain.GEAR_RATIO,
+      Util.revolutionsToMeters(rearLeftEnc  .getPosition(), wheelDiameter) / Control.drivetrain.GEAR_RATIO,
+      Util.revolutionsToMeters(rearRightEnc .getPosition(), wheelDiameter) / Control.drivetrain.GEAR_RATIO);
   }
 
   private ChassisSpeeds getChassisSpeeds(){
@@ -216,7 +209,10 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public double getHeadingDeg(){
-    return gyro.getRotation2d().getDegrees();
+    return Units.radiansToDegrees(MathUtil.angleModulus(gyro.getRotation2d().getRadians()));
+  }
+  public double getHeadingRad(){
+    return MathUtil.angleModulus(gyro.getRotation2d().getRadians());
   }
 
   public Pose2d getPosition(){
@@ -269,7 +265,7 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("frSetPoint", frontRightSpeed);
     SmartDashboard.putNumber("rlSetPoint", rearLeftSpeed);
     SmartDashboard.putNumber("rrSetPoint", rearRightSpeed);
-    SmartDashboard.putNumber("heading", gyro.getAngle());
+    SmartDashboard.putNumber("heading", getHeadingDeg());
     SmartDashboard.putData("field", field);
   }
 
@@ -280,7 +276,7 @@ public class DriveSubsystem extends SubsystemBase {
     config = new SparkMaxConfig();
     /*config.apply(new EncoderConfig().positionConversionFactor(Units.inchesToMeters(6) * Math.PI / 5.95));
     config.apply(new EncoderConfig().velocityConversionFactor(0.1524 / Math.PI * 60));  */
-    config.smartCurrentLimit(Control.kCurrentLimit)
+    config.smartCurrentLimit(Control.CURRENT_LIMIT)
           .idleMode(IdleMode.kBrake)
           .inverted(false)
           .closedLoopRampRate(Control.drivetrain.kRampRate)
@@ -311,8 +307,8 @@ public class DriveSubsystem extends SubsystemBase {
             this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             (speeds, feedforwards) -> drive(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
             new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                    new PIDConstants(18.5, 0.0, 2.5), // Translation PID constants
-                    new PIDConstants(7.5, 0.0, 0.0) // Rotation PID constants
+                    new PIDConstants(Control.drivetrain.kPPP, Control.drivetrain.kPPI, Control.drivetrain.kPPD), // Translation PID constants
+                    new PIDConstants(Control.drivetrain.kRotP, Control.drivetrain.kRotI, Control.drivetrain.kRotD) // Rotation PID constants
             ),
             robotConfig, // The robot configuration
             () -> {

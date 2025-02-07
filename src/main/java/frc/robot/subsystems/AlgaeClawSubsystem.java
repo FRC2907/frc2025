@@ -71,8 +71,8 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     shootSetPoint = velRPM;
   }
   public static void shoot(){
-    armSetSetpoint(135);
-    shootSetSetPoint(4000);; //TODO add algorithm
+    armSetSetpoint(Control.algaeManipulator.kFixedShootAngle);
+    shootSetSetPoint(Control.algaeManipulator.kFixedShootSpeed);; //TODO add algorithm
   }
 
   /**
@@ -95,7 +95,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
    * @return value of some boolean subsystem state, such as a digital sensor.
    */
   public boolean hasAlgae() {
-    return colorSensor.getProximity() > Control.algaeManipulator.proximityBand;
+    return colorSensor.getProximity() > Control.algaeManipulator.kProximityBand;
   }
 
   @Override

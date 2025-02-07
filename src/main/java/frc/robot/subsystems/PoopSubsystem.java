@@ -19,7 +19,7 @@ public class PoopSubsystem extends SubsystemBase{
         shoot.set(Control.coralManipulator.kShootSpeed);
     }
     public void stop(){
-        shoot.set(0);
+        shoot.set(Control.coralManipulator.kStopSpeed);
     }
 
     /*private void currentDetection(){

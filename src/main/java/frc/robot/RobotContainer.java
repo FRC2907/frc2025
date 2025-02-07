@@ -86,7 +86,7 @@ public class RobotContainer {
           driveSubsystem.drive(
             - yLimiter.calculate(driver.getLeftY()) * Control.drivetrain.kMaxVelMeters,
             - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMeters,
-            - rotLimiter.calculate(driver.getRightX()) * Control.drivetrain.kMaxAngularVel,
+            - rotLimiter.calculate(driver.getRightX()) * Control.drivetrain.kMaxAngularVelRad,
             false);
         else 
             driveSubsystem.stop(); },

@@ -7,13 +7,15 @@ import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.util.Units;
 
 public class Control {
+    public static final String LIMELIGHT_NAME = "";
+    public static final int CURRENT_LIMIT = 40; //amps
     public static final double kDriverDeadband = 0.08;
-    public static final int kCurrentLimit = 40; //amps
 
     public class drivetrain {
         public static final double TRACK_WIDTH = Units.inchesToMeters(19.5); //TODO update
         public static final double WHEEL_BASE = Units.inchesToMeters(20.75); //TODO update
         public static final double WHEEL_DIAMETER = Units.inchesToMeters(6);
+        public static final double GEAR_RATIO = 5.95;
         public static final Translation2d FRONT_LEFT_LOCATION = new Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2);
         public static final Translation2d FRONT_RIGHT_LOCATION = new Translation2d(WHEEL_BASE / 2, - TRACK_WIDTH / 2);
         public static final Translation2d REAR_LEFT_LOCATION = new Translation2d(-WHEEL_BASE / 2, TRACK_WIDTH / 2);
@@ -37,31 +39,34 @@ public class Control {
         public static final double kP = 4e-7,
                                    kI = 1e-7,
                                    kD = 3;
-        public static final double rotP = 7.5,
-                                   rotI = 0,
-                                   rotD = 0;
-        public static double kMaxAngularVel;
+        public static final double kRotP = 7.5,
+                                   kRotI = 0,
+                                   kRotD = 0;
+        public static final double kPPP = 18.5,
+                                   kPPI = 0,
+                                   kPPD = 2.5;
     }
 
     public class coralManipulator {
         public static final MotorType MOTOR_TYPE = MotorType.kBrushed;
 
-        public static final double kShootSpeed = 0.3;
+        public static final double kShootSpeed = 0.3; //percentage
+        public static final double kStopSpeed = 0; //percentage
     }
 
     public class algaeManipulator {
         public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
         public static final double GEAR_RATIO = 1; //TODO find
 
-        public static final double armConversionFactor = GEAR_RATIO / 360;
-        public static final double armDownLimit = 30; //TODO find
-        public static final double armUpLimit = 135; //TODO find
-        public static final double shootAngle = 100; //TODO find
-        public static final double intakeAngle = 90;
-        public static final double groundIntakeAngle = 35;
-        public static final double intakeSpeed = 0.1;
-        public static final double fixedShootSpeed = 1000;
+        public static final double kArmConversionFactor = GEAR_RATIO / 360;
+        public static final double kArmDownLimit = 30; //TODO find
+        public static final double kArmUpLimit = 135; //TODO find
+        public static final double kIntakeAngle = 90; //TODO find
+        public static final double kGroundIntakeAngle = 35; //TODO find
+        public static final double kIntakeSpeed = 0.1; //TODO find
+        public static final double kFixedShootSpeed = 2000; //TODO find
+        public static final double kFixedShootAngle = 135; //TODO find
 
-        public static final double proximityBand = 500; //TODO tune
+        public static final double kProximityBand = 500; //TODO tune
     }
 }
