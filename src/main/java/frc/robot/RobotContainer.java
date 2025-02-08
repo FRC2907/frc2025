@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import frc.robot.commands.Autos;
 import frc.robot.commands.CoralPoop;
 import frc.robot.commands.EndPoop;
 import frc.robot.constants.Control;
@@ -15,6 +14,7 @@ import frc.robot.subsystems.PoopSubsystem;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -50,8 +50,6 @@ public class RobotContainer {
   private static final SlewRateLimiter yLimiter = new SlewRateLimiter(10);
   private static final SlewRateLimiter rotLimiter = new SlewRateLimiter(10);
 
-  private PathPlannerAuto test;
-
   private final SendableChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -62,8 +60,6 @@ public class RobotContainer {
 
     NamedCommands.registerCommand("Coral Poop", new CoralPoop(poopSubsystem));
     NamedCommands.registerCommand("End Poop", new EndPoop(poopSubsystem));
-
-    test = new PathPlannerAuto("Test");
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -95,8 +91,8 @@ public class RobotContainer {
 
     configureBindings();
 
-    //PathfindingCommand.warmupCommand().schedule();
-    // Configure the trigger bindings
+    FollowPathCommand.warmupCommand().schedule();
+    
     SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 

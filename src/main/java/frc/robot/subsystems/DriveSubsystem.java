@@ -13,7 +13,6 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
-import com.pathplanner.lib.util.DriveFeedforwards;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
@@ -159,7 +158,7 @@ public class DriveSubsystem extends SubsystemBase {
     }
   }
 
-  public void drive(ChassisSpeeds chassisSpeeds, DriveFeedforwards feedforwards){
+  public void drive(ChassisSpeeds chassisSpeeds){
     MecanumDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(chassisSpeeds);
     wheelSpeeds.desaturate(Control.drivetrain.kMaxVelMPS);
 
@@ -250,7 +249,7 @@ public class DriveSubsystem extends SubsystemBase {
         path,
         this::getPose2d, 
         this::getChassisSpeeds, 
-        this::drive, 
+        (speeds, feedforwards) -> drive(speeds), 
         Control.drivetrain.PPDriveController,
         robotConfig,
         Util::isRed,
@@ -338,7 +337,7 @@ public class DriveSubsystem extends SubsystemBase {
             poseEstimator::getEstimatedPosition, // Robot pose supplier
             poseEstimator::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
             this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            (speeds, feedforwards) -> drive(speeds, feedforwards), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+            (speeds, feedforwards) -> drive(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
             Control.drivetrain.PPDriveController,
             robotConfig, // The robot configuration
             Util::isRed,
