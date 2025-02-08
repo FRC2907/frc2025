@@ -1,5 +1,8 @@
 package frc.robot.constants;
 
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -9,6 +12,7 @@ import edu.wpi.first.math.util.Units;
 public class Control {
     public static final String LIMELIGHT_NAME = "";
     public static final int CURRENT_LIMIT = 40; //amps
+    public static final double NOMINAL_VOLTAGE = 12.0;
     public static final double kDriverDeadband = 0.08;
 
     public class drivetrain {
@@ -24,27 +28,41 @@ public class Control {
             FRONT_LEFT_LOCATION, FRONT_RIGHT_LOCATION, REAR_LEFT_LOCATION, REAR_RIGHT_LOCATION);
         public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
 
-        public static final double kMaxAcceleration = 4000; //rpm / s
-        public static final double kMaxVelRPM = 4000; // rpm
-        public static final double kMaxVelMeters = 14; // m/s
-        public static final double kMaxAngularVelRad = 6 * Math.PI; // radians per second
-        public static final double kMaxAngularAccel = 10 * Math.PI; //radians per second per second
+        public static final double kMaxAccelRPM = 4000; //revolutions per minute per second (acceleration)
+        public static final double kMaxVelRPM = 4000; // revolutions per minute
+        public static final double kMaxAccelMPS = 14; // meters per second per second
+        public static final double kMaxVelMPS = 14; // meters per second
+        public static final double kMaxAngularVelRad = 4.5 * Math.PI; // radians per second
+        public static final double kMaxAngularAccel = 9 * Math.PI; //radians per second per second
         public static final double kAllowedError = 0.005;
         public static final double kRampRate = 0.1;
 
-        public static final double kflFF = 0.000158,
-                                   kfrFF = 0.000149,
-                                   krlFF = 0.000158420,
-                                   krrFF = 0.000156;
-        public static final double kP = 4e-7,
-                                   kI = 1e-7,
-                                   kD = 3;
-        public static final double kRotP = 7.5,
-                                   kRotI = 0,
-                                   kRotD = 0;
-        public static final double kPPP = 18.5,
-                                   kPPI = 0,
-                                   kPPD = 2.5;
+        //All PIDF constants
+        public static final double kflFF = 0.000158, //Front left wheel feedforward
+                                   kfrFF = 0.000149, //Front right wheel feedforward
+                                   krlFF = 0.000158420, //Rear left wheel feedforward
+                                   krrFF = 0.000156; //Rear right wheel feedforward
+        public static final double kP = 4e-7, //All wheels P constant
+                                   kI = 1e-7, //All wheels I constant
+                                   kD = 3;    //All wheels D constant
+        public static final double kPPP = 18.5, //PathPlanner translational P constant
+                                   kPPI = 0,    //PathPlanner translational I constant
+                                   kPPD = 2.5;  //PathPlanner translational D constant
+        public static final double kPPRotP = 7.5, //PathPlanner rotational P constant
+                                   kPPRotI = 0,   //PathPlanner rotational I constant
+                                   kPPRotD = 0;   //PathPlanner rotational D constant
+        public static final PPHolonomicDriveController PPDriveController = new PPHolonomicDriveController(
+            new PIDConstants(kPPP, kPPI, kPPD),           // Translation PID constants
+            new PIDConstants(kPPRotP, kPPRotI, kPPRotD)); // Rotation PID constants
+
+        public static final PathConstraints pathConstraints = new PathConstraints(
+            kMaxVelMPS,
+            kMaxAccelRPM,
+            kMaxAngularVelRad,
+            kMaxAngularAccel,
+            NOMINAL_VOLTAGE,
+            false
+        );
     }
 
     public class coralManipulator {

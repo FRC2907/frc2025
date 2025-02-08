@@ -84,8 +84,8 @@ public class RobotContainer {
       () -> {
         if (Util.checkDriverDeadband(driver)) 
           driveSubsystem.drive(
-            - yLimiter.calculate(driver.getLeftY()) * Control.drivetrain.kMaxVelMeters,
-            - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMeters,
+            - yLimiter.calculate(driver.getLeftY()) * Control.drivetrain.kMaxVelMPS,
+            - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMPS,
             - rotLimiter.calculate(driver.getRightX()) * Control.drivetrain.kMaxAngularVelRad,
             false);
         else 

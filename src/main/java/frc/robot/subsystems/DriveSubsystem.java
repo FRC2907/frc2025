@@ -4,10 +4,16 @@
 
 package frc.robot.subsystems;
 
+import java.util.List;
+import java.util.Stack;
+
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.Waypoint;
+import com.pathplanner.lib.util.DriveFeedforwards;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
@@ -35,6 +41,7 @@ import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 import frc.robot.Util;
@@ -134,7 +141,7 @@ public class DriveSubsystem extends SubsystemBase {
       fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, gyro.getRotation2d())
                     : chassisSpeeds
     );
-    wheelSpeeds.desaturate(Control.drivetrain.kMaxVelMeters);
+    wheelSpeeds.desaturate(Control.drivetrain.kMaxVelMPS);
 
     frontLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontLeftMetersPerSecond, wheelDiameter);
     frontRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontRightMetersPerSecond, wheelDiameter);
@@ -152,9 +159,9 @@ public class DriveSubsystem extends SubsystemBase {
     }
   }
 
-  public void drive(ChassisSpeeds chassisSpeeds){
+  public void drive(ChassisSpeeds chassisSpeeds, DriveFeedforwards feedforwards){
     MecanumDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(chassisSpeeds);
-    wheelSpeeds.desaturate(Control.drivetrain.kMaxVelMeters);
+    wheelSpeeds.desaturate(Control.drivetrain.kMaxVelMPS);
 
     frontLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontLeftMetersPerSecond, wheelDiameter);
     frontRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontRightMetersPerSecond, wheelDiameter);
@@ -164,11 +171,11 @@ public class DriveSubsystem extends SubsystemBase {
 
   public void lockDrive(double xSpeed, double ySpeed, Pose2d point){
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, 
-      FieldConstraints.Reef.centerFaces[1].minus(getPosition()).getTranslation().rotateBy(getPosition().getRotation()).getAngle().getRadians()*0.5);
+      FieldConstraints.Reef.centerFaces[1].minus(getPose2d()).getTranslation().rotateBy(getPose2d().getRotation()).getAngle().getRadians()*0.5);
     MecanumDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(
       ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, gyro.getRotation2d())
     );
-    wheelSpeeds.desaturate(Control.drivetrain.kMaxVelMeters);
+    wheelSpeeds.desaturate(Control.drivetrain.kMaxVelMPS);
 
     frontLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontLeftMetersPerSecond, wheelDiameter);
     frontRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontRightMetersPerSecond, wheelDiameter);
@@ -202,10 +209,10 @@ public class DriveSubsystem extends SubsystemBase {
   private ChassisSpeeds getChassisSpeeds(){
     return kinematics.toChassisSpeeds(
       new MecanumDriveWheelSpeeds(
-        Util.RPMToMetersPerSecond(frontLeftEnc .getVelocity(), wheelDiameter), 
-        Util.RPMToMetersPerSecond(frontRightEnc.getVelocity(), wheelDiameter), 
-        Util.RPMToMetersPerSecond(rearLeftEnc  .getVelocity(), wheelDiameter), 
-        Util.RPMToMetersPerSecond(rearRightEnc .getVelocity(), wheelDiameter)));
+        Util.RPMToMetersPerSecond(frontLeftEnc .getVelocity(), wheelDiameter) / Control.drivetrain.GEAR_RATIO, 
+        Util.RPMToMetersPerSecond(frontRightEnc.getVelocity(), wheelDiameter) / Control.drivetrain.GEAR_RATIO, 
+        Util.RPMToMetersPerSecond(rearLeftEnc  .getVelocity(), wheelDiameter) / Control.drivetrain.GEAR_RATIO, 
+        Util.RPMToMetersPerSecond(rearRightEnc .getVelocity(), wheelDiameter) / Control.drivetrain.GEAR_RATIO));
   }
 
   public double getHeadingDeg(){
@@ -215,17 +222,43 @@ public class DriveSubsystem extends SubsystemBase {
     return MathUtil.angleModulus(gyro.getRotation2d().getRadians());
   }
 
-  public Pose2d getPosition(){
+  public Pose2d getPose2d(){
     return poseEstimator.getEstimatedPosition();
   }
 
-  public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
+  public PathPlannerPath generatePath(List<Pose2d> goal, Rotation2d endState){
+    List<Pose2d> pathPoses = new Stack<Pose2d>();
+    pathPoses.add(this.getPose2d());
+    for (int i = 0; i < goal.size(); i++){
+      pathPoses.add(goal.get(i));
+    }
+    List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
+      pathPoses
+    );
+
+    return new PathPlannerPath(
+      waypoints,
+      Control.drivetrain.pathConstraints, 
+      null,
+      new GoalEndState(0.0, endState)
+    );
+  }
+
+  public Command followPathCommand(PathPlannerPath path) {
+    try {
+      return new FollowPathCommand(
+        path,
+        this::getPose2d, 
+        this::getChassisSpeeds, 
+        this::drive, 
+        Control.drivetrain.PPDriveController,
+        robotConfig,
+        Util::isRed,
+        this);
+    } catch (Exception e) {
+      DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
+      return Commands.none();
+    }
   }
 
   public boolean exampleCondition() {
@@ -281,7 +314,7 @@ public class DriveSubsystem extends SubsystemBase {
           .inverted(false)
           .closedLoopRampRate(Control.drivetrain.kRampRate)
           .closedLoop.pidf(Control.drivetrain.kP, Control.drivetrain.kI, Control.drivetrain.kD, Control.drivetrain.kflFF)
-                     .maxMotion.maxAcceleration(Control.drivetrain.kMaxAcceleration)
+                     .maxMotion.maxAcceleration(Control.drivetrain.kMaxAccelRPM)
                                .maxVelocity(Control.drivetrain.kMaxVelRPM)
                                .allowedClosedLoopError(Control.drivetrain.kAllowedError)
                                .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal); 
@@ -305,23 +338,10 @@ public class DriveSubsystem extends SubsystemBase {
             poseEstimator::getEstimatedPosition, // Robot pose supplier
             poseEstimator::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
             this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            (speeds, feedforwards) -> drive(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
-            new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                    new PIDConstants(Control.drivetrain.kPPP, Control.drivetrain.kPPI, Control.drivetrain.kPPD), // Translation PID constants
-                    new PIDConstants(Control.drivetrain.kRotP, Control.drivetrain.kRotI, Control.drivetrain.kRotD) // Rotation PID constants
-            ),
+            (speeds, feedforwards) -> drive(speeds, feedforwards), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+            Control.drivetrain.PPDriveController,
             robotConfig, // The robot configuration
-            () -> {
-              // Boolean supplier that controls when the path will be mirrored for the red alliance
-              // This will flip the path being followed to the red side of the field.
-              // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-              var alliance = DriverStation.getAlliance();
-              if (alliance.isPresent()) {
-                return alliance.get() == DriverStation.Alliance.Red;
-              }
-              return false;
-            },
+            Util::isRed,
             this // Reference to this subsystem to set requirements
     );
   }

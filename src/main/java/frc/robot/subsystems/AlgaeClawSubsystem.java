@@ -25,7 +25,7 @@ import frc.robot.constants.Ports;
 public class AlgaeClawSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   private SparkMax arm,
-                  shootLeader, shootFollower;
+                   shootLeader, shootFollower;
   private SparkMaxConfig armConfig, shootConfig;
   private static double armSetPoint, shootSetPoint;
   private static ColorSensorV3 colorSensor;
@@ -103,7 +103,6 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
     //arm.getClosedLoopController().setReference(armSetPoint, ControlType.kMAXMotionPositionControl);
     //shootLeader.getClosedLoopController().setReference(shootSetPoint, ControlType.kMAXMotionVelocityControl);
-
 
     SmartDashboard.putBoolean("algae", hasAlgae());
   }
