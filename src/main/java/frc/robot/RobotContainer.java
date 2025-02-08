@@ -5,7 +5,6 @@
 package frc.robot;
 
 import frc.robot.commands.CoralPoop;
-import frc.robot.commands.EndPoop;
 import frc.robot.constants.Control;
 import frc.robot.constants.Ports;
 import frc.robot.subsystems.AlgaeClawSubsystem;
@@ -59,7 +58,6 @@ public class RobotContainer {
     //algaeClawSubsystem = new AlgaeClawSubsystem();
 
     NamedCommands.registerCommand("Coral Poop", new CoralPoop(poopSubsystem));
-    NamedCommands.registerCommand("End Poop", new EndPoop(poopSubsystem));
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -92,7 +90,7 @@ public class RobotContainer {
     configureBindings();
 
     FollowPathCommand.warmupCommand().schedule();
-    
+
     SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
