@@ -14,7 +14,6 @@ import frc.robot.subsystems.PoopSubsystem;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.PS5Controller;
@@ -105,7 +104,7 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new JoystickButton(driver, Button.kR2.value).whileTrue(new CoralPoop(poopSubsystem));
+    new JoystickButton(operator, Button.kR2.value).whileTrue(new CoralPoop(poopSubsystem));
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.

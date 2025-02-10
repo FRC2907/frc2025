@@ -17,6 +17,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
@@ -36,7 +37,6 @@ import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -57,7 +57,6 @@ public class DriveSubsystem extends SubsystemBase {
   private SparkMax frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor;
   private SparkMaxConfig config;
   private RelativeEncoder frontLeftEnc, frontRightEnc, rearLeftEnc, rearRightEnc;
-  private MecanumDrive dt;
   private AHRS gyro;
   private MecanumDrivePoseEstimator poseEstimator;
   private MecanumDriveKinematics kinematics;
@@ -91,11 +90,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     configure();
 
-    //dt = new MecanumDrive(frontLeftMotor::set, rearLeftMotor::set, frontRightMotor::set, rearRightMotor::set);
-
     gyro = new AHRS(NavXComType.kMXP_SPI);
-    //gyro.reset();
-    //gyro.resetDisplacement();
     
     kinematics = Control.drivetrain.DRIVE_KINEMATICS;
 
@@ -306,8 +301,8 @@ public class DriveSubsystem extends SubsystemBase {
 
   private void configure(){
     config = new SparkMaxConfig();
-    /*config.apply(new EncoderConfig().positionConversionFactor(Units.inchesToMeters(6) * Math.PI / 5.95));
-    config.apply(new EncoderConfig().velocityConversionFactor(0.1524 / Math.PI * 60));  */
+    config.apply(new EncoderConfig().positionConversionFactor(Control.drivetrain.kPositionConversionFactor)
+                                    .velocityConversionFactor(Control.drivetrain.kPositionConversionFactor));
     config.smartCurrentLimit(Control.CURRENT_LIMIT)
           .idleMode(IdleMode.kBrake)
           .inverted(false)

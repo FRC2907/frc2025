@@ -10,7 +10,7 @@ import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.util.Units;
 
 public class Control {
-    public static final String LIMELIGHT_NAME = "";
+    public static final String LIMELIGHT_NAME = ""; //TODO find
     public static final int CURRENT_LIMIT = 40; //amps
     public static final double NOMINAL_VOLTAGE = 12.0;
     public static final double kDriverDeadband = 0.08;
@@ -19,6 +19,7 @@ public class Control {
         public static final double TRACK_WIDTH = Units.inchesToMeters(19.5); //TODO update
         public static final double WHEEL_BASE = Units.inchesToMeters(20.75); //TODO update
         public static final double WHEEL_DIAMETER = Units.inchesToMeters(6);
+        public static final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
         public static final double GEAR_RATIO = 5.95;
         public static final Translation2d FRONT_LEFT_LOCATION = new Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2);
         public static final Translation2d FRONT_RIGHT_LOCATION = new Translation2d(WHEEL_BASE / 2, - TRACK_WIDTH / 2);
@@ -28,16 +29,18 @@ public class Control {
             FRONT_LEFT_LOCATION, FRONT_RIGHT_LOCATION, REAR_LEFT_LOCATION, REAR_RIGHT_LOCATION);
         public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
 
+        public static final double kPositionConversionFactor = (1 / GEAR_RATIO) * WHEEL_CIRCUMFERENCE; //revolutions to meters
+        public static final double kVelocityConversionFactor = kPositionConversionFactor / 60; //rpm to m/s
         public static final double kMaxAccelRPM = 4000; //revolutions per minute per second (acceleration)
         public static final double kMaxVelRPM = 4000; // revolutions per minute
-        public static final double kMaxAccelMPS = 14; // meters per second per second
+        public static final double kMaxAccelMPS = 14; // meters per second per second OR meters per second squared (m/s^2)
         public static final double kMaxVelMPS = 14; // meters per second
         public static final double kMaxAngularVelRad = 4.5 * Math.PI; // radians per second
-        public static final double kMaxAngularAccel = 9 * Math.PI; //radians per second per second
+        public static final double kMaxAngularAccel = 9 * Math.PI; //radians per second per second OR radians per second squared
         public static final double kAllowedError = 0.005;
         public static final double kRampRate = 0.1;
 
-        //All PIDF constants
+        //ALL PIDF CONSTANTS
         public static final double kflFF = 0.000158, //Front left wheel feedforward
                                    kfrFF = 0.000149, //Front right wheel feedforward
                                    krlFF = 0.000158420, //Rear left wheel feedforward
@@ -45,6 +48,7 @@ public class Control {
         public static final double kP = 4e-7, //All wheels P constant
                                    kI = 1e-7, //All wheels I constant
                                    kD = 3;    //All wheels D constant
+        //PathPlanner PID constants
         public static final double kPPP = 18.5, //PathPlanner translational P constant
                                    kPPI = 0,    //PathPlanner translational I constant
                                    kPPD = 2.5;  //PathPlanner translational D constant
@@ -86,5 +90,14 @@ public class Control {
         public static final double kFixedShootAngle = 135; //TODO find
 
         public static final double kProximityBand = 500; //TODO tune
+    }
+
+    public class elevator {
+        public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
+
+        public static final double kElevatorConversionFactor = 1; //TODO find
+        public static final double kElevatorDownLimit = 0;
+        public static final double kElevatorUpLimit = 100; //TODO find
+        public static final double kAllowedError = 1;
     }
 }

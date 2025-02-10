@@ -1,5 +1,7 @@
 package frc.robot.constants;
 
+import edu.wpi.first.wpilibj.I2C.Port;
+
 public class Ports {
     public class drivetrain {
         public static final int FRONT_LEFT = 16;
@@ -14,6 +16,12 @@ public class Ports {
         public static final int ALGAE_ARM = 2;
         public static final int ALGAE_SHOOT_LEADER = 3;
         public static final int ALGAE_SHOOT_FOLLOWER = 5;
+
+        public static final Port COLOR_SENSOR = Port.kOnboard;
+    }
+
+    public class elevator {
+        public static final int ELEVATOR = 6;
     }
 
     public class HID {
