@@ -45,7 +45,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 import frc.robot.Util;
 import frc.robot.constants.Control;
-import frc.robot.constants.FieldConstraints;
+import frc.robot.constants.FieldElements;
 import frc.robot.constants.Ports;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -62,10 +62,10 @@ public class DriveSubsystem extends SubsystemBase {
   private MecanumDriveKinematics kinematics;
   private RobotConfig robotConfig;
   private String limelight;
-  private LimelightHelpers.PoseEstimate limelightMeasurement;
+  //private LimelightHelpers.PoseEstimate limelightMeasurement;
   //private HolonomicDriveController driveController;
 
-  public DriveSubsystem() {
+  private DriveSubsystem() {
     frontLeftMotor =  new SparkMax(Ports.drivetrain.FRONT_LEFT,  MotorType.kBrushless);
     frontRightMotor = new SparkMax(Ports.drivetrain.FRONT_RIGHT, MotorType.kBrushless);
     rearLeftMotor =   new SparkMax(Ports.drivetrain.REAR_LEFT,   MotorType.kBrushless);
@@ -91,6 +91,8 @@ public class DriveSubsystem extends SubsystemBase {
     configure();
 
     gyro = new AHRS(NavXComType.kMXP_SPI);
+    gyro.reset();
+    gyro.resetDisplacement();
     
     kinematics = Control.drivetrain.DRIVE_KINEMATICS;
 
@@ -122,11 +124,24 @@ public class DriveSubsystem extends SubsystemBase {
     field = new Field2d();
   }
 
+  private static DriveSubsystem instance;
+  public static DriveSubsystem getInstance(){
+    if (instance == null){
+      instance = new DriveSubsystem();
+    }
+    return instance;
+  }
+
+
+
   public void stop(){
     frontLeftSpeed = 0;
     frontRightSpeed = 0;
     rearLeftSpeed = 0;
     rearRightSpeed = 0;
+  }
+  public void resetGyro(){
+    gyro.reset();
   }
 
   public void drive(double xSpeed, double ySpeed, double zRotation, boolean fieldRelative){
@@ -165,7 +180,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   public void lockDrive(double xSpeed, double ySpeed, Pose2d point){
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, 
-      FieldConstraints.Reef.centerFaces[1].minus(getPose2d()).getTranslation().rotateBy(getPose2d().getRotation()).getAngle().getRadians()*0.5);
+      FieldElements.Reef.centerFaces[1].minus(getPose2d()).getTranslation().rotateBy(getPose2d().getRotation()).getAngle().getRadians()*0.5);
     MecanumDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(
       ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, gyro.getRotation2d())
     );
@@ -261,15 +276,15 @@ public class DriveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    LimelightHelpers.SetRobotOrientation(limelight, gyro.getYaw(), 0, 0, 0, 0, 0);
+    /*LimelightHelpers.SetRobotOrientation(limelight, gyro.getYaw(), 0, 0, 0, 0, 0);
     if (Util.isBlue())
       limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelight);
     else 
-      limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiRed(limelight);
-    poseEstimator.update(Rotation2d.fromDegrees(90), getWheelPositions());
-    poseEstimator.addVisionMeasurement(limelightMeasurement.pose, 
+      limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiRed(limelight);*/
+    poseEstimator.update(gyro.getRotation2d(), getWheelPositions());
+    /*poseEstimator.addVisionMeasurement(limelightMeasurement.pose, 
                                        limelightMeasurement.timestampSeconds, 
-                                       VecBuilder.fill(0.7, 0.7, 0.7));
+                                       VecBuilder.fill(0.7, 0.7, 0.7));*/
 
     frontLeftMotor .getClosedLoopController().setReference(frontLeftSpeed,  ControlType.kMAXMotionVelocityControl);
     frontRightMotor.getClosedLoopController().setReference(frontRightSpeed, ControlType.kMAXMotionVelocityControl);
@@ -301,8 +316,8 @@ public class DriveSubsystem extends SubsystemBase {
 
   private void configure(){
     config = new SparkMaxConfig();
-    config.apply(new EncoderConfig().positionConversionFactor(Control.drivetrain.kPositionConversionFactor)
-                                    .velocityConversionFactor(Control.drivetrain.kPositionConversionFactor));
+    /*config.apply(new EncoderConfig().positionConversionFactor(Control.drivetrain.kPositionConversionFactor)
+                                    .velocityConversionFactor(Control.drivetrain.kPositionConversionFactor));*/
     config.smartCurrentLimit(Control.CURRENT_LIMIT)
           .idleMode(IdleMode.kBrake)
           .inverted(false)

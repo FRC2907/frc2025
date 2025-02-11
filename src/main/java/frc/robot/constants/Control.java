@@ -49,12 +49,12 @@ public class Control {
                                    kI = 1e-7, //All wheels I constant
                                    kD = 3;    //All wheels D constant
         //PathPlanner PID constants
-        public static final double kPPP = 18.5, //PathPlanner translational P constant
-                                   kPPI = 0,    //PathPlanner translational I constant
+        public static final double kPPP = 10.0, //PathPlanner translational P constant
+                                   kPPI = 0.0,    //PathPlanner translational I constant
                                    kPPD = 2.5;  //PathPlanner translational D constant
-        public static final double kPPRotP = 7.5, //PathPlanner rotational P constant
-                                   kPPRotI = 0,   //PathPlanner rotational I constant
-                                   kPPRotD = 0;   //PathPlanner rotational D constant
+        public static final double kPPRotP = 15.0, //PathPlanner rotational P constant
+                                   kPPRotI = 0.0,   //PathPlanner rotational I constant
+                                   kPPRotD = 0.0;   //PathPlanner rotational D constant
         public static final PPHolonomicDriveController PPDriveController = new PPHolonomicDriveController(
             new PIDConstants(kPPP, kPPI, kPPD),           // Translation PID constants
             new PIDConstants(kPPRotP, kPPRotI, kPPRotD)); // Rotation PID constants
@@ -95,9 +95,14 @@ public class Control {
     public class elevator {
         public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
 
-        public static final double kElevatorConversionFactor = 1; //TODO find
+        public static final double kConversionFactor = 1; //TODO find
+        public static final double kElevatorOffset = 6; //TODO find
         public static final double kElevatorDownLimit = 0;
         public static final double kElevatorUpLimit = 100; //TODO find
-        public static final double kAllowedError = 1;
+        public static final double kAllowedError = 1; //TODO tune
+        public static final double kL1 = FieldElements.ReefHeight.L1.height + 1; //TODO tune
+        public static final double kL2 = FieldElements.ReefHeight.L2.height + 1; //TODO tune
+        public static final double kL3 = FieldElements.ReefHeight.L3.height + 1; //TODO tune
+        public static final double kL4 = FieldElements.ReefHeight.L4.height + 3; //TODO tune 
     }
 }

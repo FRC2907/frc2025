@@ -21,20 +21,21 @@ public class ElevatorSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   private static SparkMax motor;
   private static SparkMaxConfig config;
-  private static double setPoint;
+  private double setPoint;
   public ElevatorSubsystem() {
     motor = new SparkMax(Ports.elevator.ELEVATOR, Control.elevator.MOTOR_TYPE);
     config = new SparkMaxConfig();
     config.idleMode(IdleMode.kBrake)
-             .inverted(false)
-             .smartCurrentLimit(0, 40)
-             .softLimit.forwardSoftLimit(30)
-                       .forwardSoftLimitEnabled(true)
-                       .reverseSoftLimit(0)
-                       .reverseSoftLimitEnabled(true);
+          .inverted(false)
+          .smartCurrentLimit(0, 40)
+          .softLimit.forwardSoftLimit(30)
+                    .forwardSoftLimitEnabled(true)
+                    .reverseSoftLimit(0)
+                    .reverseSoftLimitEnabled(true);
     config.closedLoop.maxMotion.maxAcceleration(2)
-                                  .maxVelocity(2)
-                                  .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal);
+                               .maxVelocity(2)
+                               .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal);
+    config.encoder.positionConversionFactor(Control.elevator.kConversionFactor);
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
@@ -52,6 +53,12 @@ public class ElevatorSubsystem extends SubsystemBase {
         });
   }
 
+  public void L1(){
+    setSetpoint(Control.elevator.kL1);
+  }
+  public void setSetpoint(double setPoint){
+    this.setPoint = setPoint - Control.elevator.kElevatorOffset;
+  }
   public boolean atSetPoint() {
     return Math.abs(motor.getEncoder().getPosition() - setPoint) < Control.elevator.kAllowedError;
   }

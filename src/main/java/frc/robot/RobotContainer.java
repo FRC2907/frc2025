@@ -52,7 +52,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    driveSubsystem = new DriveSubsystem();
+    driveSubsystem = DriveSubsystem.getInstance();
     poopSubsystem = new PoopSubsystem();
     //algaeClawSubsystem = new AlgaeClawSubsystem();
 
