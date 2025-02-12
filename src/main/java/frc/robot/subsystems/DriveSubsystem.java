@@ -43,6 +43,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
+import frc.robot.LimelightHelpers.LimelightResults;
+import frc.robot.LimelightHelpers.LimelightTarget_Fiducial;
 import frc.robot.Util;
 import frc.robot.constants.Control;
 import frc.robot.constants.FieldElements;
@@ -62,7 +64,7 @@ public class DriveSubsystem extends SubsystemBase {
   private MecanumDriveKinematics kinematics;
   private RobotConfig robotConfig;
   private String limelight;
-  //private LimelightHelpers.PoseEstimate limelightMeasurement;
+  private LimelightHelpers.PoseEstimate limelightMeasurement;
   //private HolonomicDriveController driveController;
 
   private DriveSubsystem() {
@@ -179,6 +181,17 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void lockDrive(double xSpeed, double ySpeed, Pose2d point){
+    LimelightResults results = LimelightHelpers.getLatestResults(limelight);
+    SmartDashboard.putBoolean("valid_results", results.valid);
+    //if (results.valid){
+      if (results.targets_Fiducials.length > 0){
+        LimelightTarget_Fiducial tag = results.targets_Fiducials[0];
+        double id = tag.fiducialID;
+        String family = tag.fiducialFamily;
+
+        point = tag.getTargetPose_RobotSpace2D();
+      }
+    //}
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, 
       FieldElements.Reef.centerFaces[1].minus(getPose2d()).getTranslation().rotateBy(getPose2d().getRotation()).getAngle().getRadians()*0.5);
     MecanumDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(
@@ -276,15 +289,15 @@ public class DriveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    /*LimelightHelpers.SetRobotOrientation(limelight, gyro.getYaw(), 0, 0, 0, 0, 0);
+    LimelightHelpers.SetRobotOrientation(limelight, gyro.getYaw(), 0, 0, 0, 0, 0);
     if (Util.isBlue())
       limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelight);
     else 
-      limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiRed(limelight);*/
+      limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiRed(limelight);
     poseEstimator.update(gyro.getRotation2d(), getWheelPositions());
-    /*poseEstimator.addVisionMeasurement(limelightMeasurement.pose, 
+    poseEstimator.addVisionMeasurement(limelightMeasurement.pose, 
                                        limelightMeasurement.timestampSeconds, 
-                                       VecBuilder.fill(0.7, 0.7, 0.7));*/
+                                       VecBuilder.fill(0.7, 0.7, 999999));
 
     frontLeftMotor .getClosedLoopController().setReference(frontLeftSpeed,  ControlType.kMAXMotionVelocityControl);
     frontRightMotor.getClosedLoopController().setReference(frontRightSpeed, ControlType.kMAXMotionVelocityControl);

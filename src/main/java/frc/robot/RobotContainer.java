@@ -16,6 +16,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.PS5Controller.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -76,11 +77,11 @@ public class RobotContainer {
     driveSubsystem.setDefaultCommand(new RunCommand(
       () -> {
         if (Util.checkDriverDeadband(driver)) 
-          driveSubsystem.drive(
+          driveSubsystem.lockDrive(
             - yLimiter.calculate(driver.getLeftY()) * Control.drivetrain.kMaxVelMPS,
             - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMPS,
-            - rotLimiter.calculate(driver.getRightX()) * Control.drivetrain.kMaxAngularVelRad,
-            false);
+            /*- rotLimiter.calculate(driver.getRightX()) * Control.drivetrain.kMaxAngularVelRad,*/ new Pose2d());
+            //false);
         else 
             driveSubsystem.stop(); },
             driveSubsystem

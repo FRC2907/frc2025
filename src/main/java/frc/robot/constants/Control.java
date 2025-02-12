@@ -10,7 +10,7 @@ import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.util.Units;
 
 public class Control {
-    public static final String LIMELIGHT_NAME = ""; //TODO find
+    public static final String LIMELIGHT_NAME = "limelight-casey"; 
     public static final int CURRENT_LIMIT = 40; //amps
     public static final double NOMINAL_VOLTAGE = 12.0;
     public static final double kDriverDeadband = 0.08;
@@ -49,7 +49,7 @@ public class Control {
                                    kI = 1e-7, //All wheels I constant
                                    kD = 3;    //All wheels D constant
         //PathPlanner PID constants
-        public static final double kPPP = 10.0, //PathPlanner translational P constant
+        public static final double kPPP = 18.5, //PathPlanner translational P constant
                                    kPPI = 0.0,    //PathPlanner translational I constant
                                    kPPD = 2.5;  //PathPlanner translational D constant
         public static final double kPPRotP = 15.0, //PathPlanner rotational P constant
