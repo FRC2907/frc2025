@@ -29,8 +29,10 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
@@ -107,6 +109,8 @@ public class DriveSubsystem extends SubsystemBase {
       VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))
     );
 
+    poseEstimator.resetPose(new Pose2d(17, 5, new Rotation2d(0)));
+
     /*driveController = new HolonomicDriveController(
       new PIDController(18.5, 0, 2.5), 
       new PIDController(25.0, 0, 2.5),
@@ -180,6 +184,7 @@ public class DriveSubsystem extends SubsystemBase {
     rearRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearRightMetersPerSecond, wheelDiameter);
   }
 
+  private double thing;
   public void lockDrive(double xSpeed, double ySpeed, Pose2d point){
     LimelightResults results = LimelightHelpers.getLatestResults(limelight);
     SmartDashboard.putBoolean("valid_results", results.valid);
@@ -191,9 +196,16 @@ public class DriveSubsystem extends SubsystemBase {
 
         point = tag.getTargetPose_RobotSpace2D();
       }
+    LinearFilter filter = LinearFilter.movingAverage(20);
+    Translation2d target =  FieldElements.Reef.centerFaces[1].minus(getPose2d()).getTranslation();
+    double minusX = FieldElements.Reef.centerFaces[1].getX() - filter.calculate(getPose2d().getX());
+    double minusY = FieldElements.Reef.centerFaces[1].getY() - filter.calculate(getPose2d().getY());
+    SmartDashboard.putNumber("minusX", FieldElements.Reef.centerFaces[1].minus(getPose2d()).getX());
+    SmartDashboard.putNumber("minusY", FieldElements.Reef.centerFaces[1].minus(getPose2d()).getY());
+    SmartDashboard.putNumber("angle", Math.acos(target.getX() / Math.hypot(target.getX(), target.getY())));
     //}
-    ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, 
-      FieldElements.Reef.centerFaces[1].minus(getPose2d()).getTranslation().rotateBy(getPose2d().getRotation()).getAngle().getRadians()*0.5);
+    thing = (Math.atan(minusX / minusY) - getHeadingRad()) * 3;
+    ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, thing);
     MecanumDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(
       ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, gyro.getRotation2d())
     );
@@ -295,9 +307,11 @@ public class DriveSubsystem extends SubsystemBase {
     else 
       limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiRed(limelight);
     poseEstimator.update(gyro.getRotation2d(), getWheelPositions());
-    poseEstimator.addVisionMeasurement(limelightMeasurement.pose, 
-                                       limelightMeasurement.timestampSeconds, 
-                                       VecBuilder.fill(0.7, 0.7, 999999));
+    if (limelightMeasurement != null){
+      poseEstimator.addVisionMeasurement(limelightMeasurement.pose, 
+                                         limelightMeasurement.timestampSeconds, 
+                                         VecBuilder.fill(0, 0, 999999));
+    }
 
     frontLeftMotor .getClosedLoopController().setReference(frontLeftSpeed,  ControlType.kMAXMotionVelocityControl);
     frontRightMotor.getClosedLoopController().setReference(frontRightSpeed, ControlType.kMAXMotionVelocityControl);
@@ -322,6 +336,7 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("rrSetPoint", rearRightSpeed);
     SmartDashboard.putNumber("heading", getHeadingDeg());
     SmartDashboard.putData("field", field);
+    SmartDashboard.putNumber("thing", thing);
   }
 
   @Override
