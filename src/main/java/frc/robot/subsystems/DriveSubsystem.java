@@ -28,6 +28,8 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -67,6 +69,8 @@ public class DriveSubsystem extends SubsystemBase {
   private RobotConfig robotConfig;
   private String limelight;
   private LimelightHelpers.PoseEstimate limelightMeasurement;
+  private PIDController controller;
+  private SimpleMotorFeedforward betterController;
   //private HolonomicDriveController driveController;
 
   private DriveSubsystem() {
@@ -128,6 +132,8 @@ public class DriveSubsystem extends SubsystemBase {
     autoBuilderThing();
 
     field = new Field2d();
+
+    controller = new PIDController(25, 0, 1500);
   }
 
   private static DriveSubsystem instance;
@@ -186,28 +192,44 @@ public class DriveSubsystem extends SubsystemBase {
 
   private double thing;
   public void lockDrive(double xSpeed, double ySpeed, Pose2d point){
-    LimelightResults results = LimelightHelpers.getLatestResults(limelight);
+    /*LimelightResults results = LimelightHelpers.getLatestResults(limelight);
+    double targets = LimelightHelpers.getFiducialID(limelight);
     SmartDashboard.putBoolean("valid_results", results.valid);
+    double minusX = 0;
+    double minusY = 0;
     //if (results.valid){
+    SmartDashboard.putNumber("targets", results.targets_Fiducials.length);
       if (results.targets_Fiducials.length > 0){
         LimelightTarget_Fiducial tag = results.targets_Fiducials[0];
         double id = tag.fiducialID;
         String family = tag.fiducialFamily;
 
         point = tag.getTargetPose_RobotSpace2D();
+        SmartDashboard.putNumber("tag", tag.fiducialID);
+
+        LinearFilter filter = LinearFilter.movingAverage(20);
+        minusX = point.getX() - filter.calculate(getPose2d().getX());
+        minusY = point.getY() - filter.calculate(getPose2d().getY());
       }
-    LinearFilter filter = LinearFilter.movingAverage(20);
+  
     Translation2d target =  FieldElements.Reef.centerFaces[1].minus(getPose2d()).getTranslation();
-    double minusX = FieldElements.Reef.centerFaces[1].getX() - filter.calculate(getPose2d().getX());
-    double minusY = FieldElements.Reef.centerFaces[1].getY() - filter.calculate(getPose2d().getY());
-    SmartDashboard.putNumber("minusX", FieldElements.Reef.centerFaces[1].minus(getPose2d()).getX());
-    SmartDashboard.putNumber("minusY", FieldElements.Reef.centerFaces[1].minus(getPose2d()).getY());
+    SmartDashboard.putNumber("minusX", minusX);
+    SmartDashboard.putNumber("minusY", minusY);
+    SmartDashboard.putNumber("ahh", FieldElements.Reef.centerFaces[1].minus(getPose2d()).getX());
+    SmartDashboard.putNumber("ahhh", FieldElements.Reef.centerFaces[1].minus(getPose2d()).getY());
     SmartDashboard.putNumber("angle", Math.acos(target.getX() / Math.hypot(target.getX(), target.getY())));
     //}
-    thing = (Math.atan(minusX / minusY) - getHeadingRad()) * 3;
+    if ((minusX != 0) && (minusY != 0) ) {
+      thing = (Math.atan(minusX / minusY) - getHeadingRad()) * 3;
+    } else {
+      thing = 0;
+    }*/
+    thing = controller.calculate(Units.degreesToRadians(LimelightHelpers.getTX(limelight)));
+    SmartDashboard.putNumber("thing", Units.radiansToDegrees(thing));
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, thing);
     MecanumDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(
-      ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, gyro.getRotation2d())
+      //ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, gyro.getRotation2d())
+      chassisSpeeds
     );
     wheelSpeeds.desaturate(Control.drivetrain.kMaxVelMPS);
 
@@ -310,7 +332,7 @@ public class DriveSubsystem extends SubsystemBase {
     if (limelightMeasurement != null){
       poseEstimator.addVisionMeasurement(limelightMeasurement.pose, 
                                          limelightMeasurement.timestampSeconds, 
-                                         VecBuilder.fill(0, 0, 999999));
+                                         VecBuilder.fill(0, 0, 0));
     }
 
     frontLeftMotor .getClosedLoopController().setReference(frontLeftSpeed,  ControlType.kMAXMotionVelocityControl);

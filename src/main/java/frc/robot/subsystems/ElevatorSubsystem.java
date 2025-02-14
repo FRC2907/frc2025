@@ -54,10 +54,17 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public void L1(){
-    setSetpoint(Control.elevator.kL1);
+    setSetPoint(Control.elevator.kL2 + Control.elevator.kOffset);
   }
-  public void setSetpoint(double setPoint){
-    this.setPoint = setPoint - Control.elevator.kElevatorOffset;
+  public void L2(){
+    setSetPoint(Control.elevator.kL2 + Control.elevator.kOffset);
+  }
+  public void L3(){
+    setSetPoint(Control.elevator.kL3 + Control.elevator.kOffset);
+  }
+
+  public void setSetPoint(double setPoint){
+    this.setPoint = setPoint - Control.elevator.kOffset;
   }
   public boolean atSetPoint() {
     return Math.abs(motor.getEncoder().getPosition() - setPoint) < Control.elevator.kAllowedError;

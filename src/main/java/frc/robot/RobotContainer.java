@@ -80,16 +80,16 @@ public class RobotContainer {
       );*/
 
     driveSubsystem.setDefaultCommand(new RunCommand(
-      () -> //{
-        //if (Util.checkDriverDeadband(driver)) 
-          driveSubsystem.lockDrive(
+      () -> {
+        if (Util.checkDriverDeadband(driver)) 
+          driveSubsystem.drive(
             - yLimiter.calculate(driver.getLeftY()) * Control.drivetrain.kMaxVelMPS,
             - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMPS,
-            /*- rotLimiter.calculate(driver.getRightX()) * Control.drivetrain.kMaxAngularVelRad,*/ new Pose2d())
-            //false);
-        //else 
-            //driveSubsystem.stop(); },
-            ,driveSubsystem
+            - rotLimiter.calculate(driver.getRightX()) * Control.drivetrain.kMaxAngularVelRad, 
+            false);
+        else 
+            driveSubsystem.stop(); },
+            driveSubsystem
     ));
 
     configureBindings();
