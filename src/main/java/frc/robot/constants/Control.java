@@ -35,7 +35,7 @@ public class Control {
         public static final double kMaxVelRPM = 4000; // revolutions per minute
         public static final double kMaxAccelMPS = 14; // meters per second per second OR meters per second squared (m/s^2)
         public static final double kMaxVelMPS = 14; // meters per second
-        public static final double kMaxAngularVelRad = 4.5 * Math.PI; // radians per second
+        public static final double kMaxAngularVelRad = 6.9 * Math.PI; // radians per second
         public static final double kMaxAngularAccel = 9 * Math.PI; //radians per second per second OR radians per second squared
         public static final double kAllowedError = 0.005;
         public static final double kRampRate = 0.1;
@@ -104,5 +104,10 @@ public class Control {
         public static final double kL2 = Units.metersToInches(FieldElements.ReefHeight.L2.height) + 1; //TODO tune
         public static final double kL3 = Units.metersToInches(FieldElements.ReefHeight.L3.height) + 1; //TODO tune
         public static final double kL4 = Units.metersToInches(FieldElements.ReefHeight.L4.height) + 3; //TODO tune 
+
+        public static final double kS = 0.1; //TODO tune
+        public static final double kG = 6.01; //TODO adjust
+        public static final double kV = 2.05; //TODO adjust
+        public static final double kA = 0.65; //TODO adjust
     }
 }

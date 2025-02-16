@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import java.util.List;
 import java.util.Stack;
 
+import com.fasterxml.jackson.databind.ser.std.StdArraySerializers.FloatArraySerializer;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.config.RobotConfig;
@@ -29,12 +30,9 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator;
-import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
@@ -47,8 +45,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
-import frc.robot.LimelightHelpers.LimelightResults;
-import frc.robot.LimelightHelpers.LimelightTarget_Fiducial;
 import frc.robot.Util;
 import frc.robot.constants.Control;
 import frc.robot.constants.FieldElements;
@@ -69,8 +65,7 @@ public class DriveSubsystem extends SubsystemBase {
   private RobotConfig robotConfig;
   private String limelight;
   private LimelightHelpers.PoseEstimate limelightMeasurement;
-  private PIDController controller;
-  private SimpleMotorFeedforward betterController;
+  private PIDController headingController;
   //private HolonomicDriveController driveController;
 
   private DriveSubsystem() {
@@ -113,8 +108,6 @@ public class DriveSubsystem extends SubsystemBase {
       VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))
     );
 
-    poseEstimator.resetPose(new Pose2d(17, 5, new Rotation2d(0)));
-
     /*driveController = new HolonomicDriveController(
       new PIDController(18.5, 0, 2.5), 
       new PIDController(25.0, 0, 2.5),
@@ -133,7 +126,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     field = new Field2d();
 
-    controller = new PIDController(25, 0, 1500);
+    headingController = new PIDController(20, 0, 999999999999999.0);
   }
 
   private static DriveSubsystem instance;
@@ -190,43 +183,12 @@ public class DriveSubsystem extends SubsystemBase {
     rearRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearRightMetersPerSecond, wheelDiameter);
   }
 
-  private double thing;
-  public void lockDrive(double xSpeed, double ySpeed, Pose2d point){
-    /*LimelightResults results = LimelightHelpers.getLatestResults(limelight);
-    double targets = LimelightHelpers.getFiducialID(limelight);
-    SmartDashboard.putBoolean("valid_results", results.valid);
-    double minusX = 0;
-    double minusY = 0;
-    //if (results.valid){
-    SmartDashboard.putNumber("targets", results.targets_Fiducials.length);
-      if (results.targets_Fiducials.length > 0){
-        LimelightTarget_Fiducial tag = results.targets_Fiducials[0];
-        double id = tag.fiducialID;
-        String family = tag.fiducialFamily;
-
-        point = tag.getTargetPose_RobotSpace2D();
-        SmartDashboard.putNumber("tag", tag.fiducialID);
-
-        LinearFilter filter = LinearFilter.movingAverage(20);
-        minusX = point.getX() - filter.calculate(getPose2d().getX());
-        minusY = point.getY() - filter.calculate(getPose2d().getY());
-      }
-  
-    Translation2d target =  FieldElements.Reef.centerFaces[1].minus(getPose2d()).getTranslation();
-    SmartDashboard.putNumber("minusX", minusX);
-    SmartDashboard.putNumber("minusY", minusY);
-    SmartDashboard.putNumber("ahh", FieldElements.Reef.centerFaces[1].minus(getPose2d()).getX());
-    SmartDashboard.putNumber("ahhh", FieldElements.Reef.centerFaces[1].minus(getPose2d()).getY());
-    SmartDashboard.putNumber("angle", Math.acos(target.getX() / Math.hypot(target.getX(), target.getY())));
-    //}
-    if ((minusX != 0) && (minusY != 0) ) {
-      thing = (Math.atan(minusX / minusY) - getHeadingRad()) * 3;
-    } else {
-      thing = 0;
-    }*/
-    thing = controller.calculate(Units.degreesToRadians(LimelightHelpers.getTX(limelight)));
-    SmartDashboard.putNumber("thing", Units.radiansToDegrees(thing));
-    ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, thing);
+  public void lockDrive(double xSpeed, double ySpeed, Pose2d point, boolean limelightLock){
+    double zRotation = limelightLock 
+    ? headingController.calculate(Units.degreesToRadians(LimelightHelpers.getTX(limelight)))
+    : headingController.calculate(Math.atan((point.getX() - getPose2d().getX()) / point.getY() - getPose2d().getY()));
+    drive(xSpeed, ySpeed, zRotation, false);
+    /*ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, zRotation);
     MecanumDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(
       //ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, gyro.getRotation2d())
       chassisSpeeds
@@ -246,13 +208,9 @@ public class DriveSubsystem extends SubsystemBase {
     if (Math.abs(ySpeed) < 2.1 && Math.abs(xSpeed) > 3.5){
       frontRightSpeed = frontLeftSpeed;
       rearLeftSpeed = rearRightSpeed;
-    }
+    }*/
   }
 
-  /*public void driveToPose(List<Waypoint> waypoints){
-    PathConstraints constraints = new PathConstraints(
-      Control.drivetrain.kMaxVelMeters, rearLeftSpeed, frontRightSpeed, frontLeftSpeed);
-  }*/
 
   private MecanumDriveWheelPositions getWheelPositions(){
     return new MecanumDriveWheelPositions(
@@ -261,7 +219,6 @@ public class DriveSubsystem extends SubsystemBase {
       Util.revolutionsToMeters(rearLeftEnc  .getPosition(), wheelDiameter) / Control.drivetrain.GEAR_RATIO,
       Util.revolutionsToMeters(rearRightEnc .getPosition(), wheelDiameter) / Control.drivetrain.GEAR_RATIO);
   }
-
   private ChassisSpeeds getChassisSpeeds(){
     return kinematics.toChassisSpeeds(
       new MecanumDriveWheelSpeeds(
@@ -284,7 +241,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   public PathPlannerPath generatePath(List<Pose2d> goal, Rotation2d endState){
     List<Pose2d> pathPoses = new Stack<Pose2d>();
-    pathPoses.add(this.getPose2d());
+    //pathPoses.add(this.getPose2d());
     for (int i = 0; i < goal.size(); i++){
       pathPoses.add(goal.get(i));
     }
@@ -315,6 +272,7 @@ public class DriveSubsystem extends SubsystemBase {
       DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
       return Commands.none();
     }
+    //return AutoBuilder.followPath(path);
   }
 
   public boolean exampleCondition() {
@@ -323,16 +281,16 @@ public class DriveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    LimelightHelpers.SetRobotOrientation(limelight, gyro.getYaw(), 0, 0, 0, 0, 0);
+    //LimelightHelpers.SetRobotOrientation(limelight, gyro.getYaw(), 0, 0, 0, 0, 0);
     if (Util.isBlue())
       limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelight);
     else 
       limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiRed(limelight);
     poseEstimator.update(gyro.getRotation2d(), getWheelPositions());
-    if (limelightMeasurement != null){
+    if (limelightMeasurement != null && limelightMeasurement.tagCount > 1){
       poseEstimator.addVisionMeasurement(limelightMeasurement.pose, 
                                          limelightMeasurement.timestampSeconds, 
-                                         VecBuilder.fill(0, 0, 0));
+                                         VecBuilder.fill(0.7, 0.7, 999999));
     }
 
     frontLeftMotor .getClosedLoopController().setReference(frontLeftSpeed,  ControlType.kMAXMotionVelocityControl);
@@ -358,7 +316,6 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("rrSetPoint", rearRightSpeed);
     SmartDashboard.putNumber("heading", getHeadingDeg());
     SmartDashboard.putData("field", field);
-    SmartDashboard.putNumber("thing", thing);
   }
 
   @Override

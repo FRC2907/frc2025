@@ -12,6 +12,7 @@ import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.Ports;
@@ -21,6 +22,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   private static SparkMax motor;
   private static SparkMaxConfig config;
+  private ElevatorFeedforward feedforward;
   private double setPoint;
   public ElevatorSubsystem() {
     motor = new SparkMax(Ports.elevator.ELEVATOR, Control.elevator.MOTOR_TYPE);
@@ -37,6 +39,11 @@ public class ElevatorSubsystem extends SubsystemBase {
                                .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal);
     config.encoder.positionConversionFactor(Control.elevator.kConversionFactor);
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    feedforward = new ElevatorFeedforward(Control.elevator.kS,
+                                          Control.elevator.kG, 
+                                          Control.elevator.kV, 
+                                          Control.elevator.kA);
   }
 
   /**

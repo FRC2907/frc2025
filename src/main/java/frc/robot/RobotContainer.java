@@ -45,6 +45,7 @@ public class RobotContainer {
   private final PoopSubsystem poopSubsystem;
   //private final AlgaeClawSubsystem algaeClawSubsystem;
 
+  private RunCommand lockDrive;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final PS5Controller driver = new PS5Controller(Ports.HID.DRIVER);
@@ -66,18 +67,14 @@ public class RobotContainer {
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
-    /*RunCommand drive = new RunCommand(
+    lockDrive = new RunCommand(
       () -> {
-        if (Util.checkDriverDeadband(driver)) 
-          driveSubsystem.drive(
-            - yLimiter.calculate(driver.getLeftY()) * Control.drivetrain.kMaxVelMeters,
-            - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMeters,
-            - rotLimiter.calculate(driver.getRightX()) * Control.drivetrain.kMaxAngularVel,
-            true);
-        else 
-            driveSubsystem.stop(); },
-            driveSubsystem
-      );*/
+        driveSubsystem.lockDrive(
+          - yLimiter.calculate(driver.getLeftY()) * Control.drivetrain.kMaxVelMPS,
+          - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMPS, 
+          FieldElements.Reef.centerFaces[4],
+          true); },
+          driveSubsystem );
 
     driveSubsystem.setDefaultCommand(new RunCommand(
       () -> {
@@ -86,7 +83,7 @@ public class RobotContainer {
             - yLimiter.calculate(driver.getLeftY()) * Control.drivetrain.kMaxVelMPS,
             - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMPS,
             - rotLimiter.calculate(driver.getRightX()) * Control.drivetrain.kMaxAngularVelRad, 
-            false);
+            true);
         else 
             driveSubsystem.stop(); },
             driveSubsystem
@@ -113,10 +110,12 @@ public class RobotContainer {
     new JoystickButton(operator, Button.kR2.value).whileTrue(new CoralPoop(poopSubsystem));
     List<Pose2d> something = new Stack<Pose2d>();
     something.add(new Pose2d(1, 1, Rotation2d.kZero));
-    something.add(new Pose2d(2, 3, Rotation2d.kZero));
+    something.add(FieldElements.Reef.centerFaces[3]);
 
     PathPlannerPath thing = driveSubsystem.generatePath(something, Rotation2d.kZero);
-    new JoystickButton(driver, Button.kR2.value).onTrue(driveSubsystem.followPathCommand(thing));
+    new JoystickButton(driver, Button.kL2.value).onTrue(driveSubsystem.followPathCommand(thing));
+
+    new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
