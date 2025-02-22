@@ -7,9 +7,7 @@ package frc.robot.subsystems;
 import java.util.List;
 import java.util.Stack;
 
-import com.fasterxml.jackson.databind.ser.std.StdArraySerializers.FloatArraySerializer;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -18,7 +16,6 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
@@ -29,7 +26,6 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -38,16 +34,13 @@ import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 import frc.robot.Util;
 import frc.robot.constants.Control;
-import frc.robot.constants.FieldElements;
 import frc.robot.constants.Ports;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -65,7 +58,7 @@ public class DriveSubsystem extends SubsystemBase {
   private RobotConfig robotConfig;
   private String limelight;
   private LimelightHelpers.PoseEstimate limelightMeasurement;
-  private PIDController headingController;
+  //private PIDController headingController;
   //private HolonomicDriveController driveController;
 
   private DriveSubsystem() {
@@ -107,6 +100,7 @@ public class DriveSubsystem extends SubsystemBase {
       VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)),
       VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))
     );
+    //poseEstimator.resetPose(new Pose2d(2, 2, Rotation2d.kZero));
 
     /*driveController = new HolonomicDriveController(
       new PIDController(18.5, 0, 2.5), 
@@ -116,17 +110,11 @@ public class DriveSubsystem extends SubsystemBase {
 
     limelight = Control.LIMELIGHT_NAME;
 
-    try{
-      robotConfig = RobotConfig.fromGUISettings();
-    } catch (Exception e) {
-      // Handle exception as needed
-      e.printStackTrace();
-    }
-    autoBuilderThing();
-
     field = new Field2d();
 
-    headingController = new PIDController(20, 0, 999999999999999.0);
+    pathPlannerConfigure();
+
+    //resetGyro();
   }
 
   private static DriveSubsystem instance;
@@ -151,8 +139,9 @@ public class DriveSubsystem extends SubsystemBase {
 
   public void drive(double xSpeed, double ySpeed, double zRotation, boolean fieldRelative){
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, zRotation);
+    gyro.getRotation2d();
     MecanumDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(
-      fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, gyro.getRotation2d())
+      fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, gyro.getRotation2d()) //DO NOT USE
                     : chassisSpeeds
     );
     wheelSpeeds.desaturate(Control.drivetrain.kMaxVelMPS);
@@ -185,30 +174,11 @@ public class DriveSubsystem extends SubsystemBase {
 
   public void lockDrive(double xSpeed, double ySpeed, Pose2d point, boolean limelightLock){
     double zRotation = limelightLock 
-    ? headingController.calculate(Units.degreesToRadians(LimelightHelpers.getTX(limelight)))
-    : headingController.calculate(Math.atan((point.getX() - getPose2d().getX()) / point.getY() - getPose2d().getY()));
+    ?   Units.degreesToRadians( - LimelightHelpers.getTX(limelight)) * Control.drivetrain.kHeadingP
+      + Units.degreesToRadians(gyro.getRate()) * Control.drivetrain.kHeadingD
+    :   Math.atan((point.getX() - getPose2d().getX()) / point.getY() - getPose2d().getY()) * Control.drivetrain.kHeadingP
+      + Units.degreesToRadians(gyro.getRate()) * Control.drivetrain.kHeadingD;
     drive(xSpeed, ySpeed, zRotation, false);
-    /*ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, zRotation);
-    MecanumDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(
-      //ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, gyro.getRotation2d())
-      chassisSpeeds
-    );
-    wheelSpeeds.desaturate(Control.drivetrain.kMaxVelMPS);
-
-    frontLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontLeftMetersPerSecond, wheelDiameter);
-    frontRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontRightMetersPerSecond, wheelDiameter);
-    rearLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearLeftMetersPerSecond, wheelDiameter);
-    rearRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearRightMetersPerSecond, wheelDiameter);
-
-    if (Math.abs(xSpeed) < 2.8 && Math.abs(ySpeed) > 3.5){
-      frontRightSpeed = - frontLeftSpeed;
-      rearLeftSpeed = - rearRightSpeed;
-    }
-
-    if (Math.abs(ySpeed) < 2.1 && Math.abs(xSpeed) > 3.5){
-      frontRightSpeed = frontLeftSpeed;
-      rearLeftSpeed = rearRightSpeed;
-    }*/
   }
 
 
@@ -258,21 +228,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public Command followPathCommand(PathPlannerPath path) {
-    try {
-      return new FollowPathCommand(
-        path,
-        this::getPose2d, 
-        this::getChassisSpeeds, 
-        (speeds, feedforwards) -> drive(speeds), 
-        Control.drivetrain.PPDriveController,
-        robotConfig,
-        Util::isRed,
-        this);
-    } catch (Exception e) {
-      DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
-      return Commands.none();
-    }
-    //return AutoBuilder.followPath(path);
+    return AutoBuilder.followPath(path);
   }
 
   public boolean exampleCondition() {
@@ -287,7 +243,7 @@ public class DriveSubsystem extends SubsystemBase {
     else 
       limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiRed(limelight);
     poseEstimator.update(gyro.getRotation2d(), getWheelPositions());
-    if (limelightMeasurement != null && limelightMeasurement.tagCount > 1){
+    if (limelightMeasurement != null && limelightMeasurement.tagCount > 0){
       poseEstimator.addVisionMeasurement(limelightMeasurement.pose, 
                                          limelightMeasurement.timestampSeconds, 
                                          VecBuilder.fill(0.7, 0.7, 999999));
@@ -348,7 +304,13 @@ public class DriveSubsystem extends SubsystemBase {
     rearRightMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  private void autoBuilderThing(){
+  private void pathPlannerConfigure(){
+    try{
+      robotConfig = RobotConfig.fromGUISettings();
+    } catch (Exception e) {
+      // Handle exception as needed
+      e.printStackTrace();
+    }
     // Configure AutoBuilder last
     AutoBuilder.configure(
             poseEstimator::getEstimatedPosition, // Robot pose supplier

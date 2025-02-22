@@ -7,6 +7,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 
 public class Control {
@@ -48,6 +49,8 @@ public class Control {
         public static final double kP = 4e-7, //All wheels P constant
                                    kI = 1e-7, //All wheels I constant
                                    kD = 3;    //All wheels D constant
+        public static final double kHeadingP = 40,
+                                   kHeadingD = 8.5;
         //PathPlanner PID constants
         public static final double kPPP = 18.5, //PathPlanner translational P constant
                                    kPPI = 0.0,    //PathPlanner translational I constant
@@ -83,13 +86,35 @@ public class Control {
         public static final double kArmConversionFactor = GEAR_RATIO / 360;
         public static final double kArmDownLimit = 30; //TODO find
         public static final double kArmUpLimit = 135; //TODO find
-        public static final double kIntakeAngle = 90; //TODO find
-        public static final double kGroundIntakeAngle = 35; //TODO find
-        public static final double kIntakeSpeed = 0.1; //TODO find
-        public static final double kFixedShootSpeed = 2000; //TODO find
+        public static final double kMaxVelocity = 180, //TODO tune (deg/s)
+                                   kMaxAcceleration = 360; //TODO tune (deg/s^2)
+        public static final double kAllowedArmError = 1.5; //TODO tune
+
+        public static final double kStowAngle = 105;
+        public static final double kGrabAngle = 80; //TODO find
+        public static final double kGroundGrabAngle = - 35; //TODO find
         public static final double kFixedShootAngle = 135; //TODO find
+        public static final double kIntakeAngle = 100;
+
+        public static final double kIntakeSpeed = 0.3; //TODO find
+        public static final double kOuttakeSpeed = 0.3; //TODO find
+        public static final double kGrabSpeed = 0.1; //TODO find
+        public static final double kFixedShootSpeed = 2000; //TODO find
+        public static final double kAllowedShootError = 100;
+        public static final double kStopSpeed = 0;
 
         public static final double kProximityBand = 500; //TODO tune
+
+        public static final double kP = 1, //TODO tune
+                                   kI = 0, //TODO tune
+                                   kD = 0; //TODO tune
+        public static final double kS = 0.1, //TODO tune
+                                   kG = 0.57, //TODO adjust
+                                   kV = 0.39, //TODO adjust
+                                   kA = 0.01; //TODO adjust
+        public static final Constraints kConstraints = new Constraints(
+            kMaxVelocity, kMaxAcceleration
+        ); //TODO adjust
     }
 
     public class elevator {
@@ -100,14 +125,26 @@ public class Control {
         public static final double kDownLimit = 0;
         public static final double kUpLimit = 100; //TODO find
         public static final double kAllowedError = 1; //TODO tune
+
+        public static final double kMaxVelocity = 5, //TODO tune
+                                   kMaxAcceleration = 10; //TODO tune
+
+        public static final double kNeutral = 0;
         public static final double kL1 = Units.metersToInches(FieldElements.ReefHeight.L1.height) + 1; //TODO tune
         public static final double kL2 = Units.metersToInches(FieldElements.ReefHeight.L2.height) + 1; //TODO tune
         public static final double kL3 = Units.metersToInches(FieldElements.ReefHeight.L3.height) + 1; //TODO tune
         public static final double kL4 = Units.metersToInches(FieldElements.ReefHeight.L4.height) + 3; //TODO tune 
 
-        public static final double kS = 0.1; //TODO tune
-        public static final double kG = 6.01; //TODO adjust
-        public static final double kV = 2.05; //TODO adjust
-        public static final double kA = 0.65; //TODO adjust
+
+        public static final double kP = 1, //TODO tune
+                                   kI = 0, //TODO tune
+                                   kD = 0; //TODO tune
+        public static final double kS = 0.1, //TODO tune
+                                   kG = 6.01, //TODO adjust
+                                   kV = 2.05, //TODO adjust
+                                   kA = 0.65; //TODO adjust
+        public static final Constraints kConstraints = new Constraints(
+            kMaxVelocity, kMaxAcceleration
+        ); //TODO adjust
     }
 }

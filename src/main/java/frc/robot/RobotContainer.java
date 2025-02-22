@@ -109,7 +109,7 @@ public class RobotContainer {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     new JoystickButton(operator, Button.kR2.value).whileTrue(new CoralPoop(poopSubsystem));
     List<Pose2d> something = new Stack<Pose2d>();
-    something.add(new Pose2d(1, 1, Rotation2d.kZero));
+    something.add(new Pose2d(3, 3, Rotation2d.kZero));
     something.add(FieldElements.Reef.centerFaces[3]);
 
     PathPlannerPath thing = driveSubsystem.generatePath(something, Rotation2d.kZero);
