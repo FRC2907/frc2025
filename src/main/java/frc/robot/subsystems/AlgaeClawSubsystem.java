@@ -19,7 +19,9 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Util;
 import frc.robot.constants.Control;
+import frc.robot.constants.FieldElements;
 import frc.robot.constants.Ports;
 
 public class AlgaeClawSubsystem extends SubsystemBase {
@@ -33,7 +35,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   private ArmFeedforward feedforward;
   private ProfiledPIDController pidController;
 
-  public AlgaeClawSubsystem() {
+  private AlgaeClawSubsystem() {
     arm = new SparkMax(Ports.manipulator.ALGAE_ARM, Control.algaeManipulator.MOTOR_TYPE);
     armConfig = new SparkMaxConfig();
     armConfig.idleMode(IdleMode.kBrake)
@@ -77,6 +79,16 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     colorSensor = new ColorSensorV3(Ports.manipulator.COLOR_SENSOR);
   }
 
+  private static AlgaeClawSubsystem instance;
+  public static AlgaeClawSubsystem getInstance(){
+    if (instance == null){
+      instance = new AlgaeClawSubsystem();
+    }
+    return instance;
+  }
+
+
+
   private static void armSetSetPoint(double angle){
     armSetPoint = angle;
   }
@@ -92,7 +104,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     armSetSetPoint(Control.algaeManipulator.kIntakeAngle);
     shootSetSetPoint(Control.algaeManipulator.kIntakeSpeed);
   }
-  public void shoot(){
+  public void fixedShoot(){
     armSetSetPoint(Control.algaeManipulator.kFixedShootAngle);
     shootSetSetPoint(Control.algaeManipulator.kFixedShootSpeed);; //TODO add algorithm
   }
@@ -103,6 +115,16 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   public void grabGround(){
     armSetSetPoint(Control.algaeManipulator.kGroundGrabAngle);
     shootSetSetPoint(Control.algaeManipulator.kGrabSpeed);
+  }
+
+  private double calculateSpeed(){
+    return Math.abs(DriveSubsystem.getInstance().getPose2d().getX()
+     - (Util.isBlue() ? 0 : FieldElements.fieldLength)) * Control.algaeManipulator.kDistanceA +
+     ElevatorSubsystem.getInstance().getHeight() * Control.algaeManipulator.kHeightA
+     + Control.algaeManipulator.kShootB;
+  }
+  public void shoot(){
+
   }
 
   /**

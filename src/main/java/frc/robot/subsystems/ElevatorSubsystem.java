@@ -27,7 +27,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   private ProfiledPIDController pidController;
   private double setPoint;
   //private ElevatorState elevatorState;
-  public ElevatorSubsystem() {
+  private ElevatorSubsystem() {
     motor = new SparkFlex(Ports.elevator.ELEVATOR, Control.elevator.MOTOR_TYPE);
     config = new SparkFlexConfig();
     config.idleMode(IdleMode.kBrake)
@@ -53,6 +53,14 @@ public class ElevatorSubsystem extends SubsystemBase {
                                               Control.elevator.kConstraints);
     
     //elevatorState = ElevatorState.NEUTRAL;
+    }
+
+    private static ElevatorSubsystem instance;
+    public static ElevatorSubsystem getInstance(){
+      if (instance == null){
+        instance = new ElevatorSubsystem();
+      }
+      return instance;
     }
 
   /**
@@ -103,6 +111,9 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
   public boolean atSetPoint() {
     return Math.abs(motor.getEncoder().getPosition() - setPoint) < Control.elevator.kAllowedError;
+  }
+  public double getHeight(){
+    return /*Control.elevator.kConversionFactor */ motor.getEncoder().getPosition();
   }
 
   @Override

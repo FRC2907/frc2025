@@ -16,7 +16,7 @@ public class PoopSubsystem extends SubsystemBase{
     private SparkMaxConfig config;
     public boolean coralShot;
 
-    public PoopSubsystem(){
+    private PoopSubsystem(){
         shoot = new SparkMax(Ports.manipulator.CORAL_SHOOTER, Control.coralManipulator.MOTOR_TYPE);
         config = new SparkMaxConfig();
         config.smartCurrentLimit(40)
@@ -24,6 +24,16 @@ public class PoopSubsystem extends SubsystemBase{
               .inverted(false);
         shoot.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
+
+    private static PoopSubsystem instance;
+    public static PoopSubsystem getInstance(){
+        if (instance == null){
+            instance = new PoopSubsystem();
+        }
+        return instance;
+    }
+
+
 
     public void shoot(){
         shoot.set(Control.coralManipulator.kShootSpeed);

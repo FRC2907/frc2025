@@ -10,7 +10,7 @@ import frc.robot.commands.CoralPoop;
 import frc.robot.constants.Control;
 import frc.robot.constants.FieldElements;
 import frc.robot.constants.Ports;
-import frc.robot.subsystems.AlgaeClawSubsystem;
+//import frc.robot.subsystems.AlgaeClawSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.PoopSubsystem;
 
@@ -60,7 +60,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     driveSubsystem = DriveSubsystem.getInstance();
-    poopSubsystem = new PoopSubsystem();
+    poopSubsystem = PoopSubsystem.getInstance();
     //algaeClawSubsystem = new AlgaeClawSubsystem();
 
     NamedCommands.registerCommand("Coral Poop", new CoralPoop(poopSubsystem));
