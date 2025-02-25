@@ -84,16 +84,17 @@ public class Control {
         public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
         public static final double GEAR_RATIO = 1; //TODO find
 
-        public static final double kArmConversionFactor = GEAR_RATIO / 360;
+        public static final double kArmConversionFactor = GEAR_RATIO * 360;
         public static final double kArmDownLimit = 30; //TODO find
         public static final double kArmUpLimit = 135; //TODO find
         public static final double kMaxVelocity = 180, //TODO tune (deg/s)
                                    kMaxAcceleration = 360; //TODO tune (deg/s^2)
         public static final double kAllowedArmError = 1.5; //TODO tune
+        public static final double kAlgaeElevatorOffset = Units.inchesToMeters(5);
 
         public static final double kStowAngle = 105;
         public static final double kGrabAngle = 80; //TODO find
-        public static final double kGroundGrabAngle = - 35; //TODO find
+        public static final double kGroundGrabAngle = -35; //TODO find
         public static final double kFixedShootAngle = 135; //TODO find
         public static final double kIntakeAngle = 100;
 
@@ -110,13 +111,13 @@ public class Control {
         public static final double kHeightA = -0.3; //TODO tune (y=mx+b for shoot linear regression equation for height)
         public static final double kShootB = 11.3; //TODO tune (y=mx+b for shoot linear regression equation for the base value)
 
-        public static final double kP = 1, //TODO tune
+        public static final double kP = 0.003, //TODO tune
                                    kI = 0, //TODO tune
                                    kD = 0; //TODO tune
-        public static final double kS = 0.1, //TODO tune
-                                   kG = 0.57, //TODO adjust
-                                   kV = 0.39, //TODO adjust
-                                   kA = 0.01; //TODO adjust
+        public static final double kS = 0.14, //TODO tune
+                                   kG = 0.46, //TODO adjust
+                                   kV = 0.01, //TODO adjust (0.53)
+                                   kA = 0.00; //TODO adjust (0.01)
         public static final Constraints kConstraints = new Constraints(
             kMaxVelocity, kMaxAcceleration
         ); //TODO adjust
@@ -125,29 +126,40 @@ public class Control {
     public class elevator {
         public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
 
-        public static final double kConversionFactor = 0.75; //TODO find
-        public static final double kOffset = 6; //TODO find (in.)
-        public static final double kDownLimit = 0;
-        public static final double kUpLimit = 100; //TODO find
-        public static final double kAllowedError = 1; //TODO tune
+        public static final double kConversionFactor = 0.01552; 
+        public static final double kOffset = Units.inchesToMeters(4.1); //TODO find better (m.) (original height off ground)
+        public static final double kDownLimit = Units.inchesToMeters(4.2);
+        public static final double kUpLimit = Units.inchesToMeters(48); //TODO find
+        public static final double kAllowedError = Units.inchesToMeters(1); //TODO tune
+        public static final double kIntakeOffset = Units.inchesToMeters(5); //TODO find
 
-        public static final double kMaxVelocity = 5, //TODO tune
-                                   kMaxAcceleration = 10; //TODO tune
+        public static final double kMaxVelocity = 6.07, //TODO tune (m/s)
+                                   kMaxAcceleration = 10; //TODO tune (m/s^2)
 
-        public static final double kNeutral = 0;
-        public static final double kL1 = Units.metersToInches(FieldElements.ReefHeight.L1.height) + 1; //TODO tune
-        public static final double kL2 = Units.metersToInches(FieldElements.ReefHeight.L2.height) + 1; //TODO tune
-        public static final double kL3 = Units.metersToInches(FieldElements.ReefHeight.L3.height) + 1; //TODO tune
-        public static final double kL4 = Units.metersToInches(FieldElements.ReefHeight.L4.height) + 3; //TODO tune 
+        public static final double kNeutral = Units.inchesToMeters(7.5); //TODO tune
+        public static final double kCoralStation = Units.inchesToMeters(50); //TODO find
+        public static final double kL1 = FieldElements.ReefHeight.L1.height + Units.inchesToMeters(1); //TODO tune
+        public static final double kL2 = FieldElements.ReefHeight.L2.height + Units.inchesToMeters(1); //TODO tune
+        public static final double kL3 = FieldElements.ReefHeight.L3.height + Units.inchesToMeters(1); //TODO tune
+        public static final double kL4 = FieldElements.ReefHeight.L4.height + Units.inchesToMeters(1); //TODO tune 
 
 
-        public static final double kP = 1, //TODO tune
+        public static final double kP = 50, //TODO tune
                                    kI = 0, //TODO tune
                                    kD = 0; //TODO tune
-        public static final double kS = 0.1, //TODO tune
+        
+        public static final double kS = 0.14,
+                                   kG = 0.31,
+                                   kV = 11.97,
+                                   kA = 0.0; //0.03 actual
+        /*public static final double kS = 0.12, //TODO tune
                                    kG = 6.01, //TODO adjust
                                    kV = 2.05, //TODO adjust
                                    kA = 0.65; //TODO adjust
+        public static final double kS = 0.12,
+                                   kG = 0.02,
+                                   kV = 18.26,
+                                   kA = 0.0;*/
         public static final Constraints kConstraints = new Constraints(
             kMaxVelocity, kMaxAcceleration
         ); //TODO adjust

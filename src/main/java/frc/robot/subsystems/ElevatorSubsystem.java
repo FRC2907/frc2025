@@ -8,12 +8,15 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.Ports;
@@ -21,27 +24,25 @@ import frc.robot.constants.Control;
 
 public class ElevatorSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
-  private static SparkFlex motor;
-  private static SparkFlexConfig config;
+  private static SparkMax motor;
+  private static SparkMaxConfig config;
   private ElevatorFeedforward feedforward;
   private ProfiledPIDController pidController;
   private double setPoint;
   //private ElevatorState elevatorState;
   private ElevatorSubsystem() {
-    motor = new SparkFlex(Ports.elevator.ELEVATOR, Control.elevator.MOTOR_TYPE);
-    config = new SparkFlexConfig();
+    motor = new SparkMax(Ports.elevator.ELEVATOR, Control.elevator.MOTOR_TYPE);
+    config = new SparkMaxConfig();
     config.idleMode(IdleMode.kBrake)
           .inverted(false)
           .smartCurrentLimit(0, 40)
-          .softLimit.forwardSoftLimit(30)
-                    .forwardSoftLimitEnabled(true)
+          .softLimit.forwardSoftLimit(10)
+                    .forwardSoftLimitEnabled(false)
                     .reverseSoftLimit(0)
                     .reverseSoftLimitEnabled(true);
-    config.closedLoop.maxMotion.maxAcceleration(180)
-                               .maxVelocity(100)
-                               .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal);
-    config.externalEncoder.positionConversionFactor(Control.elevator.kConversionFactor);
+    config.encoder.positionConversionFactor(Control.elevator.kConversionFactor);
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    motor.getEncoder().setPosition(0);
 
     feedforward = new ElevatorFeedforward(Control.elevator.kS,
                                           Control.elevator.kG, 
@@ -68,12 +69,28 @@ public class ElevatorSubsystem extends SubsystemBase {
    *
    * @return a command
    */
-  public Command exampleMethodCommand() {
+  public Command goToL1() {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
         () -> {
-          /* one-time action goes here */
+          L1();
+        });
+  }
+  public Command goToL2() {
+    // Inline construction of command goes here.
+    // Subsystem::RunOnce implicitly requires `this` subsystem.
+    return runOnce(
+        () -> {
+          L2();
+        });
+  }
+  public Command goToL3() {
+    // Inline construction of command goes here.
+    // Subsystem::RunOnce implicitly requires `this` subsystem.
+    return runOnce(
+        () -> {
+          L3();
         });
   }
 
@@ -97,17 +114,17 @@ public class ElevatorSubsystem extends SubsystemBase {
     setSetPoint(Control.elevator.kNeutral);
   }
   public void L1(){
-    setSetPoint(Control.elevator.kL1 + Control.elevator.kOffset);
+    setSetPoint(Control.elevator.kL1);
   }
   public void L2(){
-    setSetPoint(Control.elevator.kL2 + Control.elevator.kOffset);
+    setSetPoint(Control.elevator.kL2);
   }
   public void L3(){
-    setSetPoint(Control.elevator.kL3 + Control.elevator.kOffset);
+    setSetPoint(Control.elevator.kL3);
   }
 
   public void setSetPoint(double setPoint){
-    this.setPoint = setPoint - Control.elevator.kOffset;
+    this.setPoint = setPoint;
   }
   public boolean atSetPoint() {
     return Math.abs(motor.getEncoder().getPosition() - setPoint) < Control.elevator.kAllowedError;
@@ -118,11 +135,22 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    double feedforwardCalculation = feedforward.calculate(pidController.getSetpoint().velocity);
+    double pidCalculation = pidController.calculate(motor.getEncoder().getPosition(), setPoint);
+    //L1();
     //stateSwitch();
-    motor.getClosedLoopController().setReference(setPoint, ControlType.kMAXMotionPositionControl);
+    //motor.getClosedLoopController().setReference(setPoint, ControlType.kMAXMotionPositionControl);
     motor.setVoltage(
-      pidController.calculate(motor.getEncoder().getPosition(), setPoint)
-    + feedforward.calculate(setPoint));
+      pidCalculation
+    + feedforwardCalculation
+    );
+
+    SmartDashboard.putNumber("setpoint", setPoint);
+    SmartDashboard.putNumber("feedforwardCalculation", feedforwardCalculation);
+    SmartDashboard.putNumber("pidCalculation", pidCalculation);
+    SmartDashboard.putNumber("position", motor.getEncoder().getPosition());
+    SmartDashboard.putNumber("pidSetpoint", pidController.getSetpoint().position);
+    SmartDashboard.putNumber("goal", pidController.getGoal().position);
   }
 
   @Override

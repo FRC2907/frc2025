@@ -10,8 +10,9 @@ import frc.robot.commands.CoralPoop;
 import frc.robot.constants.Control;
 import frc.robot.constants.FieldElements;
 import frc.robot.constants.Ports;
-//import frc.robot.subsystems.AlgaeClawSubsystem;
+import frc.robot.subsystems.AlgaeClawSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
+//import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.PoopSubsystem;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -42,8 +43,9 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
 
   private final DriveSubsystem driveSubsystem;
-  private final PoopSubsystem poopSubsystem;
-  //private final AlgaeClawSubsystem algaeClawSubsystem;
+  //private final PoopSubsystem poopSubsystem;
+  private final AlgaeClawSubsystem algaeClawSubsystem;
+  //private final ElevatorSubsystem elevatorSubsystem;
 
   private RunCommand lockDrive;
 
@@ -60,10 +62,12 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     driveSubsystem = DriveSubsystem.getInstance();
-    poopSubsystem = PoopSubsystem.getInstance();
-    //algaeClawSubsystem = new AlgaeClawSubsystem();
+    //poopSubsystem = PoopSubsystem.getInstance();
+    algaeClawSubsystem = AlgaeClawSubsystem.getInstance();
+    //elevatorSubsystem = ElevatorSubsystem.getInstance();
+    
 
-    NamedCommands.registerCommand("Coral Poop", new CoralPoop(poopSubsystem));
+    //NamedCommands.registerCommand("Coral Poop", new CoralPoop(poopSubsystem));
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -107,7 +111,8 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new JoystickButton(operator, Button.kR2.value).whileTrue(new CoralPoop(poopSubsystem));
+
+    //new JoystickButton(operator, Button.kR2.value).whileTrue(new CoralPoop(poopSubsystem));
     List<Pose2d> something = new Stack<Pose2d>();
     something.add(new Pose2d(3, 3, Rotation2d.kZero));
     something.add(FieldElements.Reef.centerFaces[3]);
@@ -116,6 +121,12 @@ public class RobotContainer {
     new JoystickButton(driver, Button.kL2.value).onTrue(driveSubsystem.followPathCommand(thing));
 
     new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);
+
+    new JoystickButton(driver, Button.kSquare.value).onTrue(algaeClawSubsystem.exampleMethodCommand());
+
+    /*new JoystickButton(driver, Button.kSquare.value).onTrue(elevatorSubsystem.goToL1());
+    new JoystickButton(driver, Button.kCircle.value).onTrue(elevatorSubsystem.goToL2());
+    new JoystickButton(driver, Button.kTriangle.value).onTrue(elevatorSubsystem.goToL3());*/
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
@@ -126,8 +137,8 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
+  /*public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     return autoChooser.getSelected();
-  }
+  }*/
 }

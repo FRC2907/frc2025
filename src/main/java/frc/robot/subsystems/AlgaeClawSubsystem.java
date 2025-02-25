@@ -16,6 +16,9 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -48,9 +51,11 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     armConfig.closedLoop.maxMotion.maxAcceleration(2)
                                   .maxVelocity(2)
                                   .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal);
+    armConfig.encoder.positionConversionFactor(Control.algaeManipulator.kArmConversionFactor);
     arm.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    arm.getEncoder().setPosition(0);
 
-    shootLeader =   new SparkMax(Ports.manipulator.ALGAE_SHOOT_LEADER,   Control.algaeManipulator.MOTOR_TYPE);
+    /*shootLeader =   new SparkMax(Ports.manipulator.ALGAE_SHOOT_LEADER,   Control.algaeManipulator.MOTOR_TYPE);
     shootFollower = new SparkMax(Ports.manipulator.ALGAE_SHOOT_FOLLOWER, Control.algaeManipulator.MOTOR_TYPE);
     shootConfig = new SparkMaxConfig();
     shootConfig.idleMode(IdleMode.kBrake)
@@ -62,7 +67,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
                                     .maxAcceleration(2500);
     shootLeader.configure(shootConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     shootConfig.apply(new SparkMaxConfig().follow(shootLeader, true));
-    shootFollower.configure(shootConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    shootFollower.configure(shootConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);*/
     
 
     feedforward = new ArmFeedforward(Control.algaeManipulator.kS,
@@ -75,7 +80,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
                                               Control.algaeManipulator.kConstraints);
 
 
-    absEncoder = arm.getAbsoluteEncoder();
+    //absEncoder = arm.getAbsoluteEncoder();
     colorSensor = new ColorSensorV3(Ports.manipulator.COLOR_SENSOR);
   }
 
@@ -117,10 +122,10 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     shootSetSetPoint(Control.algaeManipulator.kGrabSpeed);
   }
 
-  private double calculateSpeed(){
-    return Math.abs(DriveSubsystem.getInstance().getPose2d().getX()
+  private double calculateSpeed(Pose2d point, double height){
+    return Math.abs(point.getX()
      - (Util.isBlue() ? 0 : FieldElements.fieldLength)) * Control.algaeManipulator.kDistanceA +
-     ElevatorSubsystem.getInstance().getHeight() * Control.algaeManipulator.kHeightA
+     /*ElevatorSubsystem.getInstance().getHeight() */ height * Control.algaeManipulator.kHeightA
      + Control.algaeManipulator.kShootB;
   }
   public void shoot(){
@@ -137,7 +142,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
         () -> {
-          /* one-time action goes here */
+          armSetSetPoint(100.0);
         });
   }
 
@@ -159,18 +164,27 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    arm.getClosedLoopController().setReference(armSetPoint, ControlType.kMAXMotionPositionControl);
+    double pidCalculation = pidController.calculate(arm.getEncoder().getPosition(), armSetPoint);
+    double feedforwardCalculation = feedforward.calculate(pidController.getSetpoint().velocity, pidController.getConstraints().maxAcceleration);
+    //arm.getClosedLoopController().setReference(armSetPoint, ControlType.kMAXMotionPositionControl);
     arm.setVoltage(
-      feedforward.calculate(armSetPoint, armSetPoint) +
-      pidController.calculate(armSetPoint)
+      //feedforwardCalculation + 
+      pidCalculation
     );
-    shootLeader.getClosedLoopController().setReference(shootSetPoint, ControlType.kMAXMotionVelocityControl);
+    //shootLeader.getClosedLoopController().setReference(shootSetPoint, ControlType.kMAXMotionVelocityControl);
 
     SmartDashboard.putBoolean("algae", hasAlgae());
+    SmartDashboard.putNumber("setpoint", armSetPoint);
+    SmartDashboard.putNumber("feedforwardCalculation", feedforwardCalculation);
+    SmartDashboard.putNumber("pidCalculation", pidCalculation);
+    SmartDashboard.putNumber("position", arm.getEncoder().getPosition());
+    SmartDashboard.putNumber("pidSetpoint", pidController.getSetpoint().position);
+    SmartDashboard.putNumber("goal", pidController.getGoal().position);
   }
 
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
+    SmartDashboard.putNumber("shoot", calculateSpeed(new Pose2d(3, 0, Rotation2d.kZero), 1));
   }
 }
