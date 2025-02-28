@@ -4,15 +4,11 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -24,15 +20,16 @@ import frc.robot.constants.Control;
 
 public class ElevatorSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
-  private static SparkMax motor;
-  private static SparkMaxConfig config;
+  private static SparkFlex motor;
+  private static SparkFlexConfig config;
   private ElevatorFeedforward feedforward;
   private ProfiledPIDController pidController;
-  private double setPoint;
-  //private ElevatorState elevatorState;
+  private double setpoint;
+  private int index;
+  private int indexMax;
   private ElevatorSubsystem() {
-    motor = new SparkMax(Ports.elevator.ELEVATOR, Control.elevator.MOTOR_TYPE);
-    config = new SparkMaxConfig();
+    motor = new SparkFlex(Ports.elevator.ELEVATOR, Control.elevator.MOTOR_TYPE);
+    config = new SparkFlexConfig();
     config.idleMode(IdleMode.kBrake)
           .inverted(false)
           .smartCurrentLimit(0, 40)
@@ -53,99 +50,83 @@ public class ElevatorSubsystem extends SubsystemBase {
                                               Control.elevator.kD, 
                                               Control.elevator.kConstraints);
     
-    //elevatorState = ElevatorState.NEUTRAL;
-    }
+    index = 0;
+    indexMax = 4;
+  }
 
-    private static ElevatorSubsystem instance;
-    public static ElevatorSubsystem getInstance(){
-      if (instance == null){
-        instance = new ElevatorSubsystem();
-      }
-      return instance;
+  private static ElevatorSubsystem instance;
+  public static ElevatorSubsystem getInstance(){
+    if (instance == null){
+      instance = new ElevatorSubsystem();
     }
+    return instance;
+  }
 
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  public Command goToL1() {
+
+
+  public Command up(){
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
         () -> {
-          L1();
+          if (index < indexMax){ index++; }
         });
   }
-  public Command goToL2() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
+  public Command manualUp(){
+    return runOnce(
+      () -> {
+        setSetpoint(setpoint + Control.elevator.kManualControlFactor);
+      });
+  }
+  public Command down(){
     return runOnce(
         () -> {
-          L2();
+          if (index > 0){ index--; }
         });
   }
-  public Command goToL3() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
+  public Command manualDown(){
     return runOnce(
-        () -> {
-          L3();
-        });
+      () -> {
+        setSetpoint(setpoint - Control.elevator.kManualControlFactor);
+      });
   }
 
-  /*public enum ElevatorState {
-    NEUTRAL, 
-    L1, L2, L3;
-  }
-  private void stateSwitch(){
-    switch (elevatorState){
-      case NEUTRAL:
-      case L1: 
-        setSetPoint(Control.elevator.kL1 + Control.elevator.kOffset);
-        break;
-      case L2:
-      case L3:
-        break;
-    }
-  }*/
-
-  public void neutral(){
-    setSetPoint(Control.elevator.kNeutral);
-  }
-  public void L1(){
-    setSetPoint(Control.elevator.kL1);
-  }
-  public void L2(){
-    setSetPoint(Control.elevator.kL2);
-  }
-  public void L3(){
-    setSetPoint(Control.elevator.kL3);
+  private void elevatorSwitch(){
+    if (index == 0){ neutral();; }
+    if (index == 1){ L1();; }
+    if (index == 2){ L2();; }
+    if (index == 3){ L3();; }
   }
 
-  public void setSetPoint(double setPoint){
-    this.setPoint = setPoint;
+  public void ground(){  setSetpoint(Control.elevator.kDownLimit); }
+  public void neutral(){ setSetpoint(Control.elevator.kNeutral); }
+  public void L1(){      setSetpoint(Control.elevator.kL1); }
+  public void L2(){      setSetpoint(Control.elevator.kL2); }
+  public void L3(){      setSetpoint(Control.elevator.kL3); }
+
+
+  public void setSetpoint(double setpoint){
+    this.setpoint = setpoint;
   }
-  public boolean atSetPoint() {
-    return Math.abs(motor.getEncoder().getPosition() - setPoint) < Control.elevator.kAllowedError;
+  public boolean atSetpoint() {
+    return Math.abs(motor.getEncoder().getPosition() - setpoint) < Control.elevator.kAllowedError;
   }
   public double getHeight(){
-    return /*Control.elevator.kConversionFactor */ motor.getEncoder().getPosition();
+    return motor.getEncoder().getPosition();
   }
 
   @Override
   public void periodic() {
+    elevatorSwitch();
     double feedforwardCalculation = feedforward.calculate(pidController.getSetpoint().velocity);
-    double pidCalculation = pidController.calculate(motor.getEncoder().getPosition(), setPoint);
-    //L1();
-    //stateSwitch();
+    double pidCalculation = pidController.calculate(motor.getEncoder().getPosition(), setpoint);
     //motor.getClosedLoopController().setReference(setPoint, ControlType.kMAXMotionPositionControl);
     motor.setVoltage(
       pidCalculation
-    + feedforwardCalculation
+    //+ feedforwardCalculation
     );
 
-    SmartDashboard.putNumber("setpoint", setPoint);
+    SmartDashboard.putNumber("setpoint", setpoint);
     SmartDashboard.putNumber("feedforwardCalculation", feedforwardCalculation);
     SmartDashboard.putNumber("pidCalculation", pidCalculation);
     SmartDashboard.putNumber("position", motor.getEncoder().getPosition());

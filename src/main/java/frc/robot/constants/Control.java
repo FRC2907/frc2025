@@ -16,6 +16,7 @@ public class Control {
     public static final double NOMINAL_VOLTAGE = 12.0;
     public static final double GRAVITY_CONSTANT = -9.80665;
     public static final double kDriverDeadband = 0.08;
+    public static final double kPOVDeadband = 10;
 
     public class drivetrain {
         public static final double TRACK_WIDTH = Units.inchesToMeters(19.5); //TODO update
@@ -82,26 +83,27 @@ public class Control {
 
     public class algaeManipulator {
         public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
-        public static final double GEAR_RATIO = 1; //TODO find
+        public static final double GEAR_RATIO = 1 / 5.95; //TODO find
 
-        public static final double kArmConversionFactor = GEAR_RATIO * 360;
+        public static final double kArmConversionFactor = GEAR_RATIO * 360.0;
         public static final double kArmDownLimit = 30; //TODO find
         public static final double kArmUpLimit = 135; //TODO find
         public static final double kMaxVelocity = 180, //TODO tune (deg/s)
                                    kMaxAcceleration = 360; //TODO tune (deg/s^2)
         public static final double kAllowedArmError = 1.5; //TODO tune
-        public static final double kAlgaeElevatorOffset = Units.inchesToMeters(5);
+        public static final double kAlgaeToElevatorOffset = Units.inchesToMeters(5);
 
-        public static final double kStowAngle = 105;
+        public static final double kStowAngle = 105;//TODO find
         public static final double kGrabAngle = 80; //TODO find
-        public static final double kGroundGrabAngle = -35; //TODO find
+        public static final double kGroundGrabAngle = -45; //TODO find
         public static final double kFixedShootAngle = 135; //TODO find
-        public static final double kIntakeAngle = 100;
+        public static final double kIntakeAngle = 110; //TODO find
+        public static final double kProcessorAngle = -40; //TODO find
 
-        public static final double kIntakeSpeed = 0.3; //TODO find
-        public static final double kOuttakeSpeed = 0.3; //TODO find
-        public static final double kGrabSpeed = 0.1; //TODO find
-        public static final double kFixedShootSpeed = 2000; //TODO find
+        public static final double kIntakeSpeed = 300; //TODO find (rpm)
+        public static final double kOuttakeSpeed = 300; //TODO find (rpm)
+        public static final double kGrabSpeed = 100; //TODO find (rpm)
+        public static final double kFixedShootSpeed = 2000; //TODO find (rpm)
         public static final double kAllowedShootError = 100;
         public static final double kStopSpeed = 0;
 
@@ -111,7 +113,7 @@ public class Control {
         public static final double kHeightA = -0.3; //TODO tune (y=mx+b for shoot linear regression equation for height)
         public static final double kShootB = 11.3; //TODO tune (y=mx+b for shoot linear regression equation for the base value)
 
-        public static final double kP = 0.003, //TODO tune
+        public static final double kP = 0.11, //TODO tune
                                    kI = 0, //TODO tune
                                    kD = 0; //TODO tune
         public static final double kS = 0.14, //TODO tune
@@ -127,9 +129,9 @@ public class Control {
         public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
 
         public static final double kConversionFactor = 0.01552; 
-        public static final double kOffset = Units.inchesToMeters(4.1); //TODO find better (m.) (original height off ground)
-        public static final double kDownLimit = Units.inchesToMeters(4.2);
-        public static final double kUpLimit = Units.inchesToMeters(48); //TODO find
+        public static final double kOffset = Units.inchesToMeters(5.75); //TODO find better (m.) (original height off ground)
+        public static final double kDownLimit = Units.inchesToMeters(6);
+        public static final double kUpLimit = Units.inchesToMeters(52); //TODO find
         public static final double kAllowedError = Units.inchesToMeters(1); //TODO tune
         public static final double kIntakeOffset = Units.inchesToMeters(5); //TODO find
 
@@ -137,7 +139,8 @@ public class Control {
                                    kMaxAcceleration = 10; //TODO tune (m/s^2)
 
         public static final double kNeutral = Units.inchesToMeters(7.5); //TODO tune
-        public static final double kCoralStation = Units.inchesToMeters(50); //TODO find
+        public static final double kCoralStation = Units.inchesToMeters(28); //TODO find
+        public static final double kManualControlFactor = Units.inchesToMeters(3); //TODO tune
         public static final double kL1 = FieldElements.ReefHeight.L1.height + Units.inchesToMeters(1); //TODO tune
         public static final double kL2 = FieldElements.ReefHeight.L2.height + Units.inchesToMeters(1); //TODO tune
         public static final double kL3 = FieldElements.ReefHeight.L3.height + Units.inchesToMeters(1); //TODO tune

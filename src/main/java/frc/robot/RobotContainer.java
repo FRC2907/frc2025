@@ -7,12 +7,15 @@ package frc.robot;
 import java.util.*;
 
 import frc.robot.commands.CoralPoop;
+import frc.robot.commands.GrabAlgae1;
+import frc.robot.commands.GrabAlgae2;
+import frc.robot.commands.GrabAlgaeGround;
 import frc.robot.constants.Control;
 import frc.robot.constants.FieldElements;
 import frc.robot.constants.Ports;
 import frc.robot.subsystems.AlgaeClawSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
-//import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.PoopSubsystem;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -43,11 +46,14 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
 
   private final DriveSubsystem driveSubsystem;
-  //private final PoopSubsystem poopSubsystem;
-  private final AlgaeClawSubsystem algaeClawSubsystem;
+  private final PoopSubsystem poopSubsystem;
+  //private final AlgaeClawSubsystem algaeClawSubsystem;
   //private final ElevatorSubsystem elevatorSubsystem;
 
   private RunCommand lockDrive;
+  private RunCommand elevatorUp;
+  private RunCommand elevatorDown;
+  
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final PS5Controller driver = new PS5Controller(Ports.HID.DRIVER);
@@ -62,12 +68,13 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     driveSubsystem = DriveSubsystem.getInstance();
-    //poopSubsystem = PoopSubsystem.getInstance();
-    algaeClawSubsystem = AlgaeClawSubsystem.getInstance();
+    poopSubsystem = PoopSubsystem.getInstance();
+    //algaeClawSubsystem = AlgaeClawSubsystem.getInstance();
     //elevatorSubsystem = ElevatorSubsystem.getInstance();
     
 
-    //NamedCommands.registerCommand("Coral Poop", new CoralPoop(poopSubsystem));
+    
+    NamedCommands.registerCommand("Coral Poop", new CoralPoop(poopSubsystem));
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -92,6 +99,9 @@ public class RobotContainer {
             driveSubsystem.stop(); },
             driveSubsystem
     ));
+
+    //elevatorUp = new RunCommand(elevatorSubsystem::up);
+    //elevatorDown = new RunCommand(elevatorSubsystem::down);
 
     configureBindings();
 
@@ -118,15 +128,16 @@ public class RobotContainer {
     something.add(FieldElements.Reef.centerFaces[3]);
 
     PathPlannerPath thing = driveSubsystem.generatePath(something, Rotation2d.kZero);
-    new JoystickButton(driver, Button.kL2.value).onTrue(driveSubsystem.followPathCommand(thing));
-
+    //new JoystickButton(driver, Button.kL2.value).onTrue(driveSubsystem.followPathCommand(thing));
     new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);
 
-    new JoystickButton(driver, Button.kSquare.value).onTrue(algaeClawSubsystem.exampleMethodCommand());
+    //new JoystickButton(driver, Button.kSquare.value).onTrue(new GrabAlgae1(algaeClawSubsystem, elevatorSubsystem));
+    //new JoystickButton(driver, Button.kCircle.value).onTrue(new GrabAlgae2(algaeClawSubsystem, elevatorSubsystem));
+    //new JoystickButton(driver, Button.kSquare.value).onTrue(new GrabAlgaeGround(algaeClawSubsystem, elevatorSubsystem));
 
-    /*new JoystickButton(driver, Button.kSquare.value).onTrue(elevatorSubsystem.goToL1());
-    new JoystickButton(driver, Button.kCircle.value).onTrue(elevatorSubsystem.goToL2());
-    new JoystickButton(driver, Button.kTriangle.value).onTrue(elevatorSubsystem.goToL3());*/
+    //new Trigger(() -> Util.checkPOVUp(driver)).onTrue(elevatorUp);
+    //new Trigger(() -> Util.checkPOVDown(driver)).onTrue(elevatorDown);
+
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
@@ -137,8 +148,8 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  /*public Command getAutonomousCommand() {
+  public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     return autoChooser.getSelected();
-  }*/
+  }
 }

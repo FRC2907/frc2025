@@ -173,12 +173,18 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void lockDrive(double xSpeed, double ySpeed, Pose2d point, boolean limelightLock){
+    double atan = (Math.atan((point.getY() - getPose2d().getY()) / point.getX() - getPose2d().getX()) - getHeadingRad()) * 20;
     double zRotation = limelightLock 
     ?   Units.degreesToRadians( - LimelightHelpers.getTX(limelight)) * Control.drivetrain.kHeadingP
       + Units.degreesToRadians(gyro.getRate()) * Control.drivetrain.kHeadingD
-    :   Math.atan((point.getX() - getPose2d().getX()) / point.getY() - getPose2d().getY()) * Control.drivetrain.kHeadingP
+    :   atan
       + Units.degreesToRadians(gyro.getRate()) * Control.drivetrain.kHeadingD;
     drive(xSpeed, ySpeed, zRotation, false);
+
+    SmartDashboard.putNumber("pointX", point.getX());
+    SmartDashboard.putNumber("pointY", point.getY());
+    SmartDashboard.putNumber("atan", atan);
+    SmartDashboard.putNumber("arate", Units.degreesToRadians(gyro.getRate()) * Control.drivetrain.kHeadingD);
   }
 
 
@@ -246,7 +252,7 @@ public class DriveSubsystem extends SubsystemBase {
     if (limelightMeasurement != null && limelightMeasurement.tagCount > 0){
       poseEstimator.addVisionMeasurement(limelightMeasurement.pose, 
                                          limelightMeasurement.timestampSeconds, 
-                                         VecBuilder.fill(0.7, 0.7, 999999));
+                                         VecBuilder.fill(0.7, 0.7, 0.7));
     }
 
     frontLeftMotor .getClosedLoopController().setReference(frontLeftSpeed,  ControlType.kMAXMotionVelocityControl);
