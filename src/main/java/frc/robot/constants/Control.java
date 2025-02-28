@@ -79,6 +79,7 @@ public class Control {
 
         public static final double kShootSpeed = 0.3; //percentage
         public static final double kStopSpeed = 0; //percentage
+        public static final double kProximityBand = 100; //TODO tune
     }
 
     public class algaeManipulator {

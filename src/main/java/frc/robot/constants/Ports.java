@@ -17,6 +17,7 @@ public class Ports {
         public static final int ALGAE_SHOOT_LEADER = 3;
         public static final int ALGAE_SHOOT_FOLLOWER = 5;
 
+        public static final int TOF_SENSOR = 0;
         public static final Port COLOR_SENSOR = Port.kOnboard;
     }
 

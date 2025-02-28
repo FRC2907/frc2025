@@ -76,6 +76,8 @@ public class RobotContainer {
 
     
     NamedCommands.registerCommand("Coral Poop", new CoralPoop(poopSubsystem));
+    NamedCommands.registerCommand("Wait Coral Intake", poopSubsystem.coralWaitIntakeCommand());
+    NamedCommands.registerCommand("Wait Coral Shoot", poopSubsystem.coralWaitShootCommand());
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -129,7 +131,7 @@ public class RobotContainer {
     something.add(FieldElements.Reef.centerFaces[3]);
 
     PathPlannerPath thing = driveSubsystem.generatePath(something, Rotation2d.kZero);
-    //new JoystickButton(driver, Button.kL2.value).onTrue(driveSubsystem.followPathCommand(thing));
+    new JoystickButton(driver, Button.kL2.value).onTrue(driveSubsystem.followPathCommand(thing, FieldElements.Reef.centerFaces[4]));
     new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);
 
     //new JoystickButton(driver, Button.kSquare.value).onTrue(new GrabAlgae1(algaeClawSubsystem, elevatorSubsystem));
