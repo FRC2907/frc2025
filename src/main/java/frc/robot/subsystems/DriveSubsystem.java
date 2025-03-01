@@ -29,6 +29,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
@@ -233,13 +234,50 @@ public class DriveSubsystem extends SubsystemBase {
     );
   }
 
+  private String leftRight(int index){
+    return index % 2 == 0 ? "L" : "R";
+  }
+  private PathPlannerPath getPathFile(int index){
+    try {
+      return PathPlannerPath.fromPathFile(index / 2 + 1 + "-" + leftRight(index));
+    } catch (Exception e){
+      e.printStackTrace();
+    }
+    return null;
+  }
   public Command followPathCommand(PathPlannerPath path, Pose2d pose) {
-    return AutoBuilder.pathfindToPoseFlipped(pose, Control.drivetrain.pathConstraints, 0);
+    Pose2d[] startingPoses = new Pose2d[12];
+    Transform2d[] minusPoses = new Transform2d[12];
+    Pose2d closestPose = new Pose2d(99, 99, Rotation2d.kZero);
+    int closestPoseIndex = 0;
+
+    List<Pose2d> blank = new Stack<Pose2d>();
+    blank.add(getPose2d());
+
+    for (int i = 0; i < 12; i++){
+      try {
+        startingPoses[i] = getPathFile(i).getPathPoses().get(0);
+        minusPoses[i] = startingPoses[i].minus(getPose2d());
+        if (minusPoses[i].getTranslation().getNorm() < closestPose.getTranslation().getNorm()){
+          closestPose = startingPoses[i];
+          closestPoseIndex = i;
+        }
+      } catch (Exception e){
+        e.printStackTrace();
+      }
+    }
+    try {
+      path = getPathFile(closestPoseIndex);
+    } catch (Exception e){
+      e.printStackTrace();
+      path = generatePath(blank, gyro.getRotation2d());
+    }
+
+    //return AutoBuilder.pathfindToPoseFlipped(pose, Control.drivetrain.pathConstraints, 0);
+    return AutoBuilder.pathfindThenFollowPath(path, Control.drivetrain.pathConstraints);
   }
 
-  public boolean exampleCondition() {
-    return false;
-  }
+  
 
   @Override
   public void periodic() {
