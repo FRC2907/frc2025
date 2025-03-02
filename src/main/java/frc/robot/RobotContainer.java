@@ -22,7 +22,6 @@ import frc.robot.util.Util;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
-import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -33,6 +32,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -57,8 +57,8 @@ public class RobotContainer {
   
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final PS5Controller driver = new PS5Controller(Ports.HID.DRIVER);
-  private final PS5Controller operator = new PS5Controller(Ports.HID.OPERATOR);
+  public final PS5Controller driver = new PS5Controller(Ports.HID.DRIVER);
+  public final PS5Controller operator = new PS5Controller(Ports.HID.OPERATOR);
 
   private static final SlewRateLimiter xLimiter = new SlewRateLimiter(10);
   private static final SlewRateLimiter yLimiter = new SlewRateLimiter(10);
@@ -126,12 +126,15 @@ public class RobotContainer {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
 
     //new JoystickButton(operator, Button.kR2.value).whileTrue(new CoralPoop(poopSubsystem));
+
     List<Pose2d> something = new Stack<Pose2d>();
     something.add(new Pose2d(3, 3, Rotation2d.kZero));
     something.add(FieldElements.Reef.centerFaces[3]);
-
-    PathPlannerPath thing = driveSubsystem.generatePath(something, Rotation2d.kZero);
-    new JoystickButton(driver, Button.kL2.value).onTrue(driveSubsystem.followPathCommand(thing, FieldElements.Reef.centerFaces[4]));
+    //PathPlannerPath thing = driveSubsystem.generatePath(something, Rotation2d.kZero);
+    Command yeah = driveSubsystem.followPathCommand(true, false).withInterruptBehavior(InterruptionBehavior.kCancelSelf);
+    Command otherYeah = driveSubsystem.followPathCommand(false, false).withInterruptBehavior(InterruptionBehavior.kCancelSelf);
+    new Trigger(() -> Util.checkPOVUp(driver)).onTrue(yeah);
+    new JoystickButton(driver, Button.kL2.value).onTrue(otherYeah);
     new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);
 
     //new JoystickButton(driver, Button.kSquare.value).onTrue(new GrabAlgae1(algaeClawSubsystem, elevatorSubsystem));

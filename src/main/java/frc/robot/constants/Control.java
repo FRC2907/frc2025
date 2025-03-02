@@ -16,7 +16,6 @@ public class Control {
     public static final double NOMINAL_VOLTAGE = 12.0;
     public static final double GRAVITY_CONSTANT = -9.80665;
     public static final double kDriverDeadband = 0.08;
-    public static final double kPOVDeadband = 10;
 
     public class drivetrain {
         public static final double TRACK_WIDTH = Units.inchesToMeters(19.5); //TODO update

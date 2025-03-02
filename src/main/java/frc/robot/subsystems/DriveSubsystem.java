@@ -50,6 +50,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   private double frontLeftSpeed, frontRightSpeed, rearLeftSpeed, rearRightSpeed;
   private double wheelDiameter;
+  private int currentPathIndex;
   private SparkMax frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor;
   private SparkMaxConfig config;
   private RelativeEncoder frontLeftEnc, frontRightEnc, rearLeftEnc, rearRightEnc;
@@ -59,8 +60,11 @@ public class DriveSubsystem extends SubsystemBase {
   private RobotConfig robotConfig;
   private String limelight;
   private LimelightHelpers.PoseEstimate limelightMeasurement;
-  //private PIDController headingController;
-  //private HolonomicDriveController driveController;
+
+  private Pose2d[] reefPoses;
+  private List<Pose2d> blank;
+  private PathPlannerPath blankPath;
+  private PathPlannerPath[] reefPaths;
 
   private DriveSubsystem() {
     frontLeftMotor =  new SparkMax(Ports.drivetrain.FRONT_LEFT,  MotorType.kBrushless);
@@ -113,9 +117,35 @@ public class DriveSubsystem extends SubsystemBase {
 
     field = new Field2d();
 
-    pathPlannerConfigure();
+    for (int i = 0; i < 12; i++){
+      try {
+        reefPoses[i] = getPathFile(i).getPathPoses().get(0);
+      } catch (Exception e){
+        e.printStackTrace();
+      }
+    }
+    blank = new Stack<Pose2d>();
+    blank.add(getPose2d());
+    blank.add(getPose2d());
+    blankPath = generatePath(blank, gyro.getRotation2d());
 
-    //resetGyro();
+    reefPaths = new PathPlannerPath[12];
+
+    for (int i = 0; i < 12; i++){
+      try {
+        reefPaths[i] = PathPlannerPath.fromPathFile(i / 2 + 1 + "-" + leftRight(i));
+      } catch (Exception e){
+        e.printStackTrace();
+      }
+    }
+      for (int i = 0; i < 12; i++){
+        reefPaths[i] = blankPath;
+      }
+    
+
+    currentPathIndex = 0;
+
+    pathPlannerConfigure();
   }
 
   private static DriveSubsystem instance;
@@ -239,42 +269,49 @@ public class DriveSubsystem extends SubsystemBase {
   }
   private PathPlannerPath getPathFile(int index){
     try {
-      return PathPlannerPath.fromPathFile(index / 2 + 1 + "-" + leftRight(index));
+      return reefPaths[index];
     } catch (Exception e){
       e.printStackTrace();
     }
     return null;
   }
-  public Command followPathCommand(PathPlannerPath path, Pose2d pose) {
-    Pose2d[] startingPoses = new Pose2d[12];
-    Transform2d[] minusPoses = new Transform2d[12];
-    Pose2d closestPose = new Pose2d(99, 99, Rotation2d.kZero);
-    int closestPoseIndex = 0;
+  int closestPoseIndex;
+  public Command followPathCommand(boolean switchPath, boolean right) {
+    PathPlannerPath path = blankPath;
+    closestPoseIndex = 0;
+    if (!switchPath){
+      Transform2d[] minusPoses = new Transform2d[12];
+      Pose2d closestPose = new Pose2d(99, 99, Rotation2d.k180deg);
 
-    List<Pose2d> blank = new Stack<Pose2d>();
-    blank.add(getPose2d());
-
-    for (int i = 0; i < 12; i++){
-      try {
-        startingPoses[i] = getPathFile(i).getPathPoses().get(0);
-        minusPoses[i] = startingPoses[i].minus(getPose2d());
-        if (minusPoses[i].getTranslation().getNorm() < closestPose.getTranslation().getNorm()){
-          closestPose = startingPoses[i];
-          closestPoseIndex = i;
+      for (int i = 0; i < 12; i++){
+        try {
+          minusPoses[i] = reefPoses[i].minus(getPose2d());
+          if (minusPoses[i].getTranslation().getNorm() < closestPose.getTranslation().getNorm()){
+            closestPose = reefPoses[i];
+            currentPathIndex = i;
+          }
+        } catch (Exception e){
+          e.printStackTrace();
         }
-      } catch (Exception e){
-        e.printStackTrace();
       }
     }
+
+    currentPathIndex = right ? currentPathIndex - 1 : currentPathIndex + 1;
+    if (currentPathIndex < 0){
+      currentPathIndex = 11;
+    } else if (currentPathIndex > 11){
+      currentPathIndex = 0;
+    }
     try {
-      path = getPathFile(closestPoseIndex);
+      path = switchPath ? getPathFile(currentPathIndex) : getPathFile(closestPoseIndex);
     } catch (Exception e){
       e.printStackTrace();
-      path = generatePath(blank, gyro.getRotation2d());
     }
-
     //return AutoBuilder.pathfindToPoseFlipped(pose, Control.drivetrain.pathConstraints, 0);
     return AutoBuilder.pathfindThenFollowPath(path, Control.drivetrain.pathConstraints);
+  }
+  public Command switchPathCommand(boolean right){
+    return followPathCommand(true, right);
   }
 
   
@@ -316,6 +353,9 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("rrSetPoint", rearRightSpeed);
     SmartDashboard.putNumber("heading", getHeadingDeg());
     SmartDashboard.putData("field", field);
+
+    SmartDashboard.putNumber("index", currentPathIndex);
+    SmartDashboard.putNumber("otherIndex", closestPoseIndex);
   }
 
   @Override

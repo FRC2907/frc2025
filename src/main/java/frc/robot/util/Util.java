@@ -35,10 +35,10 @@ public class Util {
             || Math.abs(input.getRightX()) > Control.kDriverDeadband;
     }
     public static boolean checkPOVUp(PS5Controller input){
-        return input.getPOV() < Control.kPOVDeadband && input.getPOV() > 360 - Control.kPOVDeadband;
+        return input.getPOV() == 0;
     }
     public static boolean checkPOVDown(PS5Controller input){
-        return input.getPOV() < Control.kPOVDeadband + 180 && input.getPOV() > 180 - Control.kPOVDeadband;
+        return input.getPOV() == 180;
     }
     public static double getLeftMagnitude(PS5Controller input){
         return Math.sqrt(Math.pow(input.getLeftX(), 2.0) + Math.pow(input.getLeftY(), 2.0));
