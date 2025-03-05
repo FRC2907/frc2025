@@ -140,6 +140,7 @@ public class Control {
 
         public static final double kNeutral = Units.inchesToMeters(7.5); //TODO tune
         public static final double kCoralStation = Units.inchesToMeters(28); //TODO find
+        public static final double kProcessor = Units.inchesToMeters(10); //TODO find
         public static final double kManualControlFactor = Units.inchesToMeters(3); //TODO tune
         public static final double kL1 = FieldElements.ReefHeight.L1.height + Units.inchesToMeters(1); //TODO tune
         public static final double kL2 = FieldElements.ReefHeight.L2.height + Units.inchesToMeters(1); //TODO tune

@@ -7,6 +7,7 @@ package frc.robot;
 import java.util.*;
 
 import frc.robot.commands.CoralPoop;
+import frc.robot.commands.FollowPath;
 import frc.robot.commands.GrabAlgae1;
 import frc.robot.commands.GrabAlgae2;
 import frc.robot.commands.GrabAlgaeGround;
@@ -32,7 +33,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -131,10 +131,9 @@ public class RobotContainer {
     something.add(new Pose2d(3, 3, Rotation2d.kZero));
     something.add(FieldElements.Reef.centerFaces[3]);
     //PathPlannerPath thing = driveSubsystem.generatePath(something, Rotation2d.kZero);
-    Command yeah = driveSubsystem.followPathCommand(true, false).withInterruptBehavior(InterruptionBehavior.kCancelSelf);
-    Command otherYeah = driveSubsystem.followPathCommand(false, false).withInterruptBehavior(InterruptionBehavior.kCancelSelf);
-    new Trigger(() -> Util.checkPOVUp(driver)).onTrue(yeah);
-    new JoystickButton(driver, Button.kL2.value).onTrue(otherYeah);
+    new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(driveSubsystem.switchPathCommand(false));
+    new Trigger(() -> Util.checkPOVRight(driver)).onTrue(driveSubsystem.switchPathCommand(true));
+    new JoystickButton(driver, Button.kL2.value).onTrue(driveSubsystem.followPathCommand(false, false));
     new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);
 
     //new JoystickButton(driver, Button.kSquare.value).onTrue(new GrabAlgae1(algaeClawSubsystem, elevatorSubsystem));

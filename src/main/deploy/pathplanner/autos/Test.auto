@@ -5,15 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 2.0
+            "pathName": "Barge-L1"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Barge-L1"
+            "pathName": "2-R"
           }
         }
       ]

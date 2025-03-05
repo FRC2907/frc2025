@@ -3,12 +3,13 @@
   "robotLength": 1.02235,
   "holonomicMode": true,
   "pathFolders": [
-    "Reef Face 6",
-    "Reef Face 5",
-    "Reef Face 4",
-    "Reef Face 3",
+    "KitBot",
+    "Reef Face 1",
     "Reef Face 2",
-    "Reef Face 1"
+    "Reef Face 3",
+    "Reef Face 4",
+    "Reef Face 5",
+    "Reef Face 6"
   ],
   "autoFolders": [],
   "defaultMaxVel": 3.0,

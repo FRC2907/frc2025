@@ -37,8 +37,14 @@ public class Util {
     public static boolean checkPOVUp(PS5Controller input){
         return input.getPOV() == 0;
     }
+    public static boolean checkPOVRight(PS5Controller input){
+        return input.getPOV() == 90;
+    }
     public static boolean checkPOVDown(PS5Controller input){
         return input.getPOV() == 180;
+    }
+    public static boolean checkPOVLeft(PS5Controller input){
+        return input.getPOV() == 270;
     }
     public static double getLeftMagnitude(PS5Controller input){
         return Math.sqrt(Math.pow(input.getLeftX(), 2.0) + Math.pow(input.getLeftY(), 2.0));

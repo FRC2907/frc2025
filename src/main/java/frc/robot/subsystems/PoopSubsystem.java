@@ -64,6 +64,7 @@ public class PoopSubsystem extends SubsystemBase{
         // This method will be called once per scheduler run
         SmartDashboard.putNumber("current", shoot.getOutputCurrent());
         SmartDashboard.putBoolean("shot", coralShot);
+        SmartDashboard.putNumber("sensor", sensor.getRange());
     }
 
     @Override

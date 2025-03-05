@@ -72,17 +72,17 @@ public class ElevatorSubsystem extends SubsystemBase {
           if (index < indexMax){ index++; }
         });
   }
-  public Command manualUp(){
-    return runOnce(
-      () -> {
-        setSetpoint(setpoint + Control.elevator.kManualControlFactor);
-      });
-  }
   public Command down(){
     return runOnce(
         () -> {
           if (index > 0){ index--; }
         });
+  }
+  public Command manualUp(){
+    return runOnce(
+      () -> {
+        setSetpoint(setpoint + Control.elevator.kManualControlFactor);
+      });
   }
   public Command manualDown(){
     return runOnce(
@@ -98,11 +98,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     if (index == 3){ L3();; }
   }
 
-  public void ground(){  setSetpoint(Control.elevator.kDownLimit); }
-  public void neutral(){ setSetpoint(Control.elevator.kNeutral); }
-  public void L1(){      setSetpoint(Control.elevator.kL1); }
-  public void L2(){      setSetpoint(Control.elevator.kL2); }
-  public void L3(){      setSetpoint(Control.elevator.kL3); }
+  public void ground()      { setSetpoint(Control.elevator.kDownLimit); }
+  public void neutral()     { setSetpoint(Control.elevator.kNeutral); }
+  public void processor()   { setSetpoint(Control.elevator.kProcessor); }
+  public void coralStation(){ setSetpoint(Control.elevator.kCoralStation); }
+  public void L1()          { setSetpoint(Control.elevator.kL1); }
+  public void L2()          { setSetpoint(Control.elevator.kL2); }
+  public void L3()          { setSetpoint(Control.elevator.kL3); }
 
 
   public void setSetpoint(double setpoint){

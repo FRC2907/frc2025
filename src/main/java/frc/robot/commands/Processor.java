@@ -5,22 +5,25 @@
 package frc.robot.commands;
 
 import frc.robot.subsystems.AlgaeClawSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
-public class OuttakeAlgae extends Command {
+public class Processor extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final AlgaeClawSubsystem algaeSubsystem;
+  private final ElevatorSubsystem elevatorSubsystem;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public OuttakeAlgae(AlgaeClawSubsystem subsystem, boolean processor) {
-    algaeSubsystem = subsystem;
+  public Processor(AlgaeClawSubsystem algaeSubsystem, ElevatorSubsystem elevatorSubsystem) {
+    this.algaeSubsystem = algaeSubsystem;
+    this.elevatorSubsystem = elevatorSubsystem;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(subsystem);
+    addRequirements(algaeSubsystem, elevatorSubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -30,13 +33,15 @@ public class OuttakeAlgae extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    algaeSubsystem.intake();
+    algaeSubsystem.processor();
+    elevatorSubsystem.processor();
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     algaeSubsystem.stow();
+    elevatorSubsystem.neutral();
   }
 
   // Returns true when the command should end.

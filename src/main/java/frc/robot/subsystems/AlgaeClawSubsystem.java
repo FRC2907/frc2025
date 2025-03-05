@@ -108,6 +108,10 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     armSetSetpoint(Control.algaeManipulator.kIntakeAngle);
     shootSetSetpoint(Control.algaeManipulator.kIntakeSpeed);
   }
+  public void processor(){
+    armSetSetpoint(Control.algaeManipulator.kProcessorAngle);
+    shootSetSetpoint(Control.algaeManipulator.kIntakeSpeed);
+  }
   public void fixedShoot(){
     armSetSetpoint(Control.algaeManipulator.kFixedShootAngle);
     shootSetSetpoint(Control.algaeManipulator.kFixedShootSpeed);; //TODO add algorithm
