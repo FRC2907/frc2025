@@ -96,7 +96,7 @@ public class Control {
         public static final double kStowAngle = 105;//TODO find
         public static final double kGrabAngle = 80; //TODO find
         public static final double kGroundGrabAngle = -45; //TODO find
-        public static final double kFixedShootAngle = 135; //TODO find
+        public static final double kFixedShootAngle = 156; //TODO tune
         public static final double kIntakeAngle = 110; //TODO find
         public static final double kProcessorAngle = -40; //TODO find
 

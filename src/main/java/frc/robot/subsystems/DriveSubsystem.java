@@ -58,7 +58,7 @@ public class DriveSubsystem extends SubsystemBase {
   private AHRS gyro;
   private MecanumDrivePoseEstimator poseEstimator;
   private MecanumDriveKinematics kinematics;
-  private RobotConfig robotConfig;
+  public RobotConfig robotConfig;
   private String limelight;
   private LimelightHelpers.PoseEstimate limelightMeasurement;
 
@@ -224,7 +224,7 @@ public class DriveSubsystem extends SubsystemBase {
       Util.revolutionsToMeters(rearLeftEnc  .getPosition(), wheelDiameter) / Control.drivetrain.GEAR_RATIO,
       Util.revolutionsToMeters(rearRightEnc .getPosition(), wheelDiameter) / Control.drivetrain.GEAR_RATIO);
   }
-  private ChassisSpeeds getChassisSpeeds(){
+  public ChassisSpeeds getChassisSpeeds(){
     return kinematics.toChassisSpeeds(
       new MecanumDriveWheelSpeeds(
         Util.RPMToMetersPerSecond(frontLeftEnc .getVelocity(), wheelDiameter) / Control.drivetrain.GEAR_RATIO, 
@@ -275,8 +275,8 @@ public class DriveSubsystem extends SubsystemBase {
   }
   int closestPoseIndex = 0;
   Pose2d closestPose = new Pose2d(99, 99, Rotation2d.fromDegrees(90));
-  PathPlannerPath path;
-  private PathPlannerPath getPath(boolean switchPath, boolean right){
+  PathPlannerPath path = blankPath;
+  public void getPath(boolean switchPath, boolean right){
     System.out.println("ARGGGGHHHHHHHHH11111111");
     path = blankPath;
     closestPoseIndex = 0;
@@ -318,11 +318,13 @@ public class DriveSubsystem extends SubsystemBase {
       e.printStackTrace();
     }
     System.out.println("ARGGGGHHHHHHHHH121212121212121212");
-    return path;
+    //return path;
   }
   public Command followPathCommand(boolean switchPath, boolean right) {
+    getPath(switchPath, right);
     return new PathfindThenFollowPath(
-      getPath(switchPath, right), 
+      //getPath(switchPath, right), 
+      path,
       Control.drivetrain.pathConstraints, 
       this::getPose2d, 
       this::getChassisSpeeds, 

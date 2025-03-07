@@ -124,6 +124,14 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     armSetSetpoint(Control.algaeManipulator.kGroundGrabAngle);
     shootSetSetpoint(Control.algaeManipulator.kGrabSpeed);
   }
+  public void shootSpinUp(){
+    armSetSetpoint(Control.algaeManipulator.kStowAngle);
+    shootSetSetpoint(calculateSpeed(DriveSubsystem.getInstance().getPose2d(),
+                                    ElevatorSubsystem.getInstance().getHeight()));
+  }
+  public void shootRelease(){
+    armSetSetpoint(Control.algaeManipulator.kFixedShootAngle);
+  }
 
   private double calculateSpeed(Pose2d point, double height){
     return Math.abs(point.getX()

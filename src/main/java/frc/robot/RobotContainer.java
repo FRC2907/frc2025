@@ -130,10 +130,13 @@ public class RobotContainer {
     List<Pose2d> something = new Stack<Pose2d>();
     something.add(new Pose2d(3, 3, Rotation2d.kZero));
     something.add(FieldElements.Reef.centerFaces[3]);
+    Command thing = driveSubsystem.followPathCommand(true, false);
     //PathPlannerPath thing = driveSubsystem.generatePath(something, Rotation2d.kZero);
-    new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(driveSubsystem.switchPathCommand(false));
-    new Trigger(() -> Util.checkPOVRight(driver)).onTrue(driveSubsystem.switchPathCommand(true));
-    new JoystickButton(driver, Button.kL2.value).onTrue(driveSubsystem.followPathCommand(false, false));
+    new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(thing);
+    new Trigger(() -> Util.checkPOVRight(driver)).onTrue(
+      new RunCommand(() -> { driveSubsystem.getPath(true, true); }).andThen(driveSubsystem.followPathCommand(true, true)));
+    new JoystickButton(driver, Button.kL2.value).onTrue(
+      new RunCommand(() -> { driveSubsystem.getPath(false, false); }).andThen(driveSubsystem.followPathCommand(false, false)));
     new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);
 
     //new JoystickButton(driver, Button.kSquare.value).onTrue(new GrabAlgae1(algaeClawSubsystem, elevatorSubsystem));
