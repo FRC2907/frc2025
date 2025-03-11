@@ -276,7 +276,7 @@ public class DriveSubsystem extends SubsystemBase {
   int closestPoseIndex = 0;
   Pose2d closestPose = new Pose2d(99, 99, Rotation2d.fromDegrees(90));
   PathPlannerPath path = blankPath;
-  public void getPath(boolean switchPath, boolean right){
+  public PathPlannerPath getPath(boolean switchPath, boolean right){
     System.out.println("ARGGGGHHHHHHHHH11111111");
     path = blankPath;
     closestPoseIndex = 0;
@@ -318,7 +318,7 @@ public class DriveSubsystem extends SubsystemBase {
       e.printStackTrace();
     }
     System.out.println("ARGGGGHHHHHHHHH121212121212121212");
-    //return path;
+    return path;
   }
   public Command followPathCommand(boolean switchPath, boolean right) {
     getPath(switchPath, right);
@@ -333,6 +333,7 @@ public class DriveSubsystem extends SubsystemBase {
       robotConfig, 
       Util::isRed, 
       this);
+    
   }
   public Command switchPathCommand(boolean right){
     System.out.println("ARGGGGHHHHHHHHH131313131313131313131313");

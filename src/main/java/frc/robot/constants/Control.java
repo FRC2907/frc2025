@@ -14,7 +14,6 @@ public class Control {
     public static final String LIMELIGHT_NAME = "limelight-casey"; 
     public static final int CURRENT_LIMIT = 40; //amps
     public static final double NOMINAL_VOLTAGE = 12.0;
-    public static final double GRAVITY_CONSTANT = -9.80665;
     public static final double kDriverDeadband = 0.08;
 
     public class drivetrain {
@@ -113,9 +112,13 @@ public class Control {
         public static final double kHeightA = -0.3; //TODO tune (y=mx+b for shoot linear regression equation for height)
         public static final double kShootB = 11.3; //TODO tune (y=mx+b for shoot linear regression equation for the base value)
 
-        public static final double kP = 0.11, //TODO tune
-                                   kI = 0, //TODO tune
-                                   kD = 0; //TODO tune
+        public static final double kShootP = 0.001, //TODO tune
+                                   kShootI = 0, //TODO tune
+                                   kShootD = 0, //TODO tune
+                                   kShootFF = 2.114e-3; //TODO adjust
+        public static final double kArmP = 0.11, //TODO tune
+                                   kArmI = 0, //TODO tune
+                                   kArmD = 0; //TODO tune
         public static final double kS = 0.14, //TODO tune
                                    kG = 0.46, //TODO adjust
                                    kV = 0.01, //TODO adjust (0.53)

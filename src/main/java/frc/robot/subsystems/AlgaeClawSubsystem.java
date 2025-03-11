@@ -60,8 +60,11 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     shootConfig.idleMode(IdleMode.kBrake)
                .inverted(false)
                .smartCurrentLimit(0, 40)
-               .closedLoop.pidf(0, 0, 0, 0)
-                          .maxMotion.allowedClosedLoopError(30)
+               .closedLoop.pidf(Control.algaeManipulator.kShootP,
+                                Control.algaeManipulator.kShootI,
+                                Control.algaeManipulator.kShootD,
+                                Control.algaeManipulator.kShootFF)
+                          .maxMotion.allowedClosedLoopError(100)
                                     .maxVelocity(5000)
                                     .maxAcceleration(2500);
     shootLeader.configure(shootConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -73,9 +76,9 @@ public class AlgaeClawSubsystem extends SubsystemBase {
                                      Control.algaeManipulator.kG, 
                                      Control.algaeManipulator.kV, 
                                      Control.algaeManipulator.kA);
-    pidController = new ProfiledPIDController(Control.algaeManipulator.kP,
-                                              Control.algaeManipulator.kI, 
-                                              Control.algaeManipulator.kD, 
+    pidController = new ProfiledPIDController(Control.algaeManipulator.kArmP,
+                                              Control.algaeManipulator.kArmI, 
+                                              Control.algaeManipulator.kArmD, 
                                               Control.algaeManipulator.kConstraints);
 
 
@@ -127,7 +130,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   public void shootSpinUp(){
     armSetSetpoint(Control.algaeManipulator.kStowAngle);
     shootSetSetpoint(calculateSpeed(DriveSubsystem.getInstance().getPose2d(),
-                                    ElevatorSubsystem.getInstance().getHeight()));
+                                    /*ElevatorSubsystem.getInstance().getHeight()*/ 1));
   }
   public void shootRelease(){
     armSetSetpoint(Control.algaeManipulator.kFixedShootAngle);
@@ -135,8 +138,8 @@ public class AlgaeClawSubsystem extends SubsystemBase {
 
   private double calculateSpeed(Pose2d point, double height){
     return Math.abs(point.getX()
-     - (Util.isBlue() ? 0 : FieldElements.fieldLength)) * Control.algaeManipulator.kDistanceA +
-     /*ElevatorSubsystem.getInstance().getHeight() */ height * Control.algaeManipulator.kHeightA
+     - (Util.isBlue() ? 0 : FieldElements.fieldLength)) * Control.algaeManipulator.kDistanceA
+     + height * Control.algaeManipulator.kHeightA
      + Control.algaeManipulator.kShootB;
   }
 

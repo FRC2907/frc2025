@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj.PS5Controller.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -131,13 +132,15 @@ public class RobotContainer {
     something.add(new Pose2d(3, 3, Rotation2d.kZero));
     something.add(FieldElements.Reef.centerFaces[3]);
     Command thing = driveSubsystem.followPathCommand(true, false);
+    Command otherThing = new RunCommand(() -> thing.initialize(), driveSubsystem).andThen(thing);
     //PathPlannerPath thing = driveSubsystem.generatePath(something, Rotation2d.kZero);
-    new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(thing);
+    new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(otherThing);
     new Trigger(() -> Util.checkPOVRight(driver)).onTrue(
-      new RunCommand(() -> { driveSubsystem.getPath(true, true); }).andThen(driveSubsystem.followPathCommand(true, true)));
+      Commands.runOnce(() -> driveSubsystem.getPath(true, false), driveSubsystem).andThen(driveSubsystem.followPathCommand(true, true)));
     new JoystickButton(driver, Button.kL2.value).onTrue(
       new RunCommand(() -> { driveSubsystem.getPath(false, false); }).andThen(driveSubsystem.followPathCommand(false, false)));
     new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);
+    
 
     //new JoystickButton(driver, Button.kSquare.value).onTrue(new GrabAlgae1(algaeClawSubsystem, elevatorSubsystem));
     //new JoystickButton(driver, Button.kCircle.value).onTrue(new GrabAlgae2(algaeClawSubsystem, elevatorSubsystem));
