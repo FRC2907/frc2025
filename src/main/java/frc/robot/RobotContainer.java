@@ -7,7 +7,6 @@ package frc.robot;
 import java.util.*;
 
 import frc.robot.commands.CoralPoop;
-import frc.robot.commands.FollowPath;
 import frc.robot.commands.GrabAlgae1;
 import frc.robot.commands.GrabAlgae2;
 import frc.robot.commands.GrabAlgaeGround;
