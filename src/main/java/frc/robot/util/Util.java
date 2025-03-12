@@ -57,14 +57,14 @@ public class Util {
 		if (DriverStation.getAlliance().isPresent()){
       	    return DriverStation.getAlliance().get() == Alliance.Blue;
 		}
-        System.err.println("[EE] I could not find an alliance");
+        System.err.println("(EE) I could not find an alliance");
         return true;
 	}
     public static boolean isRed(){
 		if (DriverStation.getAlliance().isPresent()){
       	    return DriverStation.getAlliance().get() == Alliance.Red;
 		}
-        System.err.println("[EE] I could not find an alliance");
+        System.err.println("(EE) I could not find an alliance");
 		return true;
 	}
 
