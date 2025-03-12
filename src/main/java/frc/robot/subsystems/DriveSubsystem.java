@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
@@ -26,11 +27,11 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
@@ -51,7 +52,6 @@ public class DriveSubsystem extends SubsystemBase {
 
   private double frontLeftSpeed, frontRightSpeed, rearLeftSpeed, rearRightSpeed;
   private double wheelDiameter;
-  private int currentPathIndex;
   private SparkMax frontLeftMotor, frontRightMotor, rearLeftMotor, rearRightMotor;
   private SparkMaxConfig config;
   private RelativeEncoder frontLeftEnc, frontRightEnc, rearLeftEnc, rearRightEnc;
@@ -62,10 +62,7 @@ public class DriveSubsystem extends SubsystemBase {
   private String limelight;
   private LimelightHelpers.PoseEstimate limelightMeasurement;
 
-  public Pose2d[] reefPoses;
-  public List<Pose2d> blank;
-  public PathPlannerPath blankPath;
-  public PathPlannerPath[] reefPaths;
+  public List<PathPlannerPath> reefPaths;
 
   private DriveSubsystem() {
     frontLeftMotor =  new SparkMax(Ports.drivetrain.FRONT_LEFT,  MotorType.kBrushless);
@@ -118,31 +115,15 @@ public class DriveSubsystem extends SubsystemBase {
 
     field = new Field2d();
 
-    reefPaths = new PathPlannerPath[12];
-    for (int i = 0; i < 12; i++){
+    reefPaths = new ArrayList<>(12);
+    for (int i = 0; i < 12; i++) {
       try {
-        reefPaths[i] = PathPlannerPath.fromPathFile(i / 2 + 1 + "-" + leftRight(i));
-      } catch (Exception e){
+        reefPaths.add(PathPlannerPath.fromPathFile(i / 2 + 1 + "-" + leftRight(i)));
+      } catch (Exception e) {
         e.printStackTrace();
       }
     }
-
-    reefPoses = new Pose2d[12];
-    for (int i = 0; i < 12; i++){
-      try {
-        reefPoses[i] = getPathFile(i).getPathPoses().get(0);
-      } catch (Exception e){
-        e.printStackTrace();
-      }
-    }
-    blank = new Stack<Pose2d>();
-    blank.add(getPose2d());
-    blank.add(getPose2d());
-    blankPath = generatePath(blank, gyro.getRotation2d());
     
-
-    currentPathIndex = 0;
-
     pathPlannerConfigure();
   }
 
@@ -265,65 +246,34 @@ public class DriveSubsystem extends SubsystemBase {
   private String leftRight(int index){
     return index % 2 == 0 ? "L" : "R";
   }
-  public PathPlannerPath getPathFile(int index){
-    try {
-      return reefPaths[index];
-    } catch (Exception e){
-      e.printStackTrace();
-    }
-    return null;
-  }
-  int closestPoseIndex = 0;
-  Pose2d closestPose = new Pose2d(99, 99, Rotation2d.fromDegrees(90));
-  PathPlannerPath path = blankPath;
-  public PathPlannerPath getPath(boolean switchPath, boolean right){
-    System.out.println("ARGGGGHHHHHHHHH11111111");
-    path = blankPath;
-    closestPoseIndex = 0;
-    if (!switchPath){
-      System.out.println("ARGGGGHHHHHHHHH222222222222");
-      Transform2d[] minusPoses = new Transform2d[12];
 
-      for (int i = 0; i < 12; i++){
-        System.out.println("ARGGGGHHHHHHHHH3333333");
-        try {
-          System.out.println("ARGGGGHHHHHHHHH44444444444");
-          minusPoses[i] = reefPoses[i].minus(getPose2d());
-          if (minusPoses[i].getTranslation().getNorm() < closestPose.getTranslation().getNorm()){
-            System.out.println("ARGGGGHHHHHHHHH555555555555");
-            closestPose = reefPoses[i];
-            closestPoseIndex = i;
-          }
-        } catch (Exception e){
-          System.out.println("ARGGGGHHHHHHHHH666666666");
-          e.printStackTrace();
-        }
-      }
-    }
+  public PathPlannerPath getNearestPath() { return getNearestPath(getPose2d()); }
+  public PathPlannerPath getNearestPath(Pose2d here){
+    return reefPaths.stream()
+      .map(
+        path -> new Pair<>(path
+          , path
+              .getPathPoses()
+              .get(0)
+              .minus(here)
+              .getTranslation()
+              .getNorm()
+        )
+      ).reduce(
+        (a,b) -> a.getSecond().doubleValue() < b.getSecond().doubleValue() ? a : b
+      ).get().getFirst();
+    
 
-    System.out.println("ARGGGGHHHHHHHHH777777777");
-    currentPathIndex = right ? currentPathIndex - 1 : currentPathIndex + 1;
-    if (currentPathIndex < 0){
-      System.out.println("ARGGGGHHHHHHHHH888888888");
-      currentPathIndex = 11;
-    } else if (currentPathIndex > 11){
-      System.out.println("ARGGGGHHHHHHHHH9999999999999");
-      currentPathIndex = 0;
-    }
-    try {
-      System.out.println("ARGGGGHHHHHHHHH10101010101010101010101010101");
-      path = switchPath ? getPathFile(currentPathIndex) : getPathFile(closestPoseIndex);
-    } catch (Exception e){
-      System.out.println("ARGGGGHHHHHHHHHELEVENELEVENELEVEN11111111");
-      e.printStackTrace();
-    }
-    System.out.println("ARGGGGHHHHHHHHH121212121212121212");
-    return path;
   }
-  public Command followPathCommand(boolean switchPath, boolean right) {
-    getPath(switchPath, right);
+  public PathPlannerPath getPathLeft(PathPlannerPath current) {
+    return reefPaths.get(reefPaths.indexOf(current) + 1);
+  }
+  public PathPlannerPath getPathRight(PathPlannerPath current) {
+    return reefPaths.get(reefPaths.indexOf(current) - 1);
+  }
+
+  public Command followPathCommand(PathPlannerPath path) {
     return new PathfindThenFollowPath(
-      //getPath(switchPath, right), 
       path,
       Control.drivetrain.pathConstraints, 
       this::getPose2d, 
@@ -333,13 +283,17 @@ public class DriveSubsystem extends SubsystemBase {
       robotConfig, 
       Util::isRed, 
       this);
-    
-  }
-  public Command switchPathCommand(boolean right){
-    System.out.println("ARGGGGHHHHHHHHH131313131313131313131313");
-    return followPathCommand(true, right);
   }
 
+  public Command scheduleReefLeftCommand() {
+    return runOnce(() -> followPathCommand(getPathLeft(getNearestPath())).schedule());
+  }
+  public Command scheduleReefRightCommand() {
+    return runOnce(() -> followPathCommand(getPathRight(getNearestPath())).schedule());
+  }
+  public Command scheduleReefNearestCommand() {
+    return runOnce(() -> followPathCommand(getNearestPath()).schedule());
+  }
   
 
   @Override
@@ -380,8 +334,8 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("heading", getHeadingDeg());
     SmartDashboard.putData("field", field);
 
-    SmartDashboard.putNumber("index", currentPathIndex);
-    SmartDashboard.putNumber("otherIndex", closestPoseIndex);
+    //SmartDashboard.putNumber("index", currentPathIndex);
+    //SmartDashboard.putNumber("otherIndex", closestPoseIndex);
   }
 
   @Override

@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.DriveSubsystem;
 //import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.Util;
@@ -95,18 +94,7 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {
-    if (Util.checkPOVLeft(m_robotContainer.driver)){
-      DriveSubsystem.getInstance().getPath(true, false);
-      //CommandScheduler.getInstance().
-    }
-    if (Util.checkPOVRight(m_robotContainer.driver)){
-      DriveSubsystem.getInstance().getPath(true, true);
-    }
-    if (m_robotContainer.driver.getL2ButtonPressed()){
-      DriveSubsystem.getInstance().getPath(false, false);
-    }
-  }
+  public void teleopPeriodic() {}
 
   @Override
   public void testInit() {
