@@ -136,7 +136,12 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
 
-
+  public void pidTune(double speed){
+    frontLeftSpeed =  speed;
+    frontRightSpeed = speed;
+    rearLeftSpeed =   speed;
+    rearRightSpeed =  speed;
+  }
   public void stop(){
     frontLeftSpeed = 0;
     frontRightSpeed = 0;
@@ -262,8 +267,6 @@ public class DriveSubsystem extends SubsystemBase {
       ).reduce(
         (a,b) -> a.getSecond().doubleValue() < b.getSecond().doubleValue() ? a : b
       ).get().getFirst();
-    
-
   }
   public PathPlannerPath getPathLeft(PathPlannerPath current) {
     return reefPaths.get(reefPaths.indexOf(current) + 1);
