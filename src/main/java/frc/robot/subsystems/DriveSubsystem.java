@@ -262,8 +262,6 @@ public class DriveSubsystem extends SubsystemBase {
       ).reduce(
         (a,b) -> a.getSecond().doubleValue() < b.getSecond().doubleValue() ? a : b
       ).get().getFirst();
-    
-
   }
   public PathPlannerPath getPathLeft(PathPlannerPath current) {
     return reefPaths.get(reefPaths.indexOf(current) + 1);
