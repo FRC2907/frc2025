@@ -17,11 +17,11 @@ public class Control {
     public static final double kDriverDeadband = 0.08;
 
     public class drivetrain {
-        public static final double TRACK_WIDTH = Units.inchesToMeters(19.5); //TODO update
-        public static final double WHEEL_BASE = Units.inchesToMeters(20.75); //TODO update
+        public static final double TRACK_WIDTH = Units.inchesToMeters(19.5); //TODO update (22.15 (check))
+        public static final double WHEEL_BASE = Units.inchesToMeters(20.75); //TODO update (24.5)
         public static final double WHEEL_DIAMETER = Units.inchesToMeters(6);
         public static final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
-        public static final double GEAR_RATIO = 5.95;
+        public static final double GEAR_RATIO = 5.95; //CHANGE TO 7.31
         public static final Translation2d FRONT_LEFT_LOCATION = new Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2);
         public static final Translation2d FRONT_RIGHT_LOCATION = new Translation2d(WHEEL_BASE / 2, - TRACK_WIDTH / 2);
         public static final Translation2d REAR_LEFT_LOCATION = new Translation2d(-WHEEL_BASE / 2, TRACK_WIDTH / 2);
@@ -62,7 +62,7 @@ public class Control {
             new PIDConstants(kPPP, kPPI, kPPD),           // Translation PID constants
             new PIDConstants(kPPRotP, kPPRotI, kPPRotD)); // Rotation PID constants
 
-        public static final PathConstraints pathConstraints = new PathConstraints(
+        public static final PathConstraints kPathConstraints = new PathConstraints(
             kMaxVelMPS,
             kMaxAccelRPM,
             kMaxAngularVelRad,

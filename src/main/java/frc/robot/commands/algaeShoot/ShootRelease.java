@@ -2,13 +2,13 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands;
+package frc.robot.commands.algaeShoot;
 
 import frc.robot.subsystems.AlgaeClawSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
-public class IntakeAlgae extends Command {
+public class ShootRelease extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final AlgaeClawSubsystem algaeSubsystem;
 
@@ -17,20 +17,22 @@ public class IntakeAlgae extends Command {
    *
    * @param subsystem The subsystem used by this command.
    */
-  public IntakeAlgae(AlgaeClawSubsystem subsystem) {
-    algaeSubsystem = subsystem;
+  public ShootRelease(AlgaeClawSubsystem algaeSubsystem) {
+    this.algaeSubsystem = algaeSubsystem;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(subsystem);
+    addRequirements(algaeSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    algaeSubsystem.shootSpinUp();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    algaeSubsystem.intake();
+    algaeSubsystem.shootRelease();
   }
 
   // Called once the command ends or is interrupted.
@@ -42,6 +44,6 @@ public class IntakeAlgae extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return !algaeSubsystem.hasAlgae();
+    return false;
   }
 }

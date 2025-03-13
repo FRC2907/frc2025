@@ -242,7 +242,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     return new PathPlannerPath(
       waypoints,
-      Control.drivetrain.pathConstraints, 
+      Control.drivetrain.kPathConstraints, 
       null,
       new GoalEndState(0.0, endState)
     );
@@ -269,16 +269,23 @@ public class DriveSubsystem extends SubsystemBase {
       ).get().getFirst();
   }
   public PathPlannerPath getPathLeft(PathPlannerPath current) {
-    return reefPaths.get(reefPaths.indexOf(current) + 1);
+    return reefPaths.get(pathIndexWrap(reefPaths.indexOf(current) + 1));
   }
   public PathPlannerPath getPathRight(PathPlannerPath current) {
-    return reefPaths.get(reefPaths.indexOf(current) - 1);
+    return reefPaths.get(pathIndexWrap(reefPaths.indexOf(current) - 1));
+  }
+  private int pathIndexWrap(int index){
+    if (index > 11)
+      return 0;
+    if (index < 0)
+      return 11;
+    return index;
   }
 
   public Command followPathCommand(PathPlannerPath path) {
     return new PathfindThenFollowPath(
       path,
-      Control.drivetrain.pathConstraints, 
+      Control.drivetrain.kPathConstraints, 
       this::getPose2d, 
       this::getChassisSpeeds, 
       (speeds, feedforwards) -> drive(speeds), 

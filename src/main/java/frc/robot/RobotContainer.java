@@ -6,10 +6,10 @@ package frc.robot;
 
 import java.util.*;
 
-import frc.robot.commands.CoralPoop;
-import frc.robot.commands.GrabAlgae1;
-import frc.robot.commands.GrabAlgae2;
-import frc.robot.commands.GrabAlgaeGround;
+import frc.robot.commands.coral.CoralPoop;
+import frc.robot.commands.grabAlgae.GrabAlgae1;
+import frc.robot.commands.grabAlgae.GrabAlgae2;
+import frc.robot.commands.grabAlgae.GrabAlgaeGround;
 import frc.robot.constants.Control;
 import frc.robot.constants.FieldElements;
 import frc.robot.constants.Ports;
