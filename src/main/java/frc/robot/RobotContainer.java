@@ -7,6 +7,9 @@ package frc.robot;
 import java.util.*;
 
 import frc.robot.commands.coral.CoralPoop;
+import frc.robot.commands.drive.ReefLeft;
+import frc.robot.commands.drive.ReefNearest;
+import frc.robot.commands.drive.ReefRight;
 import frc.robot.commands.grabAlgae.GrabAlgae1;
 import frc.robot.commands.grabAlgae.GrabAlgae2;
 import frc.robot.commands.grabAlgae.GrabAlgaeGround;
@@ -131,9 +134,9 @@ public class RobotContainer {
     something.add(new Pose2d(3, 3, Rotation2d.kZero));
     something.add(FieldElements.Reef.centerFaces[3]);
     //PathPlannerPath thing = driveSubsystem.generatePath(something, Rotation2d.kZero);
-    new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(driveSubsystem.scheduleReefLeftCommand());
-    new Trigger(() -> Util.checkPOVRight(driver)).onTrue(driveSubsystem.scheduleReefRightCommand());
-    new JoystickButton(driver, Button.kL2.value).onTrue(driveSubsystem.scheduleReefNearestCommand());
+    new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(new ReefLeft(driveSubsystem));
+    new Trigger(() -> Util.checkPOVRight(driver)).onTrue(new ReefRight(driveSubsystem));
+    new JoystickButton(driver, Button.kL2.value).onTrue(new ReefNearest(driveSubsystem));
     new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);
     new JoystickButton(driver, Button.kCircle.value).onTrue(new RunCommand(() ->
         CommandScheduler.getInstance().cancel(driveSubsystem.scheduleReefLeftCommand(),
