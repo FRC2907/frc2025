@@ -82,9 +82,9 @@ public class Control {
 
     public class algaeManipulator {
         public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
-        public static final double GEAR_RATIO = 1 / 5.95; //TODO find
+        public static final double GEAR_RATIO = 36;
 
-        public static final double kArmConversionFactor = GEAR_RATIO * 360.0;
+        public static final double kArmConversionFactor = GEAR_RATIO / 360.0;
         public static final double kArmDownLimit = 30; //TODO find
         public static final double kArmUpLimit = 135; //TODO find
         public static final double kMaxVelocity = 180, //TODO tune (deg/s)

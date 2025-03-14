@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -54,6 +55,7 @@ public class RobotContainer {
   //private final AlgaeClawSubsystem algaeClawSubsystem;
   //private final ElevatorSubsystem elevatorSubsystem;
 
+  private RunCommand drive;
   private RunCommand lockDrive;
   private RunCommand elevatorUp;
   private RunCommand elevatorDown;
@@ -93,18 +95,19 @@ public class RobotContainer {
           true); },
           driveSubsystem );
 
-    driveSubsystem.setDefaultCommand(new RunCommand(
+    drive = new RunCommand(
       () -> {
-        if (Util.checkDriverDeadband(driver)) 
+        //if (Util.checkDriverDeadband(driver)) 
           driveSubsystem.drive(
             - yLimiter.calculate(driver.getLeftY()) * Control.drivetrain.kMaxVelMPS,
             - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMPS,
             - rotLimiter.calculate(driver.getRightX()) * Control.drivetrain.kMaxAngularVelRad, 
             true);
-        else 
-            driveSubsystem.stop(); },
+        /*else 
+            driveSubsystem.stop(); */ }, 
             driveSubsystem
-    ));
+    );
+    driveSubsystem.setDefaultCommand(new RunCommand(() -> driveSubsystem.stop()));
 
     //elevatorUp = new RunCommand(elevatorSubsystem::up);
     //elevatorDown = new RunCommand(elevatorSubsystem::down);
@@ -130,13 +133,19 @@ public class RobotContainer {
 
     //new JoystickButton(operator, Button.kR2.value).whileTrue(new CoralPoop(poopSubsystem));
 
+    new Trigger(() -> Util.checkDriverDeadband(driver)).onTrue(
+      drive.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+
     List<Pose2d> something = new Stack<Pose2d>();
     something.add(new Pose2d(3, 3, Rotation2d.kZero));
     something.add(FieldElements.Reef.centerFaces[3]);
     //PathPlannerPath thing = driveSubsystem.generatePath(something, Rotation2d.kZero);
-    new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(new ReefLeft(driveSubsystem));
-    new Trigger(() -> Util.checkPOVRight(driver)).onTrue(new ReefRight(driveSubsystem));
-    new JoystickButton(driver, Button.kL2.value).onTrue(new ReefNearest(driveSubsystem));
+    new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(
+      new ReefLeft(driveSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
+    new Trigger(() -> Util.checkPOVRight(driver)).onTrue(
+      new ReefRight(driveSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
+    new JoystickButton(driver, Button.kL2.value).onTrue(
+      new ReefNearest(driveSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
     new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);
     new JoystickButton(driver, Button.kCircle.value).onTrue(new RunCommand(() ->
         CommandScheduler.getInstance().cancel(driveSubsystem.scheduleReefLeftCommand(),
