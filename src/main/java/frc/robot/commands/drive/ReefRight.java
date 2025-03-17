@@ -39,7 +39,8 @@ public class ReefRight extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    AutoBuilder.pathfindThenFollowPath(path, Control.drivetrain.kPathConstraints).schedule();
+    AutoBuilder.pathfindThenFollowPath(path, Control.drivetrain.kPathConstraints)
+      .withInterruptBehavior(InterruptionBehavior.kCancelSelf).schedule();
   }
 
   // Called once the command ends or is interrupted.

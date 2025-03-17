@@ -34,13 +34,13 @@ public class ReefLeft extends Command {
   @Override
   public void initialize() {
     path = m_subsystem.getPathLeft(m_subsystem.getNearestPath());
+    AutoBuilder.pathfindThenFollowPath(path, Control.drivetrain.kPathConstraints)
+      .withInterruptBehavior(InterruptionBehavior.kCancelSelf).schedule();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-    AutoBuilder.pathfindThenFollowPath(path, Control.drivetrain.kPathConstraints).schedule();
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override
@@ -49,6 +49,6 @@ public class ReefLeft extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return true;
   }
 }

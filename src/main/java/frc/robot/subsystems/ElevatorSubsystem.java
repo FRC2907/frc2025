@@ -20,7 +20,7 @@ import frc.robot.constants.Control;
 
 public class ElevatorSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
-  private static SparkFlex motor;
+  private static SparkFlex motor, motorFollower;
   private static SparkFlexConfig config;
   private ElevatorFeedforward feedforward;
   private ProfiledPIDController pidController;
@@ -28,7 +28,8 @@ public class ElevatorSubsystem extends SubsystemBase {
   private int index;
   private int indexMax;
   private ElevatorSubsystem() {
-    motor = new SparkFlex(Ports.elevator.ELEVATOR, Control.elevator.MOTOR_TYPE);
+    motor = new SparkFlex(Ports.elevator.LEADER, Control.elevator.MOTOR_TYPE);
+    motorFollower = new SparkFlex(Ports.elevator.FOLLOWER, Control.elevator.MOTOR_TYPE);
     config = new SparkFlexConfig();
     config.idleMode(IdleMode.kBrake)
           .inverted(false)
@@ -39,6 +40,9 @@ public class ElevatorSubsystem extends SubsystemBase {
                     .reverseSoftLimitEnabled(true);
     config.encoder.positionConversionFactor(Control.elevator.kConversionFactor);
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    config.apply(new SparkFlexConfig().follow(motor, true));
+    motorFollower.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
     motor.getEncoder().setPosition(0);
 
     feedforward = new ElevatorFeedforward(Control.elevator.kS,
@@ -51,7 +55,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                                               Control.elevator.kConstraints);
     
     index = 0;
-    indexMax = 4;
+    indexMax = 3;
   }
 
   private static ElevatorSubsystem instance;
