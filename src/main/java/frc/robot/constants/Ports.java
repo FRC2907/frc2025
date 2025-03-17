@@ -22,7 +22,8 @@ public class Ports {
     }
 
     public class elevator {
-        public static final int ELEVATOR = 6;
+        public static final int LEADER = 6;
+        public static final int FOLLOWER = 7;
     }
 
     public class HID {

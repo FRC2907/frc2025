@@ -29,7 +29,7 @@ import frc.robot.util.Util;
 public class AlgaeClawSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   private SparkMax arm,
-                   shootLeader, shootFollower;
+                   shoot, shootFollower;
   private SparkMaxConfig armConfig, shootConfig;
   private static double armSetpoint, shootSetpoint;
   private static ColorSensorV3 colorSensor;
@@ -54,7 +54,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     arm.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     arm.getEncoder().setPosition(0);
 
-    shootLeader =   new SparkMax(Ports.manipulator.ALGAE_SHOOT_LEADER,   Control.algaeManipulator.MOTOR_TYPE);
+    shoot =         new SparkMax(Ports.manipulator.ALGAE_SHOOT_LEADER,   Control.algaeManipulator.MOTOR_TYPE);
     shootFollower = new SparkMax(Ports.manipulator.ALGAE_SHOOT_FOLLOWER, Control.algaeManipulator.MOTOR_TYPE);
     shootConfig = new SparkMaxConfig();
     shootConfig.idleMode(IdleMode.kBrake)
@@ -65,10 +65,10 @@ public class AlgaeClawSubsystem extends SubsystemBase {
                                 Control.algaeManipulator.kShootD,
                                 Control.algaeManipulator.kShootFF)
                           .maxMotion.allowedClosedLoopError(100)
-                                    .maxVelocity(5000)
+                                    .maxVelocity(3000)
                                     .maxAcceleration(2500);
-    shootLeader.configure(shootConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    shootConfig.apply(new SparkMaxConfig().follow(shootLeader, true));
+    shoot.configure(shootConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    shootConfig.apply(new SparkMaxConfig().follow(shoot, true));
     shootFollower.configure(shootConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     
 
@@ -107,9 +107,15 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     armSetSetpoint(Control.algaeManipulator.kStowAngle);
     shootSetSetpoint(Control.algaeManipulator.kStopSpeed);
   }
+  public void intakeAngle(){
+    armSetSetpoint(Control.algaeManipulator.kIntakeAngle);
+  }
   public void intake(){
     armSetSetpoint(Control.algaeManipulator.kIntakeAngle);
     shootSetSetpoint(Control.algaeManipulator.kIntakeSpeed);
+  }
+  public void processorAngle(){
+    armSetSetpoint(Control.algaeManipulator.kProcessorAngle);
   }
   public void processor(){
     armSetSetpoint(Control.algaeManipulator.kProcessorAngle);
@@ -117,7 +123,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   }
   public void fixedShoot(){
     armSetSetpoint(Control.algaeManipulator.kFixedShootAngle);
-    shootSetSetpoint(Control.algaeManipulator.kFixedShootSpeed);; //TODO add algorithm
+    shootSetSetpoint(Control.algaeManipulator.kFixedShootSpeed);;
   }
   public void grab(){
     armSetSetpoint(Control.algaeManipulator.kGrabAngle);
@@ -130,7 +136,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   public void shootSpinUp(){
     armSetSetpoint(Control.algaeManipulator.kStowAngle);
     shootSetSetpoint(calculateSpeed(DriveSubsystem.getInstance().getPose2d(),
-                                    /*ElevatorSubsystem.getInstance().getHeight()*/ 1));
+                                    ElevatorSubsystem.getInstance().getHeight()));
   }
   public void shootRelease(){
     armSetSetpoint(Control.algaeManipulator.kFixedShootAngle);
@@ -157,6 +163,14 @@ public class AlgaeClawSubsystem extends SubsystemBase {
         });
   }
 
+  public Command intakeAlgae(){
+    return runOnce(
+      () -> {
+        intakeAngle();
+      }
+    );
+  }
+
   /**
    * An example method querying a boolean state of the subsystem (for example, a digital sensor).
    *
@@ -169,7 +183,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     return absEncoder.getPosition() - armSetpoint < Control.algaeManipulator.kAllowedArmError;
   }
   public boolean atShooterSetPoint() {
-    return shootLeader.getEncoder().getVelocity() - shootSetpoint < Control.algaeManipulator.kAllowedShootError;
+    return shoot.getEncoder().getVelocity() - shootSetpoint < Control.algaeManipulator.kAllowedShootError;
   }
 
   @Override
@@ -182,7 +196,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
       //feedforwardCalculation + 
       pidCalculation
     );
-    shootLeader.getClosedLoopController().setReference(shootSetpoint, ControlType.kMAXMotionVelocityControl);
+    shoot.getClosedLoopController().setReference(shootSetpoint, ControlType.kMAXMotionVelocityControl);
 
     SmartDashboard.putBoolean("algae", hasAlgae());
     SmartDashboard.putNumber("setpoint", armSetpoint);

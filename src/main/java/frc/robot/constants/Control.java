@@ -73,7 +73,7 @@ public class Control {
     }
 
     public class coralManipulator {
-        public static final MotorType MOTOR_TYPE = MotorType.kBrushed;
+        public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
 
         public static final double kShootSpeed = 0.3; //percentage
         public static final double kStopSpeed = 0; //percentage
@@ -82,22 +82,22 @@ public class Control {
 
     public class algaeManipulator {
         public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
-        public static final double GEAR_RATIO = 36;
+        public static final double GEAR_RATIO = 36.0;
 
-        public static final double kArmConversionFactor = GEAR_RATIO / 360.0;
-        public static final double kArmDownLimit = 30; //TODO find
-        public static final double kArmUpLimit = 135; //TODO find
-        public static final double kMaxVelocity = 180, //TODO tune (deg/s)
-                                   kMaxAcceleration = 360; //TODO tune (deg/s^2)
-        public static final double kAllowedArmError = 1.5; //TODO tune
+        public static final double kArmConversionFactor = GEAR_RATIO / Units.degreesToRadians(360.0);
+        public static final double kArmDownLimit = Units.degreesToRadians(30); //TODO find
+        public static final double kArmUpLimit = Units.degreesToRadians(135); //TODO find
+        public static final double kMaxVelocity = Units.degreesToRadians(180), //TODO tune (deg/s)
+                                   kMaxAcceleration = Units.degreesToRadians(360); //TODO tune (deg/s^2)
+        public static final double kAllowedArmError = Units.degreesToRadians(1.5); //TODO tune
         public static final double kAlgaeToElevatorOffset = Units.inchesToMeters(5);
 
-        public static final double kStowAngle = 105;//TODO find
-        public static final double kGrabAngle = 80; //TODO find
-        public static final double kGroundGrabAngle = -45; //TODO find
-        public static final double kFixedShootAngle = 156; //TODO tune
-        public static final double kIntakeAngle = 110; //TODO find
-        public static final double kProcessorAngle = -40; //TODO find
+        public static final double kStowAngle = Units.degreesToRadians(105);//TODO find
+        public static final double kGrabAngle = Units.degreesToRadians(80); //TODO find
+        public static final double kGroundGrabAngle = Units.degreesToRadians(-45); //TODO find
+        public static final double kFixedShootAngle = Units.degreesToRadians(156); //TODO tune
+        public static final double kIntakeAngle = Units.degreesToRadians(110); //TODO find
+        public static final double kProcessorAngle = Units.degreesToRadians(-40); //TODO find
 
         public static final double kIntakeSpeed = 300; //TODO find (rpm)
         public static final double kOuttakeSpeed = 300; //TODO find (rpm)
@@ -121,8 +121,8 @@ public class Control {
                                    kArmD = 0; //TODO tune
         public static final double kS = 0.14, //TODO tune
                                    kG = 0.46, //TODO adjust
-                                   kV = 0.01, //TODO adjust (0.53)
-                                   kA = 0.00; //TODO adjust (0.01)
+                                   kV = 0.53, //TODO adjust (0.01 if degrees)
+                                   kA = 0.01; //TODO adjust (0.00 if degrees)
         public static final Constraints kConstraints = new Constraints(
             kMaxVelocity, kMaxAcceleration
         ); //TODO adjust
