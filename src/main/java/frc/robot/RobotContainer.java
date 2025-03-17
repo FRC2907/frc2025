@@ -27,7 +27,6 @@ import edu.wpi.first.wpilibj.PS5Controller.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
@@ -135,27 +134,9 @@ public class RobotContainer {
     something.add(FieldElements.Reef.centerFaces[3]);
     //PathPlannerPath thing = driveSubsystem.generatePath(something, Rotation2d.kZero);*/
 
-    new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(
-      new InstantCommand(() -> {
-        Command cmd = AutoBuilder.pathfindThenFollowPath(driveSubsystem.getPathLeft(), Control.drivetrain.kPathConstraints);
-        cmd.addRequirements(driveSubsystem);
-        cmd.withInterruptBehavior(InterruptionBehavior.kCancelSelf);
-        cmd.schedule();
-      }));
-    new Trigger(() -> Util.checkPOVRight(driver)).onTrue(
-      new InstantCommand(() -> {
-        Command cmd = AutoBuilder.pathfindThenFollowPath(driveSubsystem.getPathRight(), Control.drivetrain.kPathConstraints);
-        cmd.addRequirements(driveSubsystem);
-        cmd.withInterruptBehavior(InterruptionBehavior.kCancelSelf);
-        cmd.schedule();
-      }));
-    new JoystickButton(driver, Button.kL2.value).onTrue(
-      new InstantCommand(() -> {
-        Command cmd = AutoBuilder.pathfindThenFollowPath(driveSubsystem.getNearestPath(), Control.drivetrain.kPathConstraints);
-        cmd.addRequirements(driveSubsystem);
-        cmd.withInterruptBehavior(InterruptionBehavior.kCancelSelf);
-        cmd.schedule();
-      }));
+    new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(new ReefLeft(driveSubsystem));
+    new Trigger(() -> Util.checkPOVRight(driver)).onTrue(new ReefRight(driveSubsystem));
+    new JoystickButton(driver, Button.kL2.value).onTrue(new ReefNearest(driveSubsystem));
     new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);
     // should create a do-nothing command that requires the driveSubsystem, causing existing commands using that system to be cancelled?
     new JoystickButton(driver, Button.kCircle.value).onTrue(new InstantCommand(() -> {}, driveSubsystem));

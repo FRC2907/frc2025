@@ -8,15 +8,13 @@ import frc.robot.constants.Control;
 import frc.robot.subsystems.DriveSubsystem;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
 public class ReefRight extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  private final DriveSubsystem m_subsystem;
-  private PathPlannerPath path;
+  private final DriveSubsystem driveSubsystem;
 
   /**
    * Creates a new ExampleCommand.
@@ -24,7 +22,7 @@ public class ReefRight extends Command {
    * @param subsystem The subsystem used by this command.
    */
   public ReefRight(DriveSubsystem subsystem) {
-    m_subsystem = subsystem;
+    driveSubsystem = subsystem;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(subsystem);
     this.withInterruptBehavior(InterruptionBehavior.kCancelSelf);
@@ -33,14 +31,15 @@ public class ReefRight extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    path = m_subsystem.getPathRight(m_subsystem.getNearestPath());
+    Command cmd = AutoBuilder.pathfindThenFollowPath(driveSubsystem.getPathRight(), Control.drivetrain.kPathConstraints);
+    cmd.addRequirements(driveSubsystem);
+    cmd.withInterruptBehavior(InterruptionBehavior.kCancelSelf);
+    cmd.schedule();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-    AutoBuilder.pathfindThenFollowPath(path, Control.drivetrain.kPathConstraints).schedule();
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override
@@ -49,6 +48,6 @@ public class ReefRight extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return true;
   }
 }
