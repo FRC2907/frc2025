@@ -268,6 +268,8 @@ public class DriveSubsystem extends SubsystemBase {
         (a,b) -> a.getSecond().doubleValue() < b.getSecond().doubleValue() ? a : b
       ).get().getFirst();
   }
+  public PathPlannerPath getPathLeft() { return getPathLeft(getNearestPath()); }
+  public PathPlannerPath getPathRight() { return getPathRight(getNearestPath()); }
   public PathPlannerPath getPathLeft(PathPlannerPath current) {
     return reefPaths.get(pathIndexWrap(reefPaths.indexOf(current) + 1));
   }
@@ -295,16 +297,6 @@ public class DriveSubsystem extends SubsystemBase {
       this);
   }
 
-  public Command scheduleReefLeftCommand() {
-    return runOnce(() -> followPathCommand(getPathLeft(getNearestPath())).schedule());
-  }
-  public Command scheduleReefRightCommand() {
-    return runOnce(() -> followPathCommand(getPathRight(getNearestPath())).schedule());
-  }
-  public Command scheduleReefNearestCommand() {
-    return runOnce(() -> followPathCommand(getNearestPath()).schedule());
-  }
-  
 
   @Override
   public void periodic() {
