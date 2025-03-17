@@ -4,15 +4,10 @@
 
 package frc.robot;
 
-import java.util.*;
-
 import frc.robot.commands.coral.CoralPoop;
 import frc.robot.commands.drive.ReefLeft;
 import frc.robot.commands.drive.ReefNearest;
 import frc.robot.commands.drive.ReefRight;
-import frc.robot.commands.grabAlgae.GrabAlgae1;
-import frc.robot.commands.grabAlgae.GrabAlgae2;
-import frc.robot.commands.grabAlgae.GrabAlgaeGround;
 import frc.robot.constants.Control;
 import frc.robot.constants.FieldElements;
 import frc.robot.constants.Ports;
@@ -27,8 +22,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.PS5Controller.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -136,10 +129,11 @@ public class RobotContainer {
     new Trigger(() -> Util.checkDriverDeadband(driver)).onTrue(
       drive.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
-    List<Pose2d> something = new Stack<Pose2d>();
+    /*List<Pose2d> something = new Stack<Pose2d>();
     something.add(new Pose2d(3, 3, Rotation2d.kZero));
     something.add(FieldElements.Reef.centerFaces[3]);
-    //PathPlannerPath thing = driveSubsystem.generatePath(something, Rotation2d.kZero);
+    //PathPlannerPath thing = driveSubsystem.generatePath(something, Rotation2d.kZero);*/
+
     new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(
       new ReefLeft(driveSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
     new Trigger(() -> Util.checkPOVRight(driver)).onTrue(
