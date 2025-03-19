@@ -190,13 +190,16 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     double pidCalculation = pidController.calculate(arm.getEncoder().getPosition(), armSetpoint);
-    double feedforwardCalculation = feedforward.calculate(pidController.getSetpoint().velocity, pidController.getConstraints().maxAcceleration);
-    //arm.getClosedLoopController().setReference(armSetPoint, ControlType.kMAXMotionPositionControl);
+    double feedforwardCalculation = feedforward.calculate(
+      pidController.getSetpoint().position, pidController.getSetpoint().velocity);
+    /*arm.getClosedLoopController().setReference(armSetPoint, ControlType.kMAXMotionPositionControl);
     arm.setVoltage(
       //feedforwardCalculation + 
       pidCalculation
     );
-    shoot.getClosedLoopController().setReference(shootSetpoint, ControlType.kMAXMotionVelocityControl);
+    shoot.getClosedLoopController().setReference(shootSetpoint, ControlType.kMAXMotionVelocityControl);*/
+
+    arm.setVoltage(0.2);
 
     SmartDashboard.putBoolean("algae", hasAlgae());
     SmartDashboard.putNumber("setpoint", armSetpoint);

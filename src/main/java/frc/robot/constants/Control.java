@@ -17,11 +17,11 @@ public class Control {
     public static final double kDriverDeadband = 0.08;
 
     public class drivetrain {
-        public static final double TRACK_WIDTH = Units.inchesToMeters(19.5); //TODO update (22.15 (check))
-        public static final double WHEEL_BASE = Units.inchesToMeters(20.75); //TODO update (24.5)
+        public static final double TRACK_WIDTH = Units.inchesToMeters(22.15); 
+        public static final double WHEEL_BASE = Units.inchesToMeters(24.5); 
         public static final double WHEEL_DIAMETER = Units.inchesToMeters(6);
         public static final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
-        public static final double GEAR_RATIO = 5.95; //CHANGE TO 7.31
+        public static final double GEAR_RATIO = 7.31; //CHANGE TO 7.31
         public static final Translation2d FRONT_LEFT_LOCATION = new Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2);
         public static final Translation2d FRONT_RIGHT_LOCATION = new Translation2d(WHEEL_BASE / 2, - TRACK_WIDTH / 2);
         public static final Translation2d REAR_LEFT_LOCATION = new Translation2d(-WHEEL_BASE / 2, TRACK_WIDTH / 2);
@@ -44,7 +44,7 @@ public class Control {
         //ALL PIDF CONSTANTS
         public static final double kflFF = 0.000158, //Front left wheel feedforward
                                    kfrFF = 0.000149, //Front right wheel feedforward
-                                   krlFF = 0.000158420, //Rear left wheel feedforward
+                                   krlFF = 0.00015, //Rear left wheel feedforward
                                    krrFF = 0.000156; //Rear right wheel feedforward
         public static final double kP = 4e-7, //All wheels P constant
                                    kI = 1e-7, //All wheels I constant
@@ -119,9 +119,9 @@ public class Control {
         public static final double kArmP = 0.11, //TODO tune
                                    kArmI = 0, //TODO tune
                                    kArmD = 0; //TODO tune
-        public static final double kS = 0.14, //TODO tune
-                                   kG = 0.46, //TODO adjust
-                                   kV = 0.53, //TODO adjust (0.01 if degrees)
+        public static final double kS = 0.3, //TODO tune
+                                   kG = 0.35, //TODO adjust
+                                   kV = 0.70, //TODO adjust (0.01 if degrees)
                                    kA = 0.01; //TODO adjust (0.00 if degrees)
         public static final Constraints kConstraints = new Constraints(
             kMaxVelocity, kMaxAcceleration

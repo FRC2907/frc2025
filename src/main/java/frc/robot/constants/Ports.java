@@ -4,9 +4,9 @@ import edu.wpi.first.wpilibj.I2C.Port;
 
 public class Ports {
     public class drivetrain {
-        public static final int FRONT_LEFT = 16;
-        public static final int FRONT_RIGHT = 4;
-        public static final int REAR_LEFT = 13;
+        public static final int FRONT_LEFT = 11;
+        public static final int FRONT_RIGHT = 10;
+        public static final int REAR_LEFT = 20;
         public static final int REAR_RIGHT = 1;
     }
 

@@ -44,7 +44,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
 
   private final DriveSubsystem driveSubsystem;
-  private final PoopSubsystem poopSubsystem;
+  //private final PoopSubsystem poopSubsystem;
   //private final AlgaeClawSubsystem algaeClawSubsystem;
   //private final ElevatorSubsystem elevatorSubsystem;
 
@@ -67,15 +67,15 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     driveSubsystem = DriveSubsystem.getInstance();
-    poopSubsystem = PoopSubsystem.getInstance();
+    //poopSubsystem = PoopSubsystem.getInstance();
     //algaeClawSubsystem = AlgaeClawSubsystem.getInstance();
     //elevatorSubsystem = ElevatorSubsystem.getInstance();
     
 
     
-    NamedCommands.registerCommand("Coral Poop", new CoralPoop(poopSubsystem));
+    /*NamedCommands.registerCommand("Coral Poop", new CoralPoop(poopSubsystem));
     NamedCommands.registerCommand("Wait Coral Intake", poopSubsystem.coralWaitIntakeCommand());
-    NamedCommands.registerCommand("Wait Coral Shoot", poopSubsystem.coralWaitShootCommand());
+    NamedCommands.registerCommand("Wait Coral Shoot", poopSubsystem.coralWaitShootCommand());*/
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -100,7 +100,7 @@ public class RobotContainer {
             driveSubsystem.stop(); */ }, 
             driveSubsystem
     );
-    driveSubsystem.setDefaultCommand(new RunCommand(() -> driveSubsystem.stop()));
+    driveSubsystem.setDefaultCommand(new RunCommand(() -> driveSubsystem.stop(), driveSubsystem));
 
     //elevatorUp = new RunCommand(elevatorSubsystem::up);
     //elevatorDown = new RunCommand(elevatorSubsystem::down);
@@ -126,7 +126,7 @@ public class RobotContainer {
 
     //new JoystickButton(operator, Button.kR2.value).whileTrue(new CoralPoop(poopSubsystem));
 
-    new Trigger(() -> Util.checkDriverDeadband(driver)).onTrue(
+    new Trigger(() -> Util.checkDriverDeadband(driver)).whileTrue(
       drive.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
     /*List<Pose2d> something = new Stack<Pose2d>();
