@@ -4,13 +4,17 @@
 
 package frc.robot;
 
+import frc.robot.commands.algaeShoot.ShootRelease;
+import frc.robot.commands.algaeShoot.ShootSpinUp;
 import frc.robot.commands.coral.CoralPoop;
 import frc.robot.commands.drive.ReefLeft;
 import frc.robot.commands.drive.ReefNearest;
 import frc.robot.commands.drive.ReefRight;
+import frc.robot.commands.processor.ProcessorPrep;
 import frc.robot.constants.Control;
 import frc.robot.constants.FieldElements;
 import frc.robot.constants.Ports;
+import frc.robot.constants.Control.algaeManipulator;
 import frc.robot.subsystems.AlgaeClawSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -45,13 +49,12 @@ public class RobotContainer {
 
   private final DriveSubsystem driveSubsystem;
   //private final PoopSubsystem poopSubsystem;
-  //private final AlgaeClawSubsystem algaeClawSubsystem;
-  //private final ElevatorSubsystem elevatorSubsystem;
+  private final AlgaeClawSubsystem algaeClawSubsystem;
+  private final ElevatorSubsystem elevatorSubsystem;
 
-  private RunCommand drive;
-  private RunCommand lockDrive;
-  private RunCommand elevatorUp;
-  private RunCommand elevatorDown;
+  private RunCommand drive, lockDrive;
+  private RunCommand elevatorUp, elevatorDown,
+                     manualElevatorUp, manualElevatorDown;
   
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -68,8 +71,8 @@ public class RobotContainer {
   public RobotContainer() {
     driveSubsystem = DriveSubsystem.getInstance();
     //poopSubsystem = PoopSubsystem.getInstance();
-    //algaeClawSubsystem = AlgaeClawSubsystem.getInstance();
-    //elevatorSubsystem = ElevatorSubsystem.getInstance();
+    algaeClawSubsystem = AlgaeClawSubsystem.getInstance();
+    elevatorSubsystem = ElevatorSubsystem.getInstance();
     
 
     
@@ -122,10 +125,9 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-
-    //new JoystickButton(operator, Button.kR2.value).whileTrue(new CoralPoop(poopSubsystem));
-
+    /*
+     * ALL DRIVER BINDINGS
+     */
     new Trigger(() -> Util.checkDriverDeadband(driver)).whileTrue(
       drive.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
@@ -141,12 +143,25 @@ public class RobotContainer {
     // should create a do-nothing command that requires the driveSubsystem, causing existing commands using that system to be cancelled?
     new JoystickButton(driver, Button.kCircle.value).onTrue(new InstantCommand(() -> {}, driveSubsystem));
 
-    //new JoystickButton(driver, Button.kSquare.value).onTrue(new GrabAlgae1(algaeClawSubsystem, elevatorSubsystem));
-    //new JoystickButton(driver, Button.kCircle.value).onTrue(new GrabAlgae2(algaeClawSubsystem, elevatorSubsystem));
-    //new JoystickButton(driver, Button.kSquare.value).onTrue(new GrabAlgaeGround(algaeClawSubsystem, elevatorSubsystem));
 
-    //new Trigger(() -> Util.checkPOVUp(driver)).onTrue(elevatorUp);
-    //new Trigger(() -> Util.checkPOVDown(driver)).onTrue(elevatorDown);
+
+    /*
+     * ALL OPERATOR BINDINGS
+     */
+    new JoystickButton(operator, Button.kL1.value).onTrue(algaeClawSubsystem.poopAlgae());
+    new JoystickButton(operator, Button.kCross.value).onTrue(algaeClawSubsystem.intakeAlgaePrep());
+    new JoystickButton(operator, Button.kCircle.value).onTrue(new ProcessorPrep(algaeClawSubsystem, elevatorSubsystem));
+    new JoystickButton(operator, Button.kR2.value).onTrue(new ShootSpinUp(algaeClawSubsystem));
+    new JoystickButton(operator, Button.kSquare.value).onTrue(new ShootRelease(algaeClawSubsystem));
+    //new JoystickButton(operator, Button.kL2.value).onTrue(new GrabAlgae(algaeClawSubsystem));
+
+    new JoystickButton(operator, Button.kTriangle.value).onTrue(elevatorSubsystem.coralStationCommand());
+    //new Trigger(() -> Util.checkPOVUp(operator)).onTrue(elevatorUp);
+    //new Trigger(() -> Util.checkPOVDown(operator)).onTrue(elevatorDown);
+    new Trigger(() -> elevatorSubsystem.checkJoystickControl(driver, true)) .whileTrue(manualElevatorUp);
+    new Trigger(() -> elevatorSubsystem.checkJoystickControl(driver, false)).whileTrue(manualElevatorDown);
+
+    //new JoystickButton(operator, Button.kR1.value).whileTrue(new CoralPoop(poopSubsystem));
 
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,

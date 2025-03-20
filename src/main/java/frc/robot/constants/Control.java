@@ -130,16 +130,18 @@ public class Control {
 
     public class elevator {
         public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
+        public static final double GEAR_RATIO = 9.0;
+        public static final double METERS_PER_ROTATION = Units.inchesToMeters(11);
 
-        public static final double kConversionFactor = 0.01552; 
+        public static final double kConversionFactor = GEAR_RATIO / METERS_PER_ROTATION; 
         public static final double kOffset = Units.inchesToMeters(5.75); //TODO find better (m.) (original height off ground)
         public static final double kDownLimit = Units.inchesToMeters(6);
         public static final double kUpLimit = Units.inchesToMeters(52); //TODO find
         public static final double kAllowedError = Units.inchesToMeters(1); //TODO tune
         public static final double kIntakeOffset = Units.inchesToMeters(5); //TODO find
 
-        public static final double kMaxVelocity = 6.07, //TODO tune (m/s)
-                                   kMaxAcceleration = 10; //TODO tune (m/s^2)
+        public static final double kMaxVelocity = Units.inchesToMeters(38), //TODO tune (m/s)
+                                   kMaxAcceleration = Units.inchesToMeters(76); //TODO tune (m/s^2)
 
         public static final double kNeutral = Units.inchesToMeters(7.5); //TODO tune
         public static final double kCoralStation = Units.inchesToMeters(28); //TODO find
@@ -150,15 +152,17 @@ public class Control {
         public static final double kL3 = FieldElements.ReefHeight.L3.height + Units.inchesToMeters(1); //TODO tune
         public static final double kL4 = FieldElements.ReefHeight.L4.height + Units.inchesToMeters(1); //TODO tune 
 
+        public static final double kElevatorDriverDeadband = 0.3;
 
-        public static final double kP = 50, //TODO tune
+
+        public static final double kP = 0.01, //TODO tune
                                    kI = 0, //TODO tune
                                    kD = 0; //TODO tune
         
         public static final double kS = 0.14,
                                    kG = 0.31,
                                    kV = 11.97,
-                                   kA = 0.0; //0.03 actual
+                                   kA = 0.03; 
         /*public static final double kS = 0.12, //TODO tune
                                    kG = 6.01, //TODO adjust
                                    kV = 2.05, //TODO adjust

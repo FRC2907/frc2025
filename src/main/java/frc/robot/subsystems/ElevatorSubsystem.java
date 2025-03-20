@@ -12,10 +12,12 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.Ports;
+import frc.robot.util.Util;
 import frc.robot.constants.Control;
 
 public class ElevatorSubsystem extends SubsystemBase {
@@ -95,6 +97,13 @@ public class ElevatorSubsystem extends SubsystemBase {
       });
   }
 
+  public Command coralStationCommand(){
+    return runOnce(
+      () -> {
+        coralStation();;
+      });
+  }
+
   private void elevatorSwitch(){
     if (index == 0){ neutral();; }
     if (index == 1){ L1();; }
@@ -128,8 +137,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     double pidCalculation = pidController.calculate(motor.getEncoder().getPosition(), setpoint);
     //motor.getClosedLoopController().setReference(setPoint, ControlType.kMAXMotionPositionControl);
     motor.setVoltage(
-      pidCalculation
-    //+ feedforwardCalculation
+      //pidCalculation
+    + feedforwardCalculation
     );
 
     SmartDashboard.putNumber("setpoint", setpoint);
@@ -143,5 +152,15 @@ public class ElevatorSubsystem extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
+  }
+
+  public boolean checkJoystickControl(PS5Controller input, boolean up){
+    double deadband = Control.elevator.kElevatorDriverDeadband;
+    if (Util.checkDriverDeadband(input)){
+      if (input.getLeftY() > (up ? deadband : - deadband)){
+        return true;
+      }
+    }
+    return false;
   }
 }

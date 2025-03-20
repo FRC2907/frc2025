@@ -7,7 +7,6 @@ package frc.robot.subsystems;
 import com.revrobotics.ColorSensorV3;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -103,6 +102,9 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     shootSetpoint = velRPM;
   }
 
+  public void poop(){
+    shootSetSetpoint(Control.algaeManipulator.kIntakeSpeed);
+  }
   public void stow(){
     armSetSetpoint(Control.algaeManipulator.kStowAngle);
     shootSetSetpoint(Control.algaeManipulator.kStopSpeed);
@@ -163,10 +165,24 @@ public class AlgaeClawSubsystem extends SubsystemBase {
         });
   }
 
-  public Command intakeAlgae(){
+  public Command intakeAlgaePrep(){
     return runOnce(
       () -> {
         intakeAngle();
+      }
+    );
+  }
+  public Command intakeAlgae(){
+    return runOnce(
+      () -> {
+        intake();
+      }
+    );
+  }
+  public Command poopAlgae(){
+    return runOnce(
+      () -> {
+        poop();
       }
     );
   }
