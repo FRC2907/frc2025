@@ -165,28 +165,6 @@ public class AlgaeClawSubsystem extends SubsystemBase {
         });
   }
 
-  public Command intakeAlgaePrep(){
-    return runOnce(
-      () -> {
-        intakeAngle();
-      }
-    );
-  }
-  public Command intakeAlgae(){
-    return runOnce(
-      () -> {
-        intake();
-      }
-    );
-  }
-  public Command poopAlgae(){
-    return runOnce(
-      () -> {
-        poop();
-      }
-    );
-  }
-
   /**
    * An example method querying a boolean state of the subsystem (for example, a digital sensor).
    *

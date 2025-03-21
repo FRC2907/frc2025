@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import frc.robot.commands.algaePoop.AlgaePoop;
+import frc.robot.commands.algaePoop.IntakeAlgaePrep;
 import frc.robot.commands.algaeShoot.ShootRelease;
 import frc.robot.commands.algaeShoot.ShootSpinUp;
 import frc.robot.commands.coral.CoralPoop;
@@ -48,7 +50,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
 
   private final DriveSubsystem driveSubsystem;
-  //private final PoopSubsystem poopSubsystem;
+  private final PoopSubsystem poopSubsystem;
   private final AlgaeClawSubsystem algaeClawSubsystem;
   private final ElevatorSubsystem elevatorSubsystem;
 
@@ -70,7 +72,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     driveSubsystem = DriveSubsystem.getInstance();
-    //poopSubsystem = PoopSubsystem.getInstance();
+    poopSubsystem = PoopSubsystem.getInstance();
     algaeClawSubsystem = AlgaeClawSubsystem.getInstance();
     elevatorSubsystem = ElevatorSubsystem.getInstance();
     
@@ -148,8 +150,8 @@ public class RobotContainer {
     /*
      * ALL OPERATOR BINDINGS
      */
-    new JoystickButton(operator, Button.kL1.value).onTrue(algaeClawSubsystem.poopAlgae());
-    new JoystickButton(operator, Button.kCross.value).onTrue(algaeClawSubsystem.intakeAlgaePrep());
+    new JoystickButton(operator, Button.kL1.value).onTrue(new AlgaePoop(algaeClawSubsystem));
+    new JoystickButton(operator, Button.kCross.value).onTrue(new IntakeAlgaePrep(algaeClawSubsystem));
     new JoystickButton(operator, Button.kCircle.value).onTrue(new ProcessorPrep(algaeClawSubsystem, elevatorSubsystem));
     new JoystickButton(operator, Button.kR2.value).onTrue(new ShootSpinUp(algaeClawSubsystem));
     new JoystickButton(operator, Button.kSquare.value).onTrue(new ShootRelease(algaeClawSubsystem));
@@ -162,6 +164,10 @@ public class RobotContainer {
     new Trigger(() -> elevatorSubsystem.checkJoystickControl(driver, false)).whileTrue(manualElevatorDown);
 
     //new JoystickButton(operator, Button.kR1.value).whileTrue(new CoralPoop(poopSubsystem));
+
+
+    new JoystickButton(operator, Button.kPS.value).onTrue(
+      new InstantCommand(() -> {}, algaeClawSubsystem, elevatorSubsystem, poopSubsystem));
 
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
