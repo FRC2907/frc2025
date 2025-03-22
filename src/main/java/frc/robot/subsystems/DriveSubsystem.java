@@ -147,6 +147,8 @@ public class DriveSubsystem extends SubsystemBase {
     frontRightSpeed = 0;
     rearLeftSpeed = 0;
     rearRightSpeed = 0;
+
+    driveMotors(frontLeftSpeed, frontRightSpeed, rearLeftSpeed, rearRightSpeed);
   }
   public void resetGyro(){
     gyro.reset();
@@ -161,10 +163,10 @@ public class DriveSubsystem extends SubsystemBase {
     );
     wheelSpeeds.desaturate(Control.drivetrain.kMaxVelMPS);
 
-    frontLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontLeftMetersPerSecond, wheelDiameter);
-    frontRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontRightMetersPerSecond, wheelDiameter);
-    rearLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearLeftMetersPerSecond, wheelDiameter);
-    rearRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearRightMetersPerSecond, wheelDiameter);
+    double frontLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontLeftMetersPerSecond, wheelDiameter);
+    double frontRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontRightMetersPerSecond, wheelDiameter);
+    double rearLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearLeftMetersPerSecond, wheelDiameter);
+    double rearRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearRightMetersPerSecond, wheelDiameter);
 
     if (Math.abs(xSpeed) < 2.8 && Math.abs(ySpeed) > 3.5){
       frontRightSpeed = - frontLeftSpeed;
@@ -175,16 +177,20 @@ public class DriveSubsystem extends SubsystemBase {
       frontRightSpeed = frontLeftSpeed;
       rearLeftSpeed = rearRightSpeed;
     }
+
+    driveMotors(frontLeftSpeed, frontRightSpeed, rearLeftSpeed, rearRightSpeed);
   }
 
   public void drive(ChassisSpeeds chassisSpeeds){
     MecanumDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(chassisSpeeds);
     wheelSpeeds.desaturate(Control.drivetrain.kMaxVelMPS);
 
-    frontLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontLeftMetersPerSecond, wheelDiameter);
-    frontRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontRightMetersPerSecond, wheelDiameter);
-    rearLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearLeftMetersPerSecond, wheelDiameter);
-    rearRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearRightMetersPerSecond, wheelDiameter);
+    double frontLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontLeftMetersPerSecond, wheelDiameter);
+    double frontRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontRightMetersPerSecond, wheelDiameter);
+    double rearLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearLeftMetersPerSecond, wheelDiameter);
+    double rearRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearRightMetersPerSecond, wheelDiameter);
+
+    driveMotors(frontLeftSpeed, frontRightSpeed, rearLeftSpeed, rearRightSpeed);
   }
 
   public void lockDrive(double xSpeed, double ySpeed, Pose2d point, boolean limelightLock){
@@ -297,6 +303,20 @@ public class DriveSubsystem extends SubsystemBase {
       this);
   }
 
+  private void driveMotors(double frontLeftSpeed, double frontRightSpeed, double rearLeftSpeed, double rearRightSpeed){
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "flSetPoint", frontLeftSpeed);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "frSetPoint", frontRightSpeed);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "rlSetPoint", rearLeftSpeed);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "rrSetPoint", rearRightSpeed);
+
+    frontLeftMotor .getClosedLoopController().setReference(frontLeftSpeed,  ControlType.kMAXMotionVelocityControl);
+    frontRightMotor.getClosedLoopController().setReference(frontRightSpeed, ControlType.kMAXMotionVelocityControl);
+    rearLeftMotor  .getClosedLoopController().setReference(rearLeftSpeed,   ControlType.kMAXMotionVelocityControl);
+    rearRightMotor .getClosedLoopController().setReference(rearRightSpeed,  ControlType.kMAXMotionVelocityControl);
+  }
+
+  private static String SUBSYSTEM_NAME = "Drive: ";
+
 
   @Override
   public void periodic() {
@@ -312,28 +332,21 @@ public class DriveSubsystem extends SubsystemBase {
                                          VecBuilder.fill(0.7, 0.7, 0.7));
     }
 
-    frontLeftMotor .getClosedLoopController().setReference(frontLeftSpeed,  ControlType.kMAXMotionVelocityControl);
-    frontRightMotor.getClosedLoopController().setReference(frontRightSpeed, ControlType.kMAXMotionVelocityControl);
-    rearLeftMotor  .getClosedLoopController().setReference(rearLeftSpeed,   ControlType.kMAXMotionVelocityControl);
-    rearRightMotor .getClosedLoopController().setReference(rearRightSpeed,  ControlType.kMAXMotionVelocityControl);
 
     field.setRobotPose(poseEstimator.getEstimatedPosition());
 
-    SmartDashboard.putNumber("flVel", frontLeftEnc.getVelocity());
-    SmartDashboard.putNumber("flVel", frontRightEnc.getVelocity());
-    SmartDashboard.putNumber("rlVel", rearLeftEnc.getVelocity());
-    SmartDashboard.putNumber("rrVel", rearRightEnc.getVelocity());
-    SmartDashboard.putNumber("flPosition", Util.revolutionsToMeters(frontLeftEnc.getPosition() / 5.95, wheelDiameter));
-    SmartDashboard.putNumber("frPosition", Util.revolutionsToMeters(frontRightEnc.getPosition() / 5.95, wheelDiameter));
-    SmartDashboard.putNumber("rlPosition", Util.revolutionsToMeters(rearLeftEnc.getPosition() / 5.95, wheelDiameter));
-    SmartDashboard.putNumber("rrPosition", Util.revolutionsToMeters(rearRightEnc.getPosition() / 5.95, wheelDiameter));
-    SmartDashboard.putNumber("PoseX", poseEstimator.getEstimatedPosition().getX());
-    SmartDashboard.putNumber("PoseY", poseEstimator.getEstimatedPosition().getY());
-    SmartDashboard.putNumber("flSetPoint", frontLeftSpeed);
-    SmartDashboard.putNumber("frSetPoint", frontRightSpeed);
-    SmartDashboard.putNumber("rlSetPoint", rearLeftSpeed);
-    SmartDashboard.putNumber("rrSetPoint", rearRightSpeed);
-    SmartDashboard.putNumber("heading", getHeadingDeg());
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "flVel", frontLeftEnc.getVelocity());
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "flVel", frontRightEnc.getVelocity());
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "rlVel", rearLeftEnc.getVelocity());
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "rrVel", rearRightEnc.getVelocity());
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "flPosition", Util.revolutionsToMeters(frontLeftEnc.getPosition() / 5.95, wheelDiameter));
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "frPosition", Util.revolutionsToMeters(frontRightEnc.getPosition() / 5.95, wheelDiameter));
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "rlPosition", Util.revolutionsToMeters(rearLeftEnc.getPosition() / 5.95, wheelDiameter));
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "rrPosition", Util.revolutionsToMeters(rearRightEnc.getPosition() / 5.95, wheelDiameter));
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "PoseX", poseEstimator.getEstimatedPosition().getX());
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "PoseY", poseEstimator.getEstimatedPosition().getY());
+
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "heading", getHeadingDeg());
     SmartDashboard.putData("field", field);
 
     //SmartDashboard.putNumber("index", currentPathIndex);

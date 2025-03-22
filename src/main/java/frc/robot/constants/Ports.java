@@ -11,19 +11,19 @@ public class Ports {
     }
 
     public class manipulator {
-        public static final int CORAL_SHOOTER = 14;
+        public static final int CORAL_SHOOTER = 12;
 
-        public static final int ALGAE_ARM = 2;
-        public static final int ALGAE_SHOOT_LEADER = 3;
-        public static final int ALGAE_SHOOT_FOLLOWER = 5;
+        public static final int ALGAE_ARM = 13;
+        public static final int ALGAE_SHOOT_LEADER = 14;
+        public static final int ALGAE_SHOOT_FOLLOWER = 15;
 
         public static final int TOF_SENSOR = 0;
         public static final Port COLOR_SENSOR = Port.kOnboard;
     }
 
     public class elevator {
-        public static final int LEADER = 6;
-        public static final int FOLLOWER = 7;
+        public static final int LEADER = 2;
+        public static final int FOLLOWER = 19;
     }
 
     public class HID {
