@@ -30,6 +30,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.PS5Controller.Button;
@@ -59,8 +60,6 @@ public class RobotContainer {
   private final ElevatorSubsystem elevatorSubsystem;
 
   private RunCommand drive, lockDrive;
-  private RunCommand elevatorUp, elevatorDown,
-                     manualElevatorUp, manualElevatorDown;
   
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -105,20 +104,15 @@ public class RobotContainer {
       () -> {
         //if (Util.checkDriverDeadband(driver)) 
           driveSubsystem.drive(
-            - yLimiter.calculate(driver.getLeftY()) * Control.drivetrain.kMaxVelMPS,
-            - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMPS,
-            - rotLimiter.calculate(driver.getRightX()) * Control.drivetrain.kMaxAngularVelRad, 
-            true);
+            - yLimiter.calculate(MathUtil.applyDeadband(driver.getLeftY(), 0.1)) * Control.drivetrain.kMaxVelMPS,
+            - xLimiter.calculate(MathUtil.applyDeadband(driver.getLeftX(), 0.1)) * Control.drivetrain.kMaxVelMPS,
+            - rotLimiter.calculate(MathUtil.applyDeadband(driver.getRightX(), 0.1)) * Control.drivetrain.kMaxAngularVelRad, 
+            false);
         /*else 
             driveSubsystem.stop(); */ }, 
             driveSubsystem
     );
     driveSubsystem.setDefaultCommand(drive);
-
-    elevatorUp = new RunCommand(elevatorSubsystem::up);
-    elevatorDown = new RunCommand(elevatorSubsystem::down);
-    manualElevatorUp = new RunCommand(elevatorSubsystem::manualUp, elevatorSubsystem);
-    manualElevatorDown = new RunCommand(elevatorSubsystem::manualDown, elevatorSubsystem);
 
     configureBindings();
 
@@ -143,9 +137,9 @@ public class RobotContainer {
     // new Trigger(() -> Util.checkDriverDeadband(driver)).whileTrue(
     //   drive.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
-    new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(new ReefLeft(driveSubsystem));
-    new Trigger(() -> Util.checkPOVRight(driver)).onTrue(new ReefRight(driveSubsystem));
-    new JoystickButton(driver, Button.kL2.value).onTrue(new ReefNearest(driveSubsystem));
+    //new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(new ReefLeft(driveSubsystem));
+    //new Trigger(() -> Util.checkPOVRight(driver)).onTrue(new ReefRight(driveSubsystem));
+    //new JoystickButton(driver, Button.kL2.value).onTrue(new ReefNearest(driveSubsystem));
     new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);
     // should create a do-nothing command that requires the driveSubsystem, causing existing commands using that system to be cancelled?
     new JoystickButton(driver, Button.kCircle.value).onTrue(new InstantCommand(() -> {}, driveSubsystem));
@@ -162,11 +156,11 @@ public class RobotContainer {
     new JoystickButton(operator, Button.kSquare.value).onTrue(new ShootRelease(algaeClawSubsystem));
     new JoystickButton(operator, Button.kL2.value).onTrue(new GrabAlgae(algaeClawSubsystem));/* */
 
-    new JoystickButton(operator, Button.kTriangle.value).onTrue(elevatorSubsystem.coralStationCommand());
-    new Trigger(() -> Util.checkPOVUp(operator)).onTrue(elevatorUp);
-    new Trigger(() -> Util.checkPOVDown(operator)).onTrue(elevatorDown);
-    new Trigger(() -> elevatorSubsystem.checkJoystickControl(driver, true)) .whileTrue(manualElevatorUp);
-    new Trigger(() -> elevatorSubsystem.checkJoystickControl(driver, false)).whileTrue(manualElevatorDown);
+    //new JoystickButton(operator, Button.kTriangle.value).onTrue(elevatorSubsystem.coralStationCommand());
+    //new Trigger(() -> Util.checkPOVUp(operator)).onTrue(elevatorSubsystem.up());
+    //new Trigger(() -> Util.checkPOVDown(operator)).onTrue(elevatorSubsystem.down());
+    new Trigger(() -> elevatorSubsystem.checkJoystickControl(operator, true)) .whileTrue(elevatorSubsystem.testUp());
+    new Trigger(() -> elevatorSubsystem.checkJoystickControl(operator, false)).whileTrue(elevatorSubsystem.testDown());
 
     //new JoystickButton(operator, Button.kR1.value).whileTrue(new CoralPoop(poopSubsystem));
 
@@ -187,9 +181,9 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     return driveSubsystem.runEnd(
-      () -> driveSubsystem.drive(-1.0 * Control.drivetrain.kMaxVelMPS, 0, 0, false),
+      () -> driveSubsystem.drive(-1.0 * Control.drivetrain.kMaxVelMPS / 6, 0, 0, false),
       () -> driveSubsystem.drive(0, 0, 0, false))
-      .withTimeout(1.0).alongWith(Commands.run(() -> System.out.println("Running")));
+      .withTimeout(1.0);
   }
 
   public void disabledPeriodic(){

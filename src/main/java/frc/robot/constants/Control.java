@@ -34,10 +34,10 @@ public class Control {
         public static final double kVelocityConversionFactor = kPositionConversionFactor / 60; //rpm to m/s
         public static final double kMaxAccelRPM = 4000; //revolutions per minute per second (acceleration)
         public static final double kMaxVelRPM = 4000; // revolutions per minute
-        public static final double kMaxAccelMPS = 25; // meters per second per second OR meters per second squared (m/s^2)
-        public static final double kMaxVelMPS = 25; // meters per second
-        public static final double kMaxAngularVelRad = 6.9 * Math.PI; // radians per second
-        public static final double kMaxAngularAccel = 9 * Math.PI; //radians per second per second OR radians per second squared
+        public static final double kMaxAccelMPS = 42; // meters per second per second OR meters per second squared (m/s^2)
+        public static final double kMaxVelMPS = 70; // meters per second
+        public static final double kMaxAngularVelRad = 14 * Math.PI; // radians per second
+        public static final double kMaxAngularAccel = 20 * Math.PI; //radians per second per second OR radians per second squared
         public static final double kAllowedError = 0.005;
         public static final double kRampRate = 0.1;
 
@@ -133,7 +133,7 @@ public class Control {
         public static final double GEAR_RATIO = 9.0;
         public static final double METERS_PER_ROTATION = Units.inchesToMeters(11);
 
-        public static final double kConversionFactor = GEAR_RATIO / METERS_PER_ROTATION; 
+        public static final double kConversionFactor = 1 / GEAR_RATIO / METERS_PER_ROTATION; 
         public static final double kOffset = Units.inchesToMeters(5.75); //TODO find better (m.) (original height off ground)
         public static final double kDownLimit = Units.inchesToMeters(6);
         public static final double kUpLimit = Units.inchesToMeters(52); //TODO find
@@ -159,10 +159,10 @@ public class Control {
                                    kI = 0, //TODO tune
                                    kD = 0; //TODO tune
         
-        public static final double kS = 0.14,
-                                   kG = 0.31,
-                                   kV = 11.97,
-                                   kA = 0.03; 
+        public static final double kS = 0.3,
+                                   kG = 0.2, //0.31
+                                   kV = 6.01, //11.97
+                                   kA = 0.00; //0.03 
         /*public static final double kS = 0.12, //TODO tune
                                    kG = 6.01, //TODO adjust
                                    kV = 2.05, //TODO adjust
