@@ -15,7 +15,6 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.Ports;
@@ -38,14 +37,12 @@ public class ElevatorSubsystem extends SubsystemBase {
     config.idleMode(IdleMode.kBrake)
           .inverted(true)
           .smartCurrentLimit(0, 40)
-          .softLimit.forwardSoftLimit(14.5)
+          .softLimit.forwardSoftLimit(1)
                     .forwardSoftLimitEnabled(true)
                     .reverseSoftLimit(0)
                     .reverseSoftLimitEnabled(true);
-    config.encoder.positionConversionFactor(Control.elevator.kConversionFactor);
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    config.apply(new SparkFlexConfig().follow(motor, true));
-    motorFollower.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    motorFollower.configure(config.follow(motor, true), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     motor.getEncoder().setPosition(0);
     motorFollower.getEncoder().setPosition(0);
@@ -58,6 +55,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                                               Control.elevator.kI, 
                                               Control.elevator.kD, 
                                               Control.elevator.kConstraints);
+    pidController.setTolerance(Control.elevator.kAllowedError);
     
     setpoint = 0;
     index = 0;
@@ -74,84 +72,65 @@ public class ElevatorSubsystem extends SubsystemBase {
 
 
 
-  public Command up(){
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          if (index < indexMax){ 
-          index++; 
-        }
-          elevatorSwitch();
-          System.out.println("working");
-        });
-  }
-  public Command down(){
-    return runOnce(
-        () -> {
-          if (index > 0){ index--; }
-          elevatorSwitch();
-        });
-  }
-  public Command manualUp(){
-    return run(
-      () -> {
-        setSetpoint(setpoint + Control.elevator.kManualControlFactor);
-        driveMotors(setpoint);
-      });
-  }
-  public Command manualDown(){
-    return run(
-      () -> {
-        setSetpoint(setpoint - Control.elevator.kManualControlFactor);
-        driveMotors(setpoint);
-      });
+  public void stop(){
+    motor.stopMotor();
   }
 
-  public Command coralStationCommand(){
-    return runOnce(
-      () -> {
-        coralStation();;
-        
-      });
+  public void addIndex(){
+    if (index < indexMax) index++;
+  }
+  public void subtractIndex(){
+    if (index > 0) index--;
   }
 
   public RunCommand testDown(){
-    return new RunCommand(() -> motor.set(0.1), this);
+    return new RunCommand(() -> motor.setVoltage(0.05), this);
   }
   public RunCommand testUp(){
-    return new RunCommand(() -> motor.set(-0.1), this);
+    return new RunCommand(() -> motor.setVoltage(-0.05), this);
   }
 
-  private void elevatorSwitch(){
-    if (index == 0){ neutral();; driveMotors(setpoint); }
-    if (index == 1){ L1();; driveMotors(setpoint); }
-    if (index == 2){ L2();; driveMotors(setpoint); }
-    if (index == 3){ L3();; driveMotors(setpoint); }
+  public void elevatorRun(){
+    if (index == 0){ driveMotors(neutral()); }
+    if (index == 1){ driveMotors(L1()); }
+    if (index == 2){ driveMotors(L2()); }
+    if (index == 3){ driveMotors(L3()); }
   }
 
-  public void ground()      { setSetpoint(Control.elevator.kDownLimit); }
-  public void neutral()     { setSetpoint(Control.elevator.kNeutral); }
-  public void processor()   { setSetpoint(Control.elevator.kProcessor); }
-  public void coralStation(){ setSetpoint(Control.elevator.kCoralStation); }
-  public void L1()          { setSetpoint(Control.elevator.kL1); }
-  public void L2()          { setSetpoint(Control.elevator.kL2); }
-  public void L3()          { setSetpoint(Control.elevator.kL3); }
+  public double ground()      { setSetpoint(Control.elevator.kDownLimit);
+                                return Control.elevator.kDownLimit; }
+  public double neutral()     { setSetpoint(Control.elevator.kNeutral);
+                                return Control.elevator.kNeutral; }
+  public double processor()   { setSetpoint(Control.elevator.kProcessor);
+                                return Control.elevator.kProcessor; }
+  public double coralStation(){ setSetpoint(Control.elevator.kCoralStation);
+                                return Control.elevator.kCoralStation; }
+  public double L1()          { setSetpoint(Control.elevator.kL1);
+                                return Control.elevator.kL1; }
+  public double L2()          { setSetpoint(Control.elevator.kL2);
+                                return Control.elevator.kL2; }
+  public double L3()          { setSetpoint(Control.elevator.kL3);
+                                return Control.elevator.kL3; }
+  public double manualUp()    { setSetpoint(setpoint + Control.elevator.kManualControlFactor);
+                                return setpoint; }
+  public double manualDown()  { setSetpoint(setpoint - Control.elevator.kManualControlFactor);
+                                return setpoint; }
+
 
 
   public void setSetpoint(double setpoint){
     this.setpoint = setpoint;
   }
   public boolean atSetpoint() {
-    return Math.abs(motor.getEncoder().getPosition() - setpoint) < Control.elevator.kAllowedError;
+    return pidController.atGoal();
   }
   public double getHeight(){
-    return motor.getEncoder().getPosition();
+    return motor.getEncoder().getPosition() * Control.elevator.kConversionFactor;
   }
 
   private static String subsystem = "Elevator: ";
 
-  private void driveMotors(double setpoint){
+  public void driveMotors(double setpoint){
     setpoint = Util.clamp(0, setpoint, Units.inchesToMeters(24));
     double feedforwardCalculation = feedforward.calculate(motor.getEncoder().getPosition() - setpoint * 1);
     double pidCalculation = pidController.calculate(

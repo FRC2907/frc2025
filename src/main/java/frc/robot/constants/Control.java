@@ -133,20 +133,20 @@ public class Control {
         public static final double GEAR_RATIO = 9.0;
         public static final double METERS_PER_ROTATION = Units.inchesToMeters(11);
 
-        public static final double kConversionFactor = 1 / GEAR_RATIO / METERS_PER_ROTATION; 
+        public static final double kConversionFactor = GEAR_RATIO / METERS_PER_ROTATION; 
         public static final double kOffset = Units.inchesToMeters(5.75); //TODO find better (m.) (original height off ground)
-        public static final double kDownLimit = Units.inchesToMeters(6);
+        public static final double kDownLimit = Units.inchesToMeters(0);
         public static final double kUpLimit = Units.inchesToMeters(52); //TODO find
         public static final double kAllowedError = Units.inchesToMeters(1); //TODO tune
         public static final double kIntakeOffset = Units.inchesToMeters(5); //TODO find
 
-        public static final double kMaxVelocity = Units.inchesToMeters(38), //TODO tune (m/s)
-                                   kMaxAcceleration = Units.inchesToMeters(76); //TODO tune (m/s^2)
+        public static final double kMaxVelocity = Units.inchesToMeters(3), //TODO tune (m/s) (38)
+                                   kMaxAcceleration = Units.inchesToMeters(6); //TODO tune (m/s^2) (76)
 
         public static final double kNeutral = Units.inchesToMeters(7.5); //TODO tune
         public static final double kCoralStation = Units.inchesToMeters(28); //TODO find
         public static final double kProcessor = Units.inchesToMeters(10); //TODO find
-        public static final double kManualControlFactor = Units.inchesToMeters(3); //TODO tune
+        public static final double kManualControlFactor = Units.inchesToMeters(1); //TODO tune
         public static final double kL1 = FieldElements.ReefHeight.L1.height + Units.inchesToMeters(1); //TODO tune
         public static final double kL2 = FieldElements.ReefHeight.L2.height + Units.inchesToMeters(1); //TODO tune
         public static final double kL3 = FieldElements.ReefHeight.L3.height + Units.inchesToMeters(1); //TODO tune
@@ -159,8 +159,8 @@ public class Control {
                                    kI = 0, //TODO tune
                                    kD = 0; //TODO tune
         
-        public static final double kS = 0.3,
-                                   kG = 0.2, //0.31
+        public static final double kS = 0.5,
+                                   kG = 0.45, //0.31
                                    kV = 6.01, //11.97
                                    kA = 0.00; //0.03 
         /*public static final double kS = 0.12, //TODO tune

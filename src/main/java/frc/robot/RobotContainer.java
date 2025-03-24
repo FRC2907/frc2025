@@ -15,6 +15,8 @@ import frc.robot.commands.coral.CoralPoop;
 import frc.robot.commands.drive.ReefLeft;
 import frc.robot.commands.drive.ReefNearest;
 import frc.robot.commands.drive.ReefRight;
+import frc.robot.commands.elevator.ElevatorDown;
+import frc.robot.commands.elevator.CoralStation;
 import frc.robot.commands.grabAlgae.GrabAlgae;
 import frc.robot.commands.processor.ProcessorPrep;
 import frc.robot.constants.Control;
@@ -156,9 +158,9 @@ public class RobotContainer {
     new JoystickButton(operator, Button.kSquare.value).onTrue(new ShootRelease(algaeClawSubsystem));
     new JoystickButton(operator, Button.kL2.value).onTrue(new GrabAlgae(algaeClawSubsystem));/* */
 
-    //new JoystickButton(operator, Button.kTriangle.value).onTrue(elevatorSubsystem.coralStationCommand());
-    //new Trigger(() -> Util.checkPOVUp(operator)).onTrue(elevatorSubsystem.up());
-    //new Trigger(() -> Util.checkPOVDown(operator)).onTrue(elevatorSubsystem.down());
+    new JoystickButton(operator, Button.kTriangle.value).onTrue(new CoralStation(elevatorSubsystem));
+    new Trigger(() -> Util.checkPOVUp(operator)).onTrue(new CoralStation(elevatorSubsystem));
+    new Trigger(() -> Util.checkPOVDown(operator)).onTrue(new ElevatorDown(elevatorSubsystem));
     new Trigger(() -> elevatorSubsystem.checkJoystickControl(operator, true)) .whileTrue(elevatorSubsystem.testUp());
     new Trigger(() -> elevatorSubsystem.checkJoystickControl(operator, false)).whileTrue(elevatorSubsystem.testDown());
 
