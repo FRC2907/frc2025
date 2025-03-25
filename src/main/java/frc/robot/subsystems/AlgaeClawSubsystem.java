@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.revrobotics.ColorSensorV3;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -27,8 +28,8 @@ import frc.robot.util.Util;
 
 public class AlgaeClawSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
-  private SparkMax arm,
-                   shoot, shootFollower;
+  private static SparkMax arm,
+                          shoot, shootFollower;
   private SparkMaxConfig armConfig, shootConfig;
   private static double armSetpoint, shootSetpoint;
   private static ColorSensorV3 colorSensor;
@@ -49,7 +50,6 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     armConfig.closedLoop.maxMotion.maxAcceleration(2)
                                   .maxVelocity(2)
                                   .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal);
-    armConfig.encoder.positionConversionFactor(Control.algaeManipulator.kArmConversionFactor);
     arm.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     arm.getEncoder().setPosition(0);
 
@@ -94,6 +94,11 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   }
 
 
+  public static void stop(){
+    arm.stopMotor();
+    shoot.stopMotor();
+    shootFollower.stopMotor();
+  }
 
   private static void armSetSetpoint(double angle){
     armSetpoint = angle;
@@ -104,44 +109,62 @@ public class AlgaeClawSubsystem extends SubsystemBase {
 
   public void poop(){
     shootSetSetpoint(Control.algaeManipulator.kIntakeSpeed);
+    driveShoot(shootSetpoint);
   }
   public void stow(){
     armSetSetpoint(Control.algaeManipulator.kStowAngle);
     shootSetSetpoint(Control.algaeManipulator.kStopSpeed);
+    driveArm(armSetpoint);
+    driveShoot(shootSetpoint);
   }
   public void intakeAngle(){
     armSetSetpoint(Control.algaeManipulator.kIntakeAngle);
+    driveArm(armSetpoint);
   }
   public void intake(){
     armSetSetpoint(Control.algaeManipulator.kIntakeAngle);
     shootSetSetpoint(Control.algaeManipulator.kIntakeSpeed);
+    driveArm(armSetpoint);
+    driveShoot(shootSetpoint);
   }
   public void processorAngle(){
     armSetSetpoint(Control.algaeManipulator.kProcessorAngle);
+    driveArm(armSetpoint);
   }
   public void processor(){
     armSetSetpoint(Control.algaeManipulator.kProcessorAngle);
     shootSetSetpoint(Control.algaeManipulator.kIntakeSpeed);
+    driveArm(armSetpoint);
+    driveShoot(shootSetpoint);
   }
   public void fixedShoot(){
     armSetSetpoint(Control.algaeManipulator.kFixedShootAngle);
     shootSetSetpoint(Control.algaeManipulator.kFixedShootSpeed);;
+    driveArm(armSetpoint);
+    driveShoot(shootSetpoint);
   }
   public void grab(){
     armSetSetpoint(Control.algaeManipulator.kGrabAngle);
     shootSetSetpoint(Control.algaeManipulator.kGrabSpeed);
+    driveArm(armSetpoint);
+    driveShoot(shootSetpoint);
   }
   public void grabGround(){
     armSetSetpoint(Control.algaeManipulator.kGroundGrabAngle);
     shootSetSetpoint(Control.algaeManipulator.kGrabSpeed);
+    driveArm(armSetpoint);
+    driveShoot(shootSetpoint);
   }
   public void shootSpinUp(){
     armSetSetpoint(Control.algaeManipulator.kStowAngle);
     shootSetSetpoint(calculateSpeed(DriveSubsystem.getInstance().getPose2d(),
                                     ElevatorSubsystem.getInstance().getHeight()));
+    driveArm(armSetpoint);
+    driveShoot(shootSetpoint);
   }
   public void shootRelease(){
     armSetSetpoint(Control.algaeManipulator.kFixedShootAngle);
+    driveArm(armSetpoint);
   }
 
   private double calculateSpeed(Pose2d point, double height){
@@ -180,25 +203,29 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     return shoot.getEncoder().getVelocity() - shootSetpoint < Control.algaeManipulator.kAllowedShootError;
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+  private void driveArm(double setpoint){
+    setpoint = setpoint * Control.algaeManipulator.kArmConversionFactor;
     double pidCalculation = pidController.calculate(arm.getEncoder().getPosition(), armSetpoint);
     double feedforwardCalculation = feedforward.calculate(
       pidController.getSetpoint().position, pidController.getSetpoint().velocity);
-    /*arm.getClosedLoopController().setReference(armSetPoint, ControlType.kMAXMotionPositionControl);
     arm.setVoltage(
-      //feedforwardCalculation + 
+      feedforwardCalculation + 
       pidCalculation
     );
-    shoot.getClosedLoopController().setReference(shootSetpoint, ControlType.kMAXMotionVelocityControl);*/
 
-    arm.setVoltage(0.2);
+    SmartDashboard.putNumber("feedforwardCalculation", feedforwardCalculation);
+    SmartDashboard.putNumber("pidCalculation", pidCalculation);
+  }
+  public void driveShoot(double setpoint){
+    shoot.getClosedLoopController().setReference(shootSetpoint, ControlType.kMAXMotionVelocityControl);
+  }
+
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
 
     SmartDashboard.putBoolean("algae", hasAlgae());
     SmartDashboard.putNumber("setpoint", armSetpoint);
-    SmartDashboard.putNumber("feedforwardCalculation", feedforwardCalculation);
-    SmartDashboard.putNumber("pidCalculation", pidCalculation);
     SmartDashboard.putNumber("position", arm.getEncoder().getPosition());
     SmartDashboard.putNumber("pidSetpoint", pidController.getSetpoint().position);
     SmartDashboard.putNumber("goal", pidController.getGoal().position);

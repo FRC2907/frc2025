@@ -15,6 +15,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.Ports;
@@ -74,10 +75,12 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public void stop(){
     motor.stopMotor();
+    setpoint = getHeight();
   }
 
   public void addIndex(){
     if (index < indexMax) index++;
+    System.out.println("called");
   }
   public void subtractIndex(){
     if (index > 0) index--;
@@ -88,6 +91,9 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
   public RunCommand testUp(){
     return new RunCommand(() -> motor.setVoltage(-0.05), this);
+  }
+  public Command moreTest(){
+    return runOnce(() -> driveMotors(Units.inchesToMeters(1)));
   }
 
   public void elevatorRun(){
@@ -134,10 +140,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     setpoint = Util.clamp(0, setpoint, Units.inchesToMeters(24));
     double feedforwardCalculation = feedforward.calculate(motor.getEncoder().getPosition() - setpoint * 1);
     double pidCalculation = pidController.calculate(
-      motor.getEncoder().getPosition(), setpoint);
+      motor.getEncoder().getPosition() * Control.elevator.kConversionFactor, setpoint);
     if (Math.abs(feedforwardCalculation) < 0.1) feedforwardCalculation = 0;    
     motor.setVoltage(
-      pidCalculation
+      Util.clamp(0, pidCalculation, 1)
     //+ 
     //feedforwardCalculation
     );
@@ -157,7 +163,7 @@ public class ElevatorSubsystem extends SubsystemBase {
       //pidCalculation
     + feedforwardCalculation
     );*/
-    if (!(testUp().isScheduled() && testDown().isScheduled())){
+    if (this.getCurrentCommand() == null){
       motor.stopMotor();
     }
 
@@ -165,6 +171,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     SmartDashboard.putNumber(subsystem + "pidSetpoint", pidController.getSetpoint().position);
     SmartDashboard.putNumber(subsystem + "goal", pidController.getGoal().position);
     SmartDashboard.putNumber(subsystem + "index", index);
+    SmartDashboard.putNumber("L1", Control.elevator.kL1);
+    SmartDashboard.putNumber("L2", Control.elevator.kL2);
+    SmartDashboard.putNumber("L3", Control.elevator.kL3);
   }
 
   @Override

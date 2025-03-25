@@ -16,6 +16,7 @@ import frc.robot.commands.drive.ReefLeft;
 import frc.robot.commands.drive.ReefNearest;
 import frc.robot.commands.drive.ReefRight;
 import frc.robot.commands.elevator.ElevatorDown;
+import frc.robot.commands.elevator.ElevatorUp;
 import frc.robot.commands.elevator.CoralStation;
 import frc.robot.commands.grabAlgae.GrabAlgae;
 import frc.robot.commands.processor.ProcessorPrep;
@@ -62,7 +63,6 @@ public class RobotContainer {
   private final ElevatorSubsystem elevatorSubsystem;
 
   private RunCommand drive, lockDrive;
-  
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   public final PS5Controller driver = new PS5Controller(Ports.HID.DRIVER);
@@ -159,8 +159,10 @@ public class RobotContainer {
     new JoystickButton(operator, Button.kL2.value).onTrue(new GrabAlgae(algaeClawSubsystem));/* */
 
     new JoystickButton(operator, Button.kTriangle.value).onTrue(new CoralStation(elevatorSubsystem));
-    new Trigger(() -> Util.checkPOVUp(operator)).onTrue(new CoralStation(elevatorSubsystem));
-    new Trigger(() -> Util.checkPOVDown(operator)).onTrue(new ElevatorDown(elevatorSubsystem));
+    new Trigger(() -> Util.checkPOVUp(operator)).toggleOnTrue(
+      new ElevatorUp(elevatorSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
+    new Trigger(() -> Util.checkPOVDown(operator)).toggleOnTrue(
+      new ElevatorDown(elevatorSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
     new Trigger(() -> elevatorSubsystem.checkJoystickControl(operator, true)) .whileTrue(elevatorSubsystem.testUp());
     new Trigger(() -> elevatorSubsystem.checkJoystickControl(operator, false)).whileTrue(elevatorSubsystem.testDown());
 
