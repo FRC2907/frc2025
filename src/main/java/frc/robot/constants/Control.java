@@ -135,8 +135,10 @@ public class Control {
 
         public static final double kConversionFactor = GEAR_RATIO / METERS_PER_ROTATION; 
         public static final double kOffset = Units.inchesToMeters(5.75); //TODO find better (m.) (original height off ground)
+        public static final double kMinVoltage = 0; //TODO find
+        public static final double kMaxVoltage = 1; //TODO find
         public static final double kDownLimit = Units.inchesToMeters(0);
-        public static final double kUpLimit = Units.inchesToMeters(52); //TODO find
+        public static final double kUpLimit = Units.inchesToMeters(50); //TODO find
         public static final double kAllowedError = Units.inchesToMeters(1); //TODO tune
         public static final double kIntakeOffset = Units.inchesToMeters(5); //TODO find
 

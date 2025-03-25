@@ -134,23 +134,21 @@ public class ElevatorSubsystem extends SubsystemBase {
     return motor.getEncoder().getPosition() * Control.elevator.kConversionFactor;
   }
 
-  private static String subsystem = "Elevator: ";
+  private static String SUBSYSTEM_NAME = "Elevator: ";
 
   public void driveMotors(double setpoint){
-    setpoint = Util.clamp(0, setpoint, Units.inchesToMeters(24));
+    setpoint = Util.clamp(Control.elevator.kDownLimit, setpoint, Units.inchesToMeters(40));
     double feedforwardCalculation = feedforward.calculate(motor.getEncoder().getPosition() - setpoint * 1);
     double pidCalculation = pidController.calculate(
       motor.getEncoder().getPosition() * Control.elevator.kConversionFactor, setpoint);
     if (Math.abs(feedforwardCalculation) < 0.1) feedforwardCalculation = 0;    
     motor.setVoltage(
-      Util.clamp(0, pidCalculation, 1)
-    //+ 
-    //feedforwardCalculation
+      Util.clamp(Control.elevator.kMinVoltage, pidCalculation, Control.elevator.kMaxVoltage)
     );
 
-    SmartDashboard.putNumber(subsystem + "feedforwardCalculation", feedforwardCalculation);
-    SmartDashboard.putNumber(subsystem + "pidCalculation", pidCalculation);
-    SmartDashboard.putNumber(subsystem + "setpoint", setpoint);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "feedforwardCalculation", feedforwardCalculation);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "pidCalculation", pidCalculation);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "setpoint", setpoint);
   }
   @Override
   public void periodic() {
@@ -167,10 +165,10 @@ public class ElevatorSubsystem extends SubsystemBase {
       motor.stopMotor();
     }
 
-    SmartDashboard.putNumber(subsystem + "position", motor.getEncoder().getPosition());
-    SmartDashboard.putNumber(subsystem + "pidSetpoint", pidController.getSetpoint().position);
-    SmartDashboard.putNumber(subsystem + "goal", pidController.getGoal().position);
-    SmartDashboard.putNumber(subsystem + "index", index);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "position", motor.getEncoder().getPosition());
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "pidSetpoint", pidController.getSetpoint().position);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "goal", pidController.getGoal().position);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "index", index);
     SmartDashboard.putNumber("L1", Control.elevator.kL1);
     SmartDashboard.putNumber("L2", Control.elevator.kL2);
     SmartDashboard.putNumber("L3", Control.elevator.kL3);
