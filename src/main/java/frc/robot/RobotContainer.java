@@ -40,7 +40,6 @@ import edu.wpi.first.wpilibj.PS5Controller.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
@@ -104,14 +103,11 @@ public class RobotContainer {
 
     drive = new RunCommand(
       () -> {
-        //if (Util.checkDriverDeadband(driver)) 
           driveSubsystem.drive(
             - yLimiter.calculate(MathUtil.applyDeadband(driver.getLeftY(), 0.1)) * Control.drivetrain.kMaxVelMPS,
             - xLimiter.calculate(MathUtil.applyDeadband(driver.getLeftX(), 0.1)) * Control.drivetrain.kMaxVelMPS,
             - rotLimiter.calculate(MathUtil.applyDeadband(driver.getRightX(), 0.1)) * Control.drivetrain.kMaxAngularVelRad, 
-            false);
-        /*else 
-            driveSubsystem.stop(); */ }, 
+            false); }, 
             driveSubsystem
     );
     driveSubsystem.setDefaultCommand(drive);
