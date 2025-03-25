@@ -7,13 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Barge-L1"
+            "pathName": "Left-2R"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "2-R"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "L2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Coral Poop"
           }
         }
       ]

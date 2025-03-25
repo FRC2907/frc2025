@@ -3,7 +3,10 @@
   "robotLength": 1.02235,
   "holonomicMode": true,
   "pathFolders": [
+    "Algae",
+    "Drive",
     "KitBot",
+    "Coral Station",
     "Reef Face 1",
     "Reef Face 2",
     "Reef Face 3",
