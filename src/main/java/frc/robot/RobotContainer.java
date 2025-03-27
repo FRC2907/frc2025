@@ -4,30 +4,9 @@
 
 package frc.robot;
 
-import frc.robot.commands.algaePoop.AlgaePoop;
-import frc.robot.commands.algaePoop.IntakeAlgaePrep;
-import frc.robot.commands.algaeShoot.ShootRelease;
-import frc.robot.commands.algaeShoot.ShootSpinUp;
-import frc.robot.commands.auto.L1;
-import frc.robot.commands.auto.L2;
-import frc.robot.commands.auto.L3;
-import frc.robot.commands.coral.CoralPoop;
-import frc.robot.commands.drive.ReefLeft;
-import frc.robot.commands.drive.ReefNearest;
-import frc.robot.commands.drive.ReefRight;
-import frc.robot.commands.elevator.ElevatorDown;
-import frc.robot.commands.elevator.ElevatorUp;
-import frc.robot.commands.elevator.CoralStation;
-import frc.robot.commands.grabAlgae.GrabAlgae;
-import frc.robot.commands.processor.ProcessorPrep;
-import frc.robot.constants.Control;
-import frc.robot.constants.FieldElements;
-import frc.robot.constants.Ports;
-import frc.robot.subsystems.AlgaeClawSubsystem;
-import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.PoopSubsystem;
-import frc.robot.util.Util;
+import frc.robot.commands.*;
+import frc.robot.constants.*;
+import frc.robot.subsystems.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -42,7 +21,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -154,11 +132,11 @@ public class RobotContainer {
     new JoystickButton(operator, Button.kSquare.value).onTrue(new ShootRelease(algaeClawSubsystem));
     new JoystickButton(operator, Button.kL2.value).onTrue(new GrabAlgae(algaeClawSubsystem));/* */
 
-    new JoystickButton(operator, Button.kTriangle.value).onTrue(new CoralStation(elevatorSubsystem));
-    new Trigger(() -> Util.checkPOVUp(operator)).toggleOnTrue(
-      new ElevatorUp(elevatorSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
+    new JoystickButton(operator, Button.kTriangle.value).whileTrue(elevatorSubsystem.moreTest());
+    /*new Trigger(() -> Util.checkPOVUp(operator)).toggleOnTrue(
+      new InstantCommand(() -> new ElevatorUp(elevatorSubsystem).schedule()));
     new Trigger(() -> Util.checkPOVDown(operator)).toggleOnTrue(
-      new ElevatorDown(elevatorSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
+      new InstantCommand(() -> new ElevatorDown(elevatorSubsystem).schedule()));*/
     new Trigger(() -> elevatorSubsystem.checkJoystickControl(operator, true)) .whileTrue(elevatorSubsystem.testUp());
     new Trigger(() -> elevatorSubsystem.checkJoystickControl(operator, false)).whileTrue(elevatorSubsystem.testDown());
 

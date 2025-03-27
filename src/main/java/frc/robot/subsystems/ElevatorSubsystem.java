@@ -15,7 +15,6 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.Ports;
@@ -38,10 +37,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     config.idleMode(IdleMode.kBrake)
           .inverted(true)
           .smartCurrentLimit(0, 40)
-          .softLimit.forwardSoftLimit(1)
+          .softLimit.forwardSoftLimit(4 * Control.elevator.GEAR_RATIO)
                     .forwardSoftLimitEnabled(true)
                     .reverseSoftLimit(0)
-                    .reverseSoftLimitEnabled(true);
+                    .reverseSoftLimitEnabled(false);
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     motorFollower.configure(config.follow(motor, true), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -87,13 +86,13 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public RunCommand testDown(){
-    return new RunCommand(() -> motor.setVoltage(0.05), this);
+    return new RunCommand(() -> motor.set(0.2), this);
   }
   public RunCommand testUp(){
-    return new RunCommand(() -> motor.setVoltage(-0.05), this);
+    return new RunCommand(() -> motor.set(-0.2), this);
   }
-  public Command moreTest(){
-    return runOnce(() -> driveMotors(Units.inchesToMeters(1)));
+  public RunCommand moreTest(){
+    return new RunCommand(() -> { motor.setVoltage(0.1); System.out.println("working");}, this);
   }
 
   public void elevatorRun(){

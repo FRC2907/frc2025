@@ -56,13 +56,13 @@ public class DriveSubsystem extends SubsystemBase {
   private SparkMaxConfig config;
   private RelativeEncoder frontLeftEnc, frontRightEnc, rearLeftEnc, rearRightEnc;
   private AHRS gyro;
+  private boolean gyroFlip;
   private MecanumDrivePoseEstimator poseEstimator;
   private MecanumDriveKinematics kinematics;
-  public RobotConfig robotConfig;
+  private RobotConfig robotConfig;
   private String limelight;
   private LimelightHelpers.PoseEstimate limelightMeasurement;
-
-  public List<PathPlannerPath> reefPaths;
+  private List<PathPlannerPath> reefPaths;
 
   private DriveSubsystem() {
     frontLeftMotor =  new SparkMax(Ports.drivetrain.FRONT_LEFT,  MotorType.kBrushless);
@@ -92,24 +92,19 @@ public class DriveSubsystem extends SubsystemBase {
     gyro = new AHRS(NavXComType.kMXP_SPI);
     gyro.reset();
     gyro.resetDisplacement();
+    gyroFlip = false;
     
     kinematics = Control.drivetrain.DRIVE_KINEMATICS;
 
     poseEstimator = new MecanumDrivePoseEstimator(
       kinematics,
-      gyro.getRotation2d(),
+      getRotation2d(),
       getWheelPositions(),
       new Pose2d(),
       VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)),
       VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))
     );
     //poseEstimator.resetPose(new Pose2d(2, 2, Rotation2d.kZero));
-
-    /*driveController = new HolonomicDriveController(
-      new PIDController(18.5, 0, 2.5), 
-      new PIDController(25.0, 0, 2.5),
-      new ProfiledPIDController(Control.drivetrain.rotP, Control.drivetrain.rotI, Control.drivetrain.rotD,
-          new Constraints(Control.drivetrain.kMaxAngularVelRad, Control.drivetrain.kMaxAngularAccel))); */
 
     limelight = Control.LIMELIGHT_NAME;
 
@@ -153,12 +148,16 @@ public class DriveSubsystem extends SubsystemBase {
   public void resetGyro(){
     gyro.reset();
   }
-
+  public void flipGyro(){
+    if (gyroFlip == false)
+      gyroFlip = true;
+    else if (gyroFlip == true)
+      gyroFlip = false;
+  }
   public void drive(double xSpeed, double ySpeed, double zRotation, boolean fieldRelative){
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, zRotation);
-    gyro.getRotation2d();
     MecanumDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(
-      fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, gyro.getRotation2d()) //DO NOT USE
+      fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, getRotation2d()) //DO NOT USE
                     : chassisSpeeds
     );
     wheelSpeeds.desaturate(Control.drivetrain.kMaxVelMPS);
@@ -167,6 +166,10 @@ public class DriveSubsystem extends SubsystemBase {
     double frontRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.frontRightMetersPerSecond, wheelDiameter);
     double rearLeftSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearLeftMetersPerSecond, wheelDiameter);
     double rearRightSpeed = Util.metersPerSecondToRPM(wheelSpeeds.rearRightMetersPerSecond, wheelDiameter);
+    SmartDashboard.putNumber("flSpeed", frontLeftSpeed);
+    SmartDashboard.putNumber("frSpeed", frontRightSpeed);
+    SmartDashboard.putNumber("rlSpeed", rearLeftSpeed);
+    SmartDashboard.putNumber("rrSpeed", rearRightSpeed);
 
     if (Math.abs(xSpeed) < 2.8 && Math.abs(ySpeed) > 3.5){
       frontRightSpeed = - frontLeftSpeed;
@@ -225,11 +228,15 @@ public class DriveSubsystem extends SubsystemBase {
         Util.RPMToMetersPerSecond(rearRightEnc .getVelocity(), wheelDiameter) / Control.drivetrain.GEAR_RATIO));
   }
 
+  public Rotation2d getRotation2d(){
+    return gyroFlip ? gyro.getRotation2d().plus(Rotation2d.fromDegrees(180))
+                    : gyro.getRotation2d();
+  }
   public double getHeadingDeg(){
-    return Units.radiansToDegrees(MathUtil.angleModulus(gyro.getRotation2d().getRadians()));
+    return Units.radiansToDegrees(MathUtil.angleModulus(getRotation2d().getRadians()));
   }
   public double getHeadingRad(){
-    return MathUtil.angleModulus(gyro.getRotation2d().getRadians());
+    return MathUtil.angleModulus(getRotation2d().getRadians());
   }
 
   public Pose2d getPose2d(){
@@ -325,7 +332,7 @@ public class DriveSubsystem extends SubsystemBase {
       limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelight);
     else 
       limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiRed(limelight);
-    poseEstimator.update(gyro.getRotation2d(), getWheelPositions());
+    poseEstimator.update(getRotation2d(), getWheelPositions());
     if (limelightMeasurement != null && limelightMeasurement.tagCount > 0){
       poseEstimator.addVisionMeasurement(limelightMeasurement.pose, 
                                          limelightMeasurement.timestampSeconds, 
@@ -339,10 +346,10 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "flVel", frontRightEnc.getVelocity());
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "rlVel", rearLeftEnc.getVelocity());
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "rrVel", rearRightEnc.getVelocity());
-    SmartDashboard.putNumber(SUBSYSTEM_NAME + "flPosition", Util.revolutionsToMeters(frontLeftEnc.getPosition() / 5.95, wheelDiameter));
-    SmartDashboard.putNumber(SUBSYSTEM_NAME + "frPosition", Util.revolutionsToMeters(frontRightEnc.getPosition() / 5.95, wheelDiameter));
-    SmartDashboard.putNumber(SUBSYSTEM_NAME + "rlPosition", Util.revolutionsToMeters(rearLeftEnc.getPosition() / 5.95, wheelDiameter));
-    SmartDashboard.putNumber(SUBSYSTEM_NAME + "rrPosition", Util.revolutionsToMeters(rearRightEnc.getPosition() / 5.95, wheelDiameter));
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "flPosition", Util.revolutionsToMeters(frontLeftEnc.getPosition() / 7.31, wheelDiameter));
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "frPosition", Util.revolutionsToMeters(frontRightEnc.getPosition() / 7.31, wheelDiameter));
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "rlPosition", Util.revolutionsToMeters(rearLeftEnc.getPosition() / 7.31, wheelDiameter));
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "rrPosition", Util.revolutionsToMeters(rearRightEnc.getPosition() / 7.31, wheelDiameter));
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "PoseX", poseEstimator.getEstimatedPosition().getX());
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "PoseY", poseEstimator.getEstimatedPosition().getY());
 
