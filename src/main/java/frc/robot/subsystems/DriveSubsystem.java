@@ -347,7 +347,7 @@ public class DriveSubsystem extends SubsystemBase {
     field.setRobotPose(poseEstimator.getEstimatedPosition());
 
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "flVel", frontLeftEnc.getVelocity());
-    SmartDashboard.putNumber(SUBSYSTEM_NAME + "flVel", frontRightEnc.getVelocity());
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "frVel", frontRightEnc.getVelocity());
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "rlVel", rearLeftEnc.getVelocity());
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "rrVel", rearRightEnc.getVelocity());
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "flPosition", Util.revolutionsToMeters(frontLeftEnc.getPosition() / 7.31, wheelDiameter));

@@ -27,6 +27,7 @@ public class ElevatorUp extends Command {
   @Override
   public void initialize() {
     m_subsystem.addIndex();
+    m_subsystem.pidReset();
   }
 
   // Called every time the scheduler runs while the command is scheduled.

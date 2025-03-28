@@ -21,7 +21,7 @@ public class Control {
         public static final double WHEEL_BASE = Units.inchesToMeters(24.5); 
         public static final double WHEEL_DIAMETER = Units.inchesToMeters(6);
         public static final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
-        public static final double GEAR_RATIO = 7.31; //CHANGE TO 7.31
+        public static final double GEAR_RATIO = 7.31; 
         public static final Translation2d FRONT_LEFT_LOCATION = new Translation2d(WHEEL_BASE / 2, TRACK_WIDTH / 2);
         public static final Translation2d FRONT_RIGHT_LOCATION = new Translation2d(WHEEL_BASE / 2, - TRACK_WIDTH / 2);
         public static final Translation2d REAR_LEFT_LOCATION = new Translation2d(-WHEEL_BASE / 2, TRACK_WIDTH / 2);
@@ -30,12 +30,12 @@ public class Control {
             FRONT_LEFT_LOCATION, FRONT_RIGHT_LOCATION, REAR_LEFT_LOCATION, REAR_RIGHT_LOCATION);
         public static final MotorType MOTOR_TYPE = MotorType.kBrushless;
 
-        public static final double kPositionConversionFactor = (1 / GEAR_RATIO) * WHEEL_CIRCUMFERENCE; //revolutions to meters
+        public static final double kPositionConversionFactor = WHEEL_CIRCUMFERENCE / GEAR_RATIO; //revolutions to meters
         public static final double kVelocityConversionFactor = kPositionConversionFactor / 60; //rpm to m/s
         public static final double kMaxAccelRPM = 4000; //revolutions per minute per second (acceleration)
         public static final double kMaxVelRPM = 4000; // revolutions per minute
-        public static final double kMaxVelMPS = 9.5; // meters per second
-        public static final double kMaxAccelMPS = 18; // meters per second per second OR meters per second squared (m/s^2)
+        public static final double kMaxVelMPS = 5.5; // meters per second
+        public static final double kMaxAccelMPS = 12; // meters per second per second OR meters per second squared (m/s^2)
         public static final double kMaxAngularVelRad = 14 * Math.PI; // radians per second
         public static final double kMaxAngularAccel = 20 * Math.PI; //radians per second per second OR radians per second squared
         public static final double kAllowedError = 0.005;
@@ -134,21 +134,20 @@ public class Control {
         public static final double METERS_PER_ROTATION = Units.inchesToMeters(11);
 
         public static final double kConversionFactor = METERS_PER_ROTATION / GEAR_RATIO; 
-        public static final double kOffset = Units.inchesToMeters(5.75); //TODO find better (m.) (original height off ground)
-        public static final double kMinVoltage = -2; //TODO find
-        public static final double kMaxVoltage = 2; //TODO find
-        public static final double kDownLimit = Units.inchesToMeters(0);
+        public static final double kOffset = Units.inchesToMeters(6.273); //TODO find better (m.) (original height off ground)
+        public static final double kMinVoltage = -4; //TODO find
+        public static final double kMaxVoltage = 4; //TODO find
+        public static final double kDownLimit = kOffset;
         public static final double kUpLimit = Units.inchesToMeters(50); //TODO find
         public static final double kAllowedError = Units.inchesToMeters(1); //TODO tune
-        public static final double kIntakeOffset = Units.inchesToMeters(5); //TODO find
+        public static final double kIntakeOffset = Units.inchesToMeters(8); //TODO find
 
         public static final double kMaxVelocity = Units.inchesToMeters(38), //TODO tune (m/s) (38)
                                    kMaxAcceleration = Units.inchesToMeters(76); //TODO tune (m/s^2) (76)
 
         public static final double kNeutral = Units.inchesToMeters(7.5); //TODO tune
-        public static final double kCoralStation = Units.inchesToMeters(28); //TODO find
-        public static final double kProcessor = Units.inchesToMeters(10); //TODO find
-        public static final double kManualControlFactor = Units.inchesToMeters(1); //TODO tune
+        public static final double kCoralStation = Units.inchesToMeters(37) - kIntakeOffset; //TODO tune
+        public static final double kManualControlFactor = Units.inchesToMeters(0.1); //TODO tune
         public static final double kL1 = FieldElements.ReefHeight.L1.height + Units.inchesToMeters(3); //TODO tune
         public static final double kL2 = FieldElements.ReefHeight.L2.height + Units.inchesToMeters(1); //TODO tune
         public static final double kL3 = FieldElements.ReefHeight.L3.height + Units.inchesToMeters(1); //TODO tune
@@ -156,10 +155,9 @@ public class Control {
 
         public static final double kElevatorDriverDeadband = 0.3;
 
-
-        public static final double kP = 27, //TODO tune
+        public static final double kP = 50, //TODO tune
                                    kI = 0, //TODO tune
-                                   kD = 0; //TODO tune
+                                   kD = 0.5; //TODO tune
         
         public static final double kS = 0.5,
                                    kG = 0.45, //0.31

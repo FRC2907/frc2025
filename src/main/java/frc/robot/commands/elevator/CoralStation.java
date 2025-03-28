@@ -37,6 +37,7 @@ public class CoralStation extends Command {
   @Override
   public void end(boolean interrupted) {
     m_subsystem.stop();
+    m_subsystem.resetIndex();
   }
 
   // Returns true when the command should end.

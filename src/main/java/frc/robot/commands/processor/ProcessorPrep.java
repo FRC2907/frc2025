@@ -34,7 +34,7 @@ public class ProcessorPrep extends Command {
   @Override
   public void execute() {
     algaeSubsystem.processorAngle();
-    elevatorSubsystem.processor();
+    elevatorSubsystem.neutral();
   }
 
   // Called once the command ends or is interrupted.

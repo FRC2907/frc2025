@@ -35,7 +35,7 @@ public class ProcessorScore extends Command {
   public void execute() {
     algaeSubsystem.processorAngle();
     algaeSubsystem.processor();
-    elevatorSubsystem.processor();
+    elevatorSubsystem.neutral();
   }
 
   // Called once the command ends or is interrupted.

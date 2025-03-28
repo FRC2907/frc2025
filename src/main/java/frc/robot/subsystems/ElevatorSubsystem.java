@@ -29,7 +29,6 @@ public class ElevatorSubsystem extends SubsystemBase {
   private static SparkFlexConfig config;
   private ElevatorFeedforward feedforward;
   private ProfiledPIDController pidController;
-  private PIDController otherPIDController;
   private double setpoint;
   private int index;
   private int indexMax;
@@ -43,7 +42,7 @@ public class ElevatorSubsystem extends SubsystemBase {
           .softLimit.forwardSoftLimit(4 * Control.elevator.GEAR_RATIO)
                     .forwardSoftLimitEnabled(true)
                     .reverseSoftLimit(0)
-                    .reverseSoftLimitEnabled(true);
+                    .reverseSoftLimitEnabled(false);
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     motorFollower.configure(config.follow(motor, true), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -58,10 +57,8 @@ public class ElevatorSubsystem extends SubsystemBase {
                                               Control.elevator.kI, 
                                               Control.elevator.kD, 
                                               Control.elevator.kConstraints);
-    pidController.setTolerance(Control.elevator.kAllowedError);
-    otherPIDController = new PIDController(Control.elevator.kP,
-                                      Control.elevator.kI, 
-                                      Control.elevator.kD);
+    //pidController.setTolerance(Control.elevator.kAllowedError);
+
     
     setpoint = 0;
     index = 0;
@@ -85,23 +82,28 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public void addIndex(){
     if (index < indexMax) index++;
-    System.out.println("called");
   }
   public void subtractIndex(){
     if (index > 0) index--;
   }
+  public void resetIndex(){
+    index = 0;
+  }
 
   public RunCommand testDown(){
-    return new RunCommand(() -> motor.set(0.2), this);
+    return new RunCommand(() -> motor.set(0.05), this);
   }
   public RunCommand testUp(){
-    return new RunCommand(() -> motor.set(-0.2), this);
+    return new RunCommand(() -> motor.set(-0.05), this);
   }
   public RunCommand moreTest(){
     return new RunCommand(() -> { motor.setVoltage(1); System.out.println("working");}, this);
   }
   public Command moreMoreTest(){
     return runOnce(() -> driveMotors(setpoint + Units.inchesToMeters(5)));
+  }
+  public Command reset(){
+    return runOnce(() -> motor.getEncoder().setPosition(0));
   }
 
   public void elevatorRun(){
@@ -115,8 +117,6 @@ public class ElevatorSubsystem extends SubsystemBase {
                                 return Control.elevator.kDownLimit; }
   public double neutral()     { setSetpoint(Control.elevator.kNeutral);
                                 return Control.elevator.kNeutral; }
-  public double processor()   { setSetpoint(Control.elevator.kProcessor);
-                                return Control.elevator.kProcessor; }
   public double coralStation(){ setSetpoint(Control.elevator.kCoralStation);
                                 return Control.elevator.kCoralStation; }
   public double L1()          { setSetpoint(Control.elevator.kL1);
@@ -139,13 +139,16 @@ public class ElevatorSubsystem extends SubsystemBase {
     return pidController.atGoal();
   }
   public double getHeight(){
-    return motor.getEncoder().getPosition() * Control.elevator.kConversionFactor + Units.inchesToMeters(7.5);
+    return motor.getEncoder().getPosition() * Control.elevator.kConversionFactor + Control.elevator.kOffset;
   }
 
   private static String SUBSYSTEM_NAME = "Elevator: ";
 
+  public void pidReset(){
+    pidController.reset(getHeight());
+  }
   public void driveMotors(double setpoint){
-    setpoint = Util.clamp(Control.elevator.kDownLimit, setpoint, Units.inchesToMeters(50));
+    setpoint = Util.clamp(Control.elevator.kDownLimit, setpoint, Control.elevator.kUpLimit);
     double feedforwardCalculation = feedforward.calculate(motor.getEncoder().getPosition() - setpoint * 1);
     double pidCalculation = pidController.calculate(
       getHeight(), setpoint);
@@ -157,6 +160,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "feedforwardCalculation", feedforwardCalculation);
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "pidCalculation", pidCalculation);
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "setpoint", setpoint);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "pidsetpoint", pidController.getSetpoint().position);
   }
   @Override
   public void periodic() {

@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.commands.*;
+import frc.robot.commands.elevator.CoralStation;
 import frc.robot.commands.elevator.ElevatorDown;
 import frc.robot.commands.elevator.ElevatorUp;
 import frc.robot.constants.*;
@@ -135,7 +136,8 @@ public class RobotContainer {
     new JoystickButton(operator, Button.kSquare.value).onTrue(new ShootRelease(algaeClawSubsystem));
     new JoystickButton(operator, Button.kL2.value).onTrue(new GrabAlgae(algaeClawSubsystem));/* */
 
-    new JoystickButton(operator, Button.kTriangle.value).onTrue(elevatorSubsystem.moreTest());
+    new JoystickButton(operator, Button.kCircle.value).onTrue(elevatorSubsystem.reset());
+    new JoystickButton(operator, Button.kTriangle.value).onTrue(new CoralStation(elevatorSubsystem));
     new Trigger(() -> Util.checkPOVUp(operator)).toggleOnTrue(
       new InstantCommand(() -> new ElevatorUp(elevatorSubsystem).schedule()));
     new Trigger(() -> Util.checkPOVDown(operator)).toggleOnTrue(
