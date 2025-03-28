@@ -5,8 +5,11 @@
 package frc.robot;
 
 import frc.robot.commands.*;
+import frc.robot.commands.elevator.ElevatorDown;
+import frc.robot.commands.elevator.ElevatorUp;
 import frc.robot.constants.*;
 import frc.robot.subsystems.*;
+import frc.robot.util.Util;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -132,11 +135,11 @@ public class RobotContainer {
     new JoystickButton(operator, Button.kSquare.value).onTrue(new ShootRelease(algaeClawSubsystem));
     new JoystickButton(operator, Button.kL2.value).onTrue(new GrabAlgae(algaeClawSubsystem));/* */
 
-    new JoystickButton(operator, Button.kTriangle.value).whileTrue(elevatorSubsystem.moreTest());
-    /*new Trigger(() -> Util.checkPOVUp(operator)).toggleOnTrue(
+    new JoystickButton(operator, Button.kTriangle.value).onTrue(elevatorSubsystem.moreTest());
+    new Trigger(() -> Util.checkPOVUp(operator)).toggleOnTrue(
       new InstantCommand(() -> new ElevatorUp(elevatorSubsystem).schedule()));
     new Trigger(() -> Util.checkPOVDown(operator)).toggleOnTrue(
-      new InstantCommand(() -> new ElevatorDown(elevatorSubsystem).schedule()));*/
+      new InstantCommand(() -> new ElevatorDown(elevatorSubsystem).schedule()));
     new Trigger(() -> elevatorSubsystem.checkJoystickControl(operator, true)) .whileTrue(elevatorSubsystem.testUp());
     new Trigger(() -> elevatorSubsystem.checkJoystickControl(operator, false)).whileTrue(elevatorSubsystem.testDown());
 

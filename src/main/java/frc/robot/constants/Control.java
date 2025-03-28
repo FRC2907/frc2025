@@ -133,23 +133,23 @@ public class Control {
         public static final double GEAR_RATIO = 9.0;
         public static final double METERS_PER_ROTATION = Units.inchesToMeters(11);
 
-        public static final double kConversionFactor = GEAR_RATIO / METERS_PER_ROTATION; 
+        public static final double kConversionFactor = METERS_PER_ROTATION / GEAR_RATIO; 
         public static final double kOffset = Units.inchesToMeters(5.75); //TODO find better (m.) (original height off ground)
-        public static final double kMinVoltage = 0; //TODO find
-        public static final double kMaxVoltage = 1; //TODO find
+        public static final double kMinVoltage = -2; //TODO find
+        public static final double kMaxVoltage = 2; //TODO find
         public static final double kDownLimit = Units.inchesToMeters(0);
         public static final double kUpLimit = Units.inchesToMeters(50); //TODO find
         public static final double kAllowedError = Units.inchesToMeters(1); //TODO tune
         public static final double kIntakeOffset = Units.inchesToMeters(5); //TODO find
 
-        public static final double kMaxVelocity = Units.inchesToMeters(3), //TODO tune (m/s) (38)
-                                   kMaxAcceleration = Units.inchesToMeters(6); //TODO tune (m/s^2) (76)
+        public static final double kMaxVelocity = Units.inchesToMeters(38), //TODO tune (m/s) (38)
+                                   kMaxAcceleration = Units.inchesToMeters(76); //TODO tune (m/s^2) (76)
 
         public static final double kNeutral = Units.inchesToMeters(7.5); //TODO tune
         public static final double kCoralStation = Units.inchesToMeters(28); //TODO find
         public static final double kProcessor = Units.inchesToMeters(10); //TODO find
         public static final double kManualControlFactor = Units.inchesToMeters(1); //TODO tune
-        public static final double kL1 = FieldElements.ReefHeight.L1.height + Units.inchesToMeters(1); //TODO tune
+        public static final double kL1 = FieldElements.ReefHeight.L1.height + Units.inchesToMeters(3); //TODO tune
         public static final double kL2 = FieldElements.ReefHeight.L2.height + Units.inchesToMeters(1); //TODO tune
         public static final double kL3 = FieldElements.ReefHeight.L3.height + Units.inchesToMeters(1); //TODO tune
         public static final double kL4 = FieldElements.ReefHeight.L4.height + Units.inchesToMeters(1); //TODO tune 
@@ -157,7 +157,7 @@ public class Control {
         public static final double kElevatorDriverDeadband = 0.3;
 
 
-        public static final double kP = 0.01, //TODO tune
+        public static final double kP = 27, //TODO tune
                                    kI = 0, //TODO tune
                                    kD = 0; //TODO tune
         

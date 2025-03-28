@@ -11,10 +11,12 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.Ports;
@@ -27,6 +29,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   private static SparkFlexConfig config;
   private ElevatorFeedforward feedforward;
   private ProfiledPIDController pidController;
+  private PIDController otherPIDController;
   private double setpoint;
   private int index;
   private int indexMax;
@@ -40,7 +43,7 @@ public class ElevatorSubsystem extends SubsystemBase {
           .softLimit.forwardSoftLimit(4 * Control.elevator.GEAR_RATIO)
                     .forwardSoftLimitEnabled(true)
                     .reverseSoftLimit(0)
-                    .reverseSoftLimitEnabled(false);
+                    .reverseSoftLimitEnabled(true);
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     motorFollower.configure(config.follow(motor, true), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -56,6 +59,9 @@ public class ElevatorSubsystem extends SubsystemBase {
                                               Control.elevator.kD, 
                                               Control.elevator.kConstraints);
     pidController.setTolerance(Control.elevator.kAllowedError);
+    otherPIDController = new PIDController(Control.elevator.kP,
+                                      Control.elevator.kI, 
+                                      Control.elevator.kD);
     
     setpoint = 0;
     index = 0;
@@ -92,7 +98,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     return new RunCommand(() -> motor.set(-0.2), this);
   }
   public RunCommand moreTest(){
-    return new RunCommand(() -> { motor.setVoltage(0.1); System.out.println("working");}, this);
+    return new RunCommand(() -> { motor.setVoltage(1); System.out.println("working");}, this);
+  }
+  public Command moreMoreTest(){
+    return runOnce(() -> driveMotors(setpoint + Units.inchesToMeters(5)));
   }
 
   public void elevatorRun(){
@@ -130,17 +139,17 @@ public class ElevatorSubsystem extends SubsystemBase {
     return pidController.atGoal();
   }
   public double getHeight(){
-    return motor.getEncoder().getPosition() * Control.elevator.kConversionFactor;
+    return motor.getEncoder().getPosition() * Control.elevator.kConversionFactor + Units.inchesToMeters(7.5);
   }
 
   private static String SUBSYSTEM_NAME = "Elevator: ";
 
   public void driveMotors(double setpoint){
-    setpoint = Util.clamp(Control.elevator.kDownLimit, setpoint, Units.inchesToMeters(40));
+    setpoint = Util.clamp(Control.elevator.kDownLimit, setpoint, Units.inchesToMeters(50));
     double feedforwardCalculation = feedforward.calculate(motor.getEncoder().getPosition() - setpoint * 1);
     double pidCalculation = pidController.calculate(
-      motor.getEncoder().getPosition() * Control.elevator.kConversionFactor, setpoint);
-    if (Math.abs(feedforwardCalculation) < 0.1) feedforwardCalculation = 0;    
+      getHeight(), setpoint);
+    if (Math.abs(pidCalculation) < 0.5) pidCalculation = 0;    
     motor.setVoltage(
       Util.clamp(Control.elevator.kMinVoltage, pidCalculation, Control.elevator.kMaxVoltage)
     );
@@ -168,6 +177,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "pidSetpoint", pidController.getSetpoint().position);
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "goal", pidController.getGoal().position);
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "index", index);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "height", getHeight());
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "abs", motor.getAbsoluteEncoder().getPosition());
     SmartDashboard.putNumber("L1", Control.elevator.kL1);
     SmartDashboard.putNumber("L2", Control.elevator.kL2);
     SmartDashboard.putNumber("L3", Control.elevator.kL3);
