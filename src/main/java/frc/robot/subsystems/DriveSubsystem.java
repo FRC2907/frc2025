@@ -316,6 +316,10 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "rlSetPoint", rearLeftSpeed);
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "rrSetPoint", rearRightSpeed);
 
+    frontLeftSpeed *= Control.drivetrain.GEAR_RATIO;
+    frontRightSpeed *= Control.drivetrain.GEAR_RATIO;
+    rearLeftSpeed *= Control.drivetrain.GEAR_RATIO;
+    rearRightSpeed *= Control.drivetrain.GEAR_RATIO;
     frontLeftMotor .getClosedLoopController().setReference(frontLeftSpeed,  ControlType.kMAXMotionVelocityControl);
     frontRightMotor.getClosedLoopController().setReference(frontRightSpeed, ControlType.kMAXMotionVelocityControl);
     rearLeftMotor  .getClosedLoopController().setReference(rearLeftSpeed,   ControlType.kMAXMotionVelocityControl);

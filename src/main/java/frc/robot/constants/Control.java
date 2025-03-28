@@ -34,8 +34,8 @@ public class Control {
         public static final double kVelocityConversionFactor = kPositionConversionFactor / 60; //rpm to m/s
         public static final double kMaxAccelRPM = 4000; //revolutions per minute per second (acceleration)
         public static final double kMaxVelRPM = 4000; // revolutions per minute
-        public static final double kMaxAccelMPS = 42; // meters per second per second OR meters per second squared (m/s^2)
-        public static final double kMaxVelMPS = 70; // meters per second
+        public static final double kMaxAccelMPS = 18; // meters per second per second OR meters per second squared (m/s^2)
+        public static final double kMaxVelMPS = 9.5; // meters per second
         public static final double kMaxAngularVelRad = 14 * Math.PI; // radians per second
         public static final double kMaxAngularAccel = 20 * Math.PI; //radians per second per second OR radians per second squared
         public static final double kAllowedError = 0.005;
