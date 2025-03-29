@@ -11,7 +11,6 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.PS5Controller;
@@ -32,6 +31,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   private double setpoint;
   private int index;
   private int indexMax;
+  private boolean algaeScoring;
   private ElevatorSubsystem() {
     motor = new SparkFlex(Ports.elevator.LEADER, Control.elevator.MOTOR_TYPE);
     motorFollower = new SparkFlex(Ports.elevator.FOLLOWER, Control.elevator.MOTOR_TYPE);
@@ -63,6 +63,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     setpoint = 0;
     index = 0;
     indexMax = 3;
+
+    algaeScoring = false;
   }
 
   private static ElevatorSubsystem instance;
@@ -89,6 +91,9 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void resetIndex(){
     index = 0;
   }
+  public void switchScoring(){
+    algaeScoring = !algaeScoring;
+  }
 
   public RunCommand testDown(){
     return new RunCommand(() -> motor.set(0.05), this);
@@ -107,10 +112,17 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public void elevatorRun(){
-    if (index == 0){ driveMotors(neutral()); }
-    if (index == 1){ driveMotors(L1()); }
-    if (index == 2){ driveMotors(L2()); }
-    if (index == 3){ driveMotors(L3()); }
+    if (algaeScoring){
+      if (index == 0){ driveMotors(neutral()); }
+      if (index == 1){ driveMotors(A1()); }
+      if (index == 2){ driveMotors(A2()); }
+      if (index == 3){ driveMotors(A2()); }
+    } else {
+      if (index == 0){ driveMotors(neutral()); }
+      if (index == 1){ driveMotors(L1()); }
+      if (index == 2){ driveMotors(L2()); }
+      if (index == 3){ driveMotors(L3()); }
+    }
   }
 
   public double ground()      { setSetpoint(Control.elevator.kDownLimit);
@@ -125,6 +137,10 @@ public class ElevatorSubsystem extends SubsystemBase {
                                 return Control.elevator.kL2; }
   public double L3()          { setSetpoint(Control.elevator.kL3);
                                 return Control.elevator.kL3; }
+  public double A1()          { setSetpoint(Control.elevator.kA1);
+                                return Control.elevator.kA1; }
+  public double A2()          { setSetpoint(Control.elevator.kA2);
+                                return Control.elevator.kA2; }
   public double manualUp()    { setSetpoint(setpoint + Control.elevator.kManualControlFactor);
                                 return setpoint; }
   public double manualDown()  { setSetpoint(setpoint - Control.elevator.kManualControlFactor);
@@ -162,17 +178,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "setpoint", setpoint);
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "pidsetpoint", pidController.getSetpoint().position);
   }
+
   @Override
   public void periodic() {
-    //elevatorSwitch();
-    /*double feedforwardCalculation = feedforward.calculate(motor.getEncoder().getPosition() - setpoint * 0.1);
-    double pidCalculation = pidController.calculate(
-      motor.getEncoder().getPosition() * Control.elevator.kConversionFactor, setpoint);
-    //motor.getClosedLoopController().setReference(setPoint, ControlType.kMAXMotionPositionControl);
-    motor.setVoltage(
-      //pidCalculation
-    + feedforwardCalculation
-    );*/
     if (this.getCurrentCommand() == null){
       motor.stopMotor();
     }

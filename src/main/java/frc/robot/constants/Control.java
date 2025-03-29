@@ -140,7 +140,8 @@ public class Control {
         public static final double kDownLimit = kOffset;
         public static final double kUpLimit = Units.inchesToMeters(50); //TODO find
         public static final double kAllowedError = Units.inchesToMeters(1); //TODO tune
-        public static final double kIntakeOffset = Units.inchesToMeters(8); //TODO find
+        public static final double kIntakeOffset = Units.inchesToMeters(8.11); //TODO tune
+        public static final double kAlgaeOffset = Units.inchesToMeters(22); //TODO tune
 
         public static final double kMaxVelocity = Units.inchesToMeters(38), //TODO tune (m/s) (38)
                                    kMaxAcceleration = Units.inchesToMeters(76); //TODO tune (m/s^2) (76)
@@ -152,6 +153,8 @@ public class Control {
         public static final double kL2 = FieldElements.ReefHeight.L2.height + Units.inchesToMeters(1); //TODO tune
         public static final double kL3 = FieldElements.ReefHeight.L3.height + Units.inchesToMeters(1); //TODO tune
         public static final double kL4 = FieldElements.ReefHeight.L4.height + Units.inchesToMeters(1); //TODO tune 
+        public static final double kA1 = kL2 + Units.inchesToMeters(8) - kAlgaeOffset;
+        public static final double kA2 = kL3 + Units.inchesToMeters(8) - kAlgaeOffset;
 
         public static final double kElevatorDriverDeadband = 0.3;
 

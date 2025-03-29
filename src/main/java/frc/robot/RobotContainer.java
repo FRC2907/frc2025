@@ -142,6 +142,9 @@ public class RobotContainer {
       new InstantCommand(() -> new ElevatorUp(elevatorSubsystem).schedule()));
     new Trigger(() -> Util.checkPOVDown(operator)).toggleOnTrue(
       new InstantCommand(() -> new ElevatorDown(elevatorSubsystem).schedule()));
+    new Trigger(() -> Util.checkPOVLeft(operator) || Util.checkPOVRight(operator)).onTrue(
+      new InstantCommand(() -> elevatorSubsystem.switchScoring(), elevatorSubsystem)
+    );
     new Trigger(() -> elevatorSubsystem.checkJoystickControl(operator, true)) .whileTrue(elevatorSubsystem.testUp());
     new Trigger(() -> elevatorSubsystem.checkJoystickControl(operator, false)).whileTrue(elevatorSubsystem.testDown());
 
