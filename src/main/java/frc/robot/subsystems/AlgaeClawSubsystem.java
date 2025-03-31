@@ -18,6 +18,7 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -81,7 +82,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
                                               Control.algaeManipulator.kConstraints);
 
 
-    //absEncoder = arm.getAbsoluteEncoder();
+    absEncoder = arm.getAbsoluteEncoder();
     colorSensor = new ColorSensorV3(Ports.manipulator.COLOR_SENSOR);
   }
 
@@ -174,38 +175,32 @@ public class AlgaeClawSubsystem extends SubsystemBase {
      + Control.algaeManipulator.kShootB;
   }
 
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          armSetSetpoint(100.0);
-        });
-  }
 
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
+
   public boolean hasAlgae() {
     return colorSensor.getProximity() > Control.algaeManipulator.kProximityBand;
   }
   public boolean atArmSetPoint() {
-    return absEncoder.getPosition() - armSetpoint < Control.algaeManipulator.kAllowedArmError;
+    return pidController.atSetpoint();
   }
   public boolean atShooterSetPoint() {
-    return shoot.getEncoder().getVelocity() - shootSetpoint < Control.algaeManipulator.kAllowedShootError;
+    return Math.abs(shoot.getEncoder().getVelocity() - shootSetpoint) < Control.algaeManipulator.kAllowedShootError;
   }
 
-  private void driveArm(double setpoint){
+  public double getArmPosition(){
+    return Units.degreesToRadians(absEncoder.getPosition() * 360);
+  }
+  public double getSpeed(){
+    return shoot.getEncoder().getVelocity();
+  }
+
+
+  public void pidReset(){
+    pidController.reset(getArmPosition());
+  }
+  public void driveArm(double setpoint){
     setpoint = setpoint * Control.algaeManipulator.kArmConversionFactor;
-    double pidCalculation = pidController.calculate(arm.getEncoder().getPosition(), armSetpoint);
+    double pidCalculation = pidController.calculate(getArmPosition(), armSetpoint);
     double feedforwardCalculation = feedforward.calculate(
       pidController.getSetpoint().position, pidController.getSetpoint().velocity);
     arm.setVoltage(
@@ -220,15 +215,17 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     shoot.getClosedLoopController().setReference(shootSetpoint, ControlType.kMAXMotionVelocityControl);
   }
 
+  private static String SUBSYSTEM_NAME = "Algae: ";
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
 
-    SmartDashboard.putBoolean("algae", hasAlgae());
-    SmartDashboard.putNumber("setpoint", armSetpoint);
-    SmartDashboard.putNumber("position", arm.getEncoder().getPosition());
-    SmartDashboard.putNumber("pidSetpoint", pidController.getSetpoint().position);
-    SmartDashboard.putNumber("goal", pidController.getGoal().position);
+    SmartDashboard.putBoolean(SUBSYSTEM_NAME + "algae", hasAlgae());
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "setpoint", armSetpoint);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "position", Units.radiansToDegrees(absEncoder.getPosition()));
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "pidSetpoint", pidController.getSetpoint().position);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "goal", pidController.getGoal().position);
   }
 
   @Override

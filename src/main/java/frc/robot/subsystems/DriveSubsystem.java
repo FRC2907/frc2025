@@ -211,6 +211,17 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("arate", Units.degreesToRadians(gyro.getRate()) * Control.drivetrain.kHeadingD);
   }
 
+  public Command danceMoveLeft(){
+    return runEnd(
+      () -> drive(0, Control.drivetrain.kDanceMoveSpeed, Control.drivetrain.kSpinSpeed, false),
+      () -> stop()).withTimeout(2);
+  }
+  public Command danceMoveRight(){
+    return runEnd(
+      () -> drive(0, - Control.drivetrain.kDanceMoveSpeed, - Control.drivetrain.kSpinSpeed, false),
+      () -> stop()).withTimeout(2);
+  }
+
 
   private MecanumDriveWheelPositions getWheelPositions(){
     return new MecanumDriveWheelPositions(

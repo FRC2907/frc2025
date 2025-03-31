@@ -120,6 +120,8 @@ public class RobotContainer {
     //new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(new ReefLeft(driveSubsystem));
     //new Trigger(() -> Util.checkPOVRight(driver)).onTrue(new ReefRight(driveSubsystem));
     //new JoystickButton(driver, Button.kL2.value).onTrue(new ReefNearest(driveSubsystem));
+    new JoystickButton(driver, Button.kL1.value).onTrue(driveSubsystem.danceMoveLeft());
+    new JoystickButton(driver, Button.kR1.value).onTrue(driveSubsystem.danceMoveRight());
     new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);
     // should create a do-nothing command that requires the driveSubsystem, causing existing commands using that system to be cancelled?
     new JoystickButton(driver, Button.kCircle.value).onTrue(new InstantCommand(() -> {}, driveSubsystem));
@@ -166,10 +168,12 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return driveSubsystem.runEnd(
+    return autoChooser.getSelected();
+          
+      /*driveSubsystem.runEnd(
       () -> driveSubsystem.drive(-1.0 * Control.drivetrain.kMaxVelMPS / 6, 0, 0, false),
       () -> driveSubsystem.drive(0, 0, 0, false))
-      .withTimeout(1.0);
+      .withTimeout(1.0);*/
   }
 
   public void disabledPeriodic(){

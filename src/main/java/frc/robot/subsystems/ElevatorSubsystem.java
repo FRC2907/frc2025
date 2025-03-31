@@ -116,7 +116,7 @@ public class ElevatorSubsystem extends SubsystemBase {
       if (index == 0){ driveMotors(neutral()); }
       if (index == 1){ driveMotors(A1()); }
       if (index == 2){ driveMotors(A2()); }
-      if (index == 3){ driveMotors(A2()); }
+      if (index == 3){ index = 2; }
     } else {
       if (index == 0){ driveMotors(neutral()); }
       if (index == 1){ driveMotors(L1()); }
@@ -190,10 +190,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "goal", pidController.getGoal().position);
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "index", index);
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "height", getHeight());
-    SmartDashboard.putNumber(SUBSYSTEM_NAME + "abs", motor.getAbsoluteEncoder().getPosition());
     SmartDashboard.putNumber("L1", Control.elevator.kL1);
     SmartDashboard.putNumber("L2", Control.elevator.kL2);
     SmartDashboard.putNumber("L3", Control.elevator.kL3);
+    SmartDashboard.putNumber("A1", Control.elevator.kA1);
+    SmartDashboard.putNumber("A2", Control.elevator.kA2);
   }
 
   @Override

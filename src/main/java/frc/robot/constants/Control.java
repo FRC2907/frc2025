@@ -32,14 +32,17 @@ public class Control {
 
         public static final double kPositionConversionFactor = WHEEL_CIRCUMFERENCE / GEAR_RATIO; //revolutions to meters
         public static final double kVelocityConversionFactor = kPositionConversionFactor / 60; //rpm to m/s
-        public static final double kMaxAccelRPM = 4000; //revolutions per minute per second (acceleration)
-        public static final double kMaxVelRPM = 4000; // revolutions per minute
-        public static final double kMaxVelMPS = 5.5; // meters per second
-        public static final double kMaxAccelMPS = 12; // meters per second per second OR meters per second squared (m/s^2)
-        public static final double kMaxAngularVelRad = 14 * Math.PI; // radians per second
-        public static final double kMaxAngularAccel = 20 * Math.PI; //radians per second per second OR radians per second squared
+        public static final double kMaxVelRPM = 4000, // revolutions per minute
+                                   kMaxAccelRPM = 4000; //revolutions per minute per second (acceleration)
+        public static final double kMaxVelMPS = 5.5, // meters per second
+                                   kMaxAccelMPS = 12; // meters per second per second OR meters per second squared (m/s^2)
+        public static final double kMaxAngularVelRad = 14 * Math.PI, // radians per second
+                                   kMaxAngularAccel = 20 * Math.PI; //radians per second per second OR radians per second squared
         public static final double kAllowedError = 0.005;
         public static final double kRampRate = 0.1;
+        
+        public static final double kSpinSpeed = kMaxAngularVelRad;
+        public static final double kDanceMoveSpeed = 3.0; // m/s
 
         //ALL PIDF CONSTANTS
         public static final double kflFF = 0.000158, //Front left wheel feedforward
