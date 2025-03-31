@@ -120,8 +120,8 @@ public class RobotContainer {
     //new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(new ReefLeft(driveSubsystem));
     //new Trigger(() -> Util.checkPOVRight(driver)).onTrue(new ReefRight(driveSubsystem));
     //new JoystickButton(driver, Button.kL2.value).onTrue(new ReefNearest(driveSubsystem));
-    new JoystickButton(driver, Button.kL1.value).onTrue(driveSubsystem.danceMoveLeft());
-    new JoystickButton(driver, Button.kR1.value).onTrue(driveSubsystem.danceMoveRight());
+    new JoystickButton(driver, Button.kL1.value).whileTrue(driveSubsystem.danceMoveLeft());
+    new JoystickButton(driver, Button.kR1.value).whileTrue(driveSubsystem.danceMoveRight());
     new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);
     // should create a do-nothing command that requires the driveSubsystem, causing existing commands using that system to be cancelled?
     new JoystickButton(driver, Button.kCircle.value).onTrue(new InstantCommand(() -> {}, driveSubsystem));

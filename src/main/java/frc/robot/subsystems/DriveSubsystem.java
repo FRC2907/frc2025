@@ -354,7 +354,6 @@ public class DriveSubsystem extends SubsystemBase {
                                          VecBuilder.fill(0.7, 0.7, 0.7));
     }
 
-
     field.setRobotPose(poseEstimator.getEstimatedPosition());
 
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "flVel", frontLeftEnc.getVelocity());
