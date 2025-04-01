@@ -201,14 +201,4 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
   }
-
-  public boolean checkJoystickControl(PS5Controller input, boolean up){
-    double deadband = Control.elevator.kElevatorDriverDeadband;
-    if (Util.checkDriverDeadband(input)){
-      if (up ? input.getLeftY() > deadband : input.getLeftY() < - deadband){
-        return true;
-      }
-    }
-    return false;
-  }
 }

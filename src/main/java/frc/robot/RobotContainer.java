@@ -43,7 +43,7 @@ public class RobotContainer {
   //private final AlgaeClawSubsystem algaeClawSubsystem;
   private final ElevatorSubsystem elevatorSubsystem;
 
-  private RunCommand drive, lockDrive;
+  private RunCommand drive, lockDrive, danceDriveRight, danceDriveLeft;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   public final PS5Controller driver = new PS5Controller(Ports.HID.DRIVER);
@@ -74,6 +74,24 @@ public class RobotContainer {
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
+    danceDriveLeft = new RunCommand(
+      () -> {
+        driveSubsystem.drive(
+          - yLimiter.calculate(driver.getLeftY()),
+          - xLimiter.calculate(driver.getLeftX()),
+          - Control.drivetrain.kSpinSpeed,
+          false);
+      }, driveSubsystem
+    );
+    danceDriveRight = new RunCommand(
+      () -> {
+        driveSubsystem.drive(
+          - yLimiter.calculate(driver.getLeftY()),
+          - xLimiter.calculate(driver.getLeftX()),
+          Control.drivetrain.kSpinSpeed,
+          false);
+      }, driveSubsystem
+    );
     lockDrive = new RunCommand(
       () -> {
         driveSubsystem.lockDrive(
@@ -81,8 +99,8 @@ public class RobotContainer {
           - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMPS, 
           FieldElements.Reef.centerFaces[4],
           true); },
-          driveSubsystem );
-
+          driveSubsystem 
+    );
     drive = new RunCommand(
       () -> {
           driveSubsystem.drive(
@@ -120,8 +138,8 @@ public class RobotContainer {
     //new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(new ReefLeft(driveSubsystem));
     //new Trigger(() -> Util.checkPOVRight(driver)).onTrue(new ReefRight(driveSubsystem));
     //new JoystickButton(driver, Button.kL2.value).onTrue(new ReefNearest(driveSubsystem));
-    new JoystickButton(driver, Button.kL1.value).whileTrue(driveSubsystem.danceMoveLeft());
-    new JoystickButton(driver, Button.kR1.value).whileTrue(driveSubsystem.danceMoveRight());
+    new JoystickButton(driver, Button.kL1.value).whileTrue(danceDriveLeft);
+    new JoystickButton(driver, Button.kR1.value).whileTrue(danceDriveRight);
     new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);
     // should create a do-nothing command that requires the driveSubsystem, causing existing commands using that system to be cancelled?
     new JoystickButton(driver, Button.kCircle.value).onTrue(new InstantCommand(() -> {}, driveSubsystem));
@@ -137,6 +155,9 @@ public class RobotContainer {
     new JoystickButton(operator, Button.kR2.value).onTrue(new ShootSpinUp(algaeClawSubsystem));
     new JoystickButton(operator, Button.kSquare.value).onTrue(new ShootRelease(algaeClawSubsystem));
     new JoystickButton(operator, Button.kL2.value).onTrue(new GrabAlgae(algaeClawSubsystem));/* */
+    //new JoystickButton(operator, Button.kR2.value).whileTrue(algaeClawSubsystem.testShoot());
+    //new Trigger(() -> Util.checkRightJoystickControl(operator, true)) .whileTrue(algaeClawSubsystem.testUp());
+    //new Trigger(() -> Util.checkRightJoystickControl(operator, false)).whileTrue(algaeClawSubsystem.testDown());
 
     new JoystickButton(operator, Button.kCircle.value).onTrue(elevatorSubsystem.reset());
     new JoystickButton(operator, Button.kTriangle.value).onTrue(new CoralStation(elevatorSubsystem));
@@ -147,8 +168,8 @@ public class RobotContainer {
     new Trigger(() -> Util.checkPOVLeft(operator) || Util.checkPOVRight(operator)).onTrue(
       new InstantCommand(() -> elevatorSubsystem.switchScoring(), elevatorSubsystem)
     );
-    new Trigger(() -> elevatorSubsystem.checkJoystickControl(operator, true)) .whileTrue(elevatorSubsystem.testUp());
-    new Trigger(() -> elevatorSubsystem.checkJoystickControl(operator, false)).whileTrue(elevatorSubsystem.testDown());
+    new Trigger(() -> Util.checkLeftJoystickControl(operator, true)) .whileTrue(elevatorSubsystem.testUp());
+    new Trigger(() -> Util.checkLeftJoystickControl(operator, false)).whileTrue(elevatorSubsystem.testDown());
 
     //new JoystickButton(operator, Button.kR1.value).whileTrue(new CoralPoop(poopSubsystem));
 

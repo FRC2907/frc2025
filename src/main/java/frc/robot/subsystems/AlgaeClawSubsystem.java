@@ -20,7 +20,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.Control;
 import frc.robot.constants.FieldElements;
@@ -68,8 +68,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
                                     .maxVelocity(3000)
                                     .maxAcceleration(2500);
     shoot.configure(shootConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    shootConfig.apply(new SparkMaxConfig().follow(shoot, true));
-    shootFollower.configure(shootConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    shootFollower.configure(shootConfig.follow(shoot, true), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     
 
     feedforward = new ArmFeedforward(Control.algaeManipulator.kS,
@@ -175,6 +174,16 @@ public class AlgaeClawSubsystem extends SubsystemBase {
      + Control.algaeManipulator.kShootB;
   }
 
+  
+  public RunCommand testUp(){
+    return new RunCommand(() -> arm.set(0.1), this);
+  }
+  public RunCommand testDown(){
+    return new RunCommand(() -> arm.set(-0.1), this);
+  }
+  public RunCommand testShoot(){
+    return new RunCommand(() -> shoot.set(0.3), this);
+  }
 
 
   public boolean hasAlgae() {
@@ -199,7 +208,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     pidController.reset(getArmPosition());
   }
   public void driveArm(double setpoint){
-    setpoint = setpoint * Control.algaeManipulator.kArmConversionFactor;
+    //setpoint = setpoint * Control.algaeManipulator.kArmConversionFactor; i don't think this is necessary???
     double pidCalculation = pidController.calculate(getArmPosition(), armSetpoint);
     double feedforwardCalculation = feedforward.calculate(
       pidController.getSetpoint().position, pidController.getSetpoint().velocity);

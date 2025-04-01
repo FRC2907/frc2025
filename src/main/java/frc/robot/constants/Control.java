@@ -88,8 +88,8 @@ public class Control {
         public static final double GEAR_RATIO = 36.0;
 
         public static final double kArmConversionFactor = GEAR_RATIO / Units.degreesToRadians(360.0);
-        public static final double kArmDownLimit = Units.degreesToRadians(30); //TODO find
-        public static final double kArmUpLimit = Units.degreesToRadians(135); //TODO find
+        public static final double kArmDownLimit = Units.degreesToRadians(-45); //TODO tune
+        public static final double kArmUpLimit = Units.degreesToRadians(160); //TODO tune
         public static final double kMaxVelocity = Units.degreesToRadians(180), //TODO tune (deg/s)
                                    kMaxAcceleration = Units.degreesToRadians(360); //TODO tune (deg/s^2)
         public static final double kAllowedArmError = Units.degreesToRadians(1.5); //TODO tune

@@ -28,6 +28,24 @@ public class Util {
         return value;
     }
 
+    public static boolean checkLeftJoystickControl(PS5Controller input, boolean up){
+        double deadband = Control.elevator.kElevatorDriverDeadband;
+        if (Util.checkDriverDeadband(input)){
+          if (up ? input.getLeftY() > deadband : input.getLeftY() < - deadband){
+            return true;
+          }
+        }
+        return false;
+    }
+    public static boolean checkRightJoystickControl(PS5Controller input, boolean up){
+        double deadband = Control.elevator.kElevatorDriverDeadband;
+        if (Util.checkDriverDeadband(input)){
+          if (up ? input.getRightY() > deadband : input.getRightY() < - deadband){
+            return true;
+          }
+        }
+        return false;
+    }
     public static boolean checkDriverDeadband(PS5Controller input){
         return Math.abs(input.getLeftY()) >  Control.kDriverDeadband
             || Math.abs(input.getLeftX()) >  Control.kDriverDeadband
