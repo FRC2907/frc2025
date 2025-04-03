@@ -160,7 +160,7 @@ public class RobotContainer {
     //new Trigger(() -> Util.checkRightJoystickControl(operator, false)).whileTrue(algaeClawSubsystem.testDown());
 
     new JoystickButton(operator, Button.kCircle.value).onTrue(elevatorSubsystem.reset());
-    new JoystickButton(operator, Button.kTriangle.value).onTrue(new CoralStation(elevatorSubsystem));
+    new JoystickButton(operator, Button.kTriangle.value).onTrue(elevatorSubsystem.coralStationCommand());
     new Trigger(() -> Util.checkPOVUp(operator)).toggleOnTrue(
       new InstantCommand(() -> new ElevatorUp(elevatorSubsystem).schedule()));
     new Trigger(() -> Util.checkPOVDown(operator)).toggleOnTrue(

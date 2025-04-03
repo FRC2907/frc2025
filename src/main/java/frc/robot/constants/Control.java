@@ -45,10 +45,10 @@ public class Control {
         public static final double kDanceMoveSpeed = 3.0; // m/s
 
         //ALL PIDF CONSTANTS
-        public static final double kflFF = 0.000158, //Front left wheel feedforward
+        public static final double kflFF = 0.00015, //Front left wheel feedforward
                                    kfrFF = 0.000149, //Front right wheel feedforward
                                    krlFF = 0.00015, //Rear left wheel feedforward
-                                   krrFF = 0.000156; //Rear right wheel feedforward
+                                   krrFF = 0.000152; //Rear right wheel feedforward
         public static final double kP = 4e-7, //All wheels P constant
                                    kI = 1e-7, //All wheels I constant
                                    kD = 3;    //All wheels D constant

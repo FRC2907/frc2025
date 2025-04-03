@@ -13,11 +13,11 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.constants.Ports;
 import frc.robot.util.Util;
 import frc.robot.constants.Control;
@@ -145,6 +145,25 @@ public class ElevatorSubsystem extends SubsystemBase {
                                 return setpoint; }
   public double manualDown()  { setSetpoint(setpoint - Control.elevator.kManualControlFactor);
                                 return setpoint; }
+  
+  public Command coralStationCommand(){
+    return runEnd(() -> driveMotors(coralStation()), () -> stop())
+      .beforeStarting(() -> pidReset(), this)
+      .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
+      .until(this::atSetpoint);
+  }
+  public Command elevatorUp(){
+    return runEnd(() -> elevatorRun(), () -> stop())
+      .beforeStarting(() -> { pidReset(); addIndex(); }, this)
+      .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
+      .until(this::atSetpoint);
+  }
+  public Command elevatorDown(){
+    return runEnd(() -> elevatorRun(), () -> stop())
+      .beforeStarting(() -> { pidReset(); subtractIndex(); }, this)
+      .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
+      .until(this::atSetpoint);
+  }
 
 
 
