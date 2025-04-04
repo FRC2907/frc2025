@@ -323,11 +323,6 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   private void driveMotors(double frontLeftSpeed, double frontRightSpeed, double rearLeftSpeed, double rearRightSpeed){
-    SmartDashboard.putNumber(SUBSYSTEM_NAME + "flSetPoint", frontLeftSpeed);
-    SmartDashboard.putNumber(SUBSYSTEM_NAME + "frSetPoint", frontRightSpeed);
-    SmartDashboard.putNumber(SUBSYSTEM_NAME + "rlSetPoint", rearLeftSpeed);
-    SmartDashboard.putNumber(SUBSYSTEM_NAME + "rrSetPoint", rearRightSpeed);
-
     frontLeftSpeed *= Control.drivetrain.GEAR_RATIO;
     frontRightSpeed *= Control.drivetrain.GEAR_RATIO;
     rearLeftSpeed *= Control.drivetrain.GEAR_RATIO;
@@ -336,6 +331,11 @@ public class DriveSubsystem extends SubsystemBase {
     frontRightMotor.getClosedLoopController().setReference(frontRightSpeed, ControlType.kMAXMotionVelocityControl);
     rearLeftMotor  .getClosedLoopController().setReference(rearLeftSpeed,   ControlType.kMAXMotionVelocityControl);
     rearRightMotor .getClosedLoopController().setReference(rearRightSpeed,  ControlType.kMAXMotionVelocityControl);
+    
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "flSetPoint", frontLeftSpeed);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "frSetPoint", frontRightSpeed);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "rlSetPoint", rearLeftSpeed);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "rrSetPoint", rearRightSpeed);
   }
 
   private static String SUBSYSTEM_NAME = "Drive: ";
