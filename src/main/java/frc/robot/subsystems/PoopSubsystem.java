@@ -59,12 +59,14 @@ public class PoopSubsystem extends SubsystemBase{
         return new WaitUntilCommand(() -> !hasCoral());
     }
 
+    private static String SUBSYSTEM_NAME = "Poop: ";
+
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
-        SmartDashboard.putNumber("current", shoot.getOutputCurrent());
-        SmartDashboard.putBoolean("shot", coralShot);
-        SmartDashboard.putNumber("sensor", sensor.getRange());
+        SmartDashboard.putNumber(SUBSYSTEM_NAME + "current", shoot.getOutputCurrent());
+        SmartDashboard.putBoolean(SUBSYSTEM_NAME + "shot", coralShot);
+        SmartDashboard.putNumber(SUBSYSTEM_NAME + "sensor", sensor.getRange());
     }
 
     @Override

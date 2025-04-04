@@ -131,11 +131,8 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
 
-  public void pidTune(double speed){
-    frontLeftSpeed =  speed;
-    frontRightSpeed = speed;
-    rearLeftSpeed =   speed;
-    rearRightSpeed =  speed;
+  public Command pidTune(double speed){
+    return run(() -> driveMotors(speed, speed, speed, speed));
   }
   public void stop(){
     frontLeftSpeed = 0;

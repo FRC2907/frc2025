@@ -72,42 +72,7 @@ public class RobotContainer {
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
-    danceDriveLeft = new RunCommand(
-      () -> {
-        driveSubsystem.drive(
-          - yLimiter.calculate(driver.getLeftY()),
-          - xLimiter.calculate(driver.getLeftX()),
-          - Control.drivetrain.kSpinSpeed,
-          false);
-      }, driveSubsystem
-    );
-    danceDriveRight = new RunCommand(
-      () -> {
-        driveSubsystem.drive(
-          - yLimiter.calculate(driver.getLeftY()),
-          - xLimiter.calculate(driver.getLeftX()),
-          Control.drivetrain.kSpinSpeed,
-          false);
-      }, driveSubsystem
-    );
-    lockDrive = new RunCommand(
-      () -> {
-        driveSubsystem.lockDrive(
-          - yLimiter.calculate(driver.getLeftY()) * Control.drivetrain.kMaxVelMPS,
-          - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMPS, 
-          FieldElements.Reef.centerFaces[4],
-          true); },
-          driveSubsystem 
-    );
-    drive = new RunCommand(
-      () -> {
-          driveSubsystem.drive(
-            - yLimiter.calculate(MathUtil.applyDeadband(driver.getLeftY(), 0.1)) * Control.drivetrain.kMaxVelMPS,
-            - xLimiter.calculate(MathUtil.applyDeadband(driver.getLeftX(), 0.1)) * Control.drivetrain.kMaxVelMPS,
-            - rotLimiter.calculate(MathUtil.applyDeadband(driver.getRightX(), 0.1)) * Control.drivetrain.kMaxAngularVelRad, 
-            false); }, 
-            driveSubsystem
-    );
+    kindaUgly();
     driveSubsystem.setDefaultCommand(drive);
 
     configureBindings();
@@ -197,5 +162,44 @@ public class RobotContainer {
 
   public void disabledPeriodic(){
     driveSubsystem.stop();
+  }
+
+  private void kindaUgly(){
+    danceDriveLeft = new RunCommand(
+      () -> {
+        driveSubsystem.drive(
+          - yLimiter.calculate(driver.getLeftY()),
+          - xLimiter.calculate(driver.getLeftX()),
+          - Control.drivetrain.kSpinSpeed,
+          false);
+      }, driveSubsystem
+    );
+    danceDriveRight = new RunCommand(
+      () -> {
+        driveSubsystem.drive(
+          - yLimiter.calculate(driver.getLeftY()),
+          - xLimiter.calculate(driver.getLeftX()),
+          Control.drivetrain.kSpinSpeed,
+          false);
+      }, driveSubsystem
+    );
+    lockDrive = new RunCommand(
+      () -> {
+        driveSubsystem.lockDrive(
+          - yLimiter.calculate(driver.getLeftY()) * Control.drivetrain.kMaxVelMPS,
+          - xLimiter.calculate(driver.getLeftX()) * Control.drivetrain.kMaxVelMPS, 
+          FieldElements.Reef.centerFaces[4],
+          true); },
+          driveSubsystem 
+    );
+    drive = new RunCommand(
+      () -> {
+          driveSubsystem.drive(
+            - yLimiter.calculate(MathUtil.applyDeadband(driver.getLeftY(), 0.1)) * Control.drivetrain.kMaxVelMPS,
+            - xLimiter.calculate(MathUtil.applyDeadband(driver.getLeftX(), 0.1)) * Control.drivetrain.kMaxVelMPS,
+            - rotLimiter.calculate(MathUtil.applyDeadband(driver.getRightX(), 0.1)) * Control.drivetrain.kMaxAngularVelRad, 
+            false); }, 
+            driveSubsystem
+    );
   }
 }
