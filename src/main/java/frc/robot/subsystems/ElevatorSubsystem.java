@@ -12,10 +12,8 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.constants.Ports;
@@ -28,7 +26,6 @@ public class ElevatorSubsystem extends SubsystemBase {
   private static SparkFlexConfig config;
   private ElevatorFeedforward feedforward;
   private ProfiledPIDController pidController;
-  private double setpoint;
   private int index;
   private int indexMax;
   private boolean algaeScoring;
@@ -37,7 +34,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     motorFollower = new SparkFlex(Ports.elevator.FOLLOWER, Control.elevator.MOTOR_TYPE);
     config = new SparkFlexConfig();
     config.idleMode(IdleMode.kBrake)
-          .inverted(true)
+          .inverted(false)
           .smartCurrentLimit(0, 40)
           .softLimit.forwardSoftLimit(4 * Control.elevator.GEAR_RATIO)
                     .forwardSoftLimitEnabled(true)
@@ -57,10 +54,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                                               Control.elevator.kI, 
                                               Control.elevator.kD, 
                                               Control.elevator.kConstraints);
-    //pidController.setTolerance(Control.elevator.kAllowedError);
 
-    
-    setpoint = 0;
     index = 0;
     indexMax = 3;
 
@@ -79,7 +73,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public void stop(){
     motor.stopMotor();
-    setpoint = getHeight();
   }
 
   public void addIndex(){
@@ -93,22 +86,6 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
   public void switchScoring(){
     algaeScoring = !algaeScoring;
-  }
-
-  public RunCommand testDown(){
-    return new RunCommand(() -> motor.set(0.05), this);
-  }
-  public RunCommand testUp(){
-    return new RunCommand(() -> motor.set(-0.05), this);
-  }
-  public RunCommand moreTest(){
-    return new RunCommand(() -> { motor.setVoltage(1); System.out.println("working");}, this);
-  }
-  public Command moreMoreTest(){
-    return runOnce(() -> driveMotors(setpoint + Units.inchesToMeters(5)));
-  }
-  public Command reset(){
-    return runOnce(() -> motor.getEncoder().setPosition(0));
   }
 
   public void elevatorRun(){
@@ -125,29 +102,25 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
   }
 
-  public double ground()      { setSetpoint(Control.elevator.kDownLimit);
-                                return Control.elevator.kDownLimit; }
-  public double neutral()     { setSetpoint(Control.elevator.kNeutral);
-                                return Control.elevator.kNeutral; }
-  public double coralStation(){ setSetpoint(Control.elevator.kCoralStation);
-                                return Control.elevator.kCoralStation; }
-  public double L1()          { setSetpoint(Control.elevator.kL1);
-                                return Control.elevator.kL1; }
-  public double L2()          { setSetpoint(Control.elevator.kL2);
-                                return Control.elevator.kL2; }
-  public double L3()          { setSetpoint(Control.elevator.kL3);
-                                return Control.elevator.kL3; }
-  public double A1()          { setSetpoint(Control.elevator.kA1);
-                                return Control.elevator.kA1; }
-  public double A2()          { setSetpoint(Control.elevator.kA2);
-                                return Control.elevator.kA2; }
-  public double manualUp()    { setSetpoint(setpoint + Control.elevator.kManualControlFactor);
-                                return setpoint; }
-  public double manualDown()  { setSetpoint(setpoint - Control.elevator.kManualControlFactor);
-                                return setpoint; }
+  public double ground()      { return Control.elevator.kDownLimit; }
+  public double neutral()     { return Control.elevator.kNeutral; }
+  public double coralStation(){ return Control.elevator.kCoralStation; }
+  public double L1()          { return Control.elevator.kL1; }
+  public double L2()          { return Control.elevator.kL2; }
+  public double L3()          { return Control.elevator.kL3; }
+  public double A1()          { return Control.elevator.kA1; }
+  public double A2()          { return Control.elevator.kA2; }
   
 
-
+  public Command reset(){
+    return runOnce(() -> motor.getEncoder().setPosition(0));
+  }
+  public Command manualDown(){
+    return run(() -> motor.set(-0.05));
+  }
+  public Command manualUp(){
+    return run(() -> motor.set(0.05));
+  }
   public Command elevatorUp(){
     return runEnd(() -> elevatorRun(), () -> stop())
       .beforeStarting(() -> { pidReset(); addIndex(); }, this)
@@ -185,9 +158,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
 
 
-  public void setSetpoint(double setpoint){
-    this.setpoint = setpoint;
-  }
   public boolean atSetpoint() {
     return pidController.atGoal();
   }

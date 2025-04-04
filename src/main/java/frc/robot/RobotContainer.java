@@ -95,9 +95,6 @@ public class RobotContainer {
     /*
      * ALL DRIVER BINDINGS
      */
-    // new Trigger(() -> Util.checkDriverDeadband(driver)).whileTrue(
-    //   drive.withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-
     //new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(new ReefLeft(driveSubsystem));
     //new Trigger(() -> Util.checkPOVRight(driver)).onTrue(new ReefRight(driveSubsystem));
     //new JoystickButton(driver, Button.kL2.value).onTrue(new ReefNearest(driveSubsystem));
@@ -131,8 +128,8 @@ public class RobotContainer {
     new Trigger(() -> Util.checkPOVLeft(operator) || Util.checkPOVRight(operator)).onTrue(
       new InstantCommand(() -> elevatorSubsystem.switchScoring(), elevatorSubsystem)
     );
-    new Trigger(() -> Util.checkLeftJoystickControl(operator, true)) .whileTrue(elevatorSubsystem.testUp());
-    new Trigger(() -> Util.checkLeftJoystickControl(operator, false)).whileTrue(elevatorSubsystem.testDown());
+    new Trigger(() -> Util.checkLeftJoystickControl(operator, true)) .whileTrue(elevatorSubsystem.manualDown());
+    new Trigger(() -> Util.checkLeftJoystickControl(operator, false)).whileTrue(elevatorSubsystem.manualUp());
 
     //new JoystickButton(operator, Button.kR1.value).whileTrue(new CoralPoop(poopSubsystem));
 
@@ -153,11 +150,6 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     return autoChooser.getSelected();
-          
-      /*driveSubsystem.runEnd(
-      () -> driveSubsystem.drive(-1.0 * Control.drivetrain.kMaxVelMPS / 6, 0, 0, false),
-      () -> driveSubsystem.drive(0, 0, 0, false))
-      .withTimeout(1.0);*/
   }
 
   public void disabledPeriodic(){

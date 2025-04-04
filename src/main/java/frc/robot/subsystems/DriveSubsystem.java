@@ -131,6 +131,9 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
 
+
+  
+
   public Command pidTune(double speed){
     return run(() -> driveMotors(speed, speed, speed, speed));
   }
@@ -146,11 +149,11 @@ public class DriveSubsystem extends SubsystemBase {
     gyro.reset();
   }
   public void flipGyro(){
-    if (gyroFlip == false)
-      gyroFlip = true;
-    else if (gyroFlip == true)
-      gyroFlip = false;
+    gyroFlip = !gyroFlip;
   }
+
+
+
   public void drive(double xSpeed, double ySpeed, double zRotation, boolean fieldRelative){
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, zRotation);
     MecanumDriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(
@@ -220,6 +223,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
 
+
   private MecanumDriveWheelPositions getWheelPositions(){
     return new MecanumDriveWheelPositions(
       Util.revolutionsToMeters(frontLeftEnc .getPosition(), wheelDiameter) / Control.drivetrain.GEAR_RATIO,
@@ -235,7 +239,6 @@ public class DriveSubsystem extends SubsystemBase {
         Util.RPMToMetersPerSecond(rearLeftEnc  .getVelocity(), wheelDiameter) / Control.drivetrain.GEAR_RATIO, 
         Util.RPMToMetersPerSecond(rearRightEnc .getVelocity(), wheelDiameter) / Control.drivetrain.GEAR_RATIO));
   }
-
   public Rotation2d getRotation2d(){
     return gyroFlip ? gyro.getRotation2d().plus(Rotation2d.fromDegrees(180))
                     : gyro.getRotation2d();
@@ -246,10 +249,11 @@ public class DriveSubsystem extends SubsystemBase {
   public double getHeadingRad(){
     return MathUtil.angleModulus(getRotation2d().getRadians());
   }
-
   public Pose2d getPose2d(){
     return poseEstimator.getEstimatedPosition();
   }
+
+
 
   public PathPlannerPath generatePath(List<Pose2d> goal, Rotation2d endState){
     List<Pose2d> pathPoses = new Stack<Pose2d>();
@@ -336,7 +340,6 @@ public class DriveSubsystem extends SubsystemBase {
 
   private static String SUBSYSTEM_NAME = "Drive: ";
 
-
   @Override
   public void periodic() {
     //LimelightHelpers.SetRobotOrientation(limelight, gyro.getYaw(), 0, 0, 0, 0, 0);
@@ -363,12 +366,8 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "rrPosition", Util.revolutionsToMeters(rearRightEnc.getPosition() / 7.31, wheelDiameter));
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "PoseX", poseEstimator.getEstimatedPosition().getX());
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "PoseY", poseEstimator.getEstimatedPosition().getY());
-
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "heading", getHeadingDeg());
     SmartDashboard.putData("field", field);
-
-    //SmartDashboard.putNumber("index", currentPathIndex);
-    //SmartDashboard.putNumber("otherIndex", closestPoseIndex);
   }
 
   @Override
@@ -376,8 +375,6 @@ public class DriveSubsystem extends SubsystemBase {
 
   private void configure(){
     config = new SparkMaxConfig();
-    /*config.apply(new EncoderConfig().positionConversionFactor(Control.drivetrain.kPositionConversionFactor)
-                                    .velocityConversionFactor(Control.drivetrain.kPositionConversionFactor));*/
     config.smartCurrentLimit(Control.CURRENT_LIMIT)
           .idleMode(IdleMode.kBrake)
           .inverted(false)

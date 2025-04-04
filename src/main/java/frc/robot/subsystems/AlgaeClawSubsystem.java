@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.Control;
@@ -94,77 +95,64 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   }
 
 
-  public static void stop(){
+  public void stop(){
     arm.stopMotor();
     shoot.stopMotor();
     shootFollower.stopMotor();
   }
+  public void armStop(){
+    arm.stopMotor();
+  }
+  public void shootStop(){
+    shoot.stopMotor();
+    shootFollower.stopMotor();
+  }
 
-  private static void armSetSetpoint(double angle){
-    armSetpoint = angle;
-  }
-  private static void shootSetSetpoint(double velRPM){
-    shootSetpoint = velRPM;
-  }
+
+
 
   public void poop(){
-    shootSetSetpoint(Control.algaeManipulator.kIntakeSpeed);
-    driveShoot(shootSetpoint);
+    driveShoot(Control.algaeManipulator.kIntakeSpeed);
   }
   public void stow(){
-    armSetSetpoint(Control.algaeManipulator.kStowAngle);
-    shootSetSetpoint(Control.algaeManipulator.kStopSpeed);
-    driveArm(armSetpoint);
-    driveShoot(shootSetpoint);
+    driveArm(Control.algaeManipulator.kStowAngle);
+    driveShoot(Control.algaeManipulator.kStopSpeed);
   }
   public void intakeAngle(){
-    armSetSetpoint(Control.algaeManipulator.kIntakeAngle);
-    driveArm(armSetpoint);
+    driveArm(Control.algaeManipulator.kIntakeAngle);
   }
   public void intake(){
-    armSetSetpoint(Control.algaeManipulator.kIntakeAngle);
-    shootSetSetpoint(Control.algaeManipulator.kIntakeSpeed);
-    driveArm(armSetpoint);
-    driveShoot(shootSetpoint);
+    driveArm(Control.algaeManipulator.kIntakeAngle);
+    driveShoot(Control.algaeManipulator.kIntakeSpeed);
   }
   public void processorAngle(){
-    armSetSetpoint(Control.algaeManipulator.kProcessorAngle);
-    driveArm(armSetpoint);
+    driveArm(Control.algaeManipulator.kProcessorAngle);
   }
   public void processor(){
-    armSetSetpoint(Control.algaeManipulator.kProcessorAngle);
-    shootSetSetpoint(Control.algaeManipulator.kIntakeSpeed);
-    driveArm(armSetpoint);
-    driveShoot(shootSetpoint);
+    driveArm(Control.algaeManipulator.kProcessorAngle);
+    driveShoot(Control.algaeManipulator.kIntakeSpeed);
   }
   public void fixedShoot(){
-    armSetSetpoint(Control.algaeManipulator.kFixedShootAngle);
-    shootSetSetpoint(Control.algaeManipulator.kFixedShootSpeed);;
-    driveArm(armSetpoint);
-    driveShoot(shootSetpoint);
+    driveArm(Control.algaeManipulator.kFixedShootAngle);
+    driveShoot(Control.algaeManipulator.kFixedShootSpeed);;
   }
   public void grab(){
-    armSetSetpoint(Control.algaeManipulator.kGrabAngle);
-    shootSetSetpoint(Control.algaeManipulator.kGrabSpeed);
-    driveArm(armSetpoint);
-    driveShoot(shootSetpoint);
+    driveArm(Control.algaeManipulator.kGrabAngle);
+    driveShoot(Control.algaeManipulator.kGrabSpeed);
   }
   public void grabGround(){
-    armSetSetpoint(Control.algaeManipulator.kGroundGrabAngle);
-    shootSetSetpoint(Control.algaeManipulator.kGrabSpeed);
-    driveArm(armSetpoint);
-    driveShoot(shootSetpoint);
+    driveArm(Control.algaeManipulator.kGroundGrabAngle);
+    driveShoot(Control.algaeManipulator.kGrabSpeed);
   }
   public void shootSpinUp(){
-    armSetSetpoint(Control.algaeManipulator.kStowAngle);
-    shootSetSetpoint(calculateSpeed(DriveSubsystem.getInstance().getPose2d(),
-                                    ElevatorSubsystem.getInstance().getHeight()));
-    driveArm(armSetpoint);
-    driveShoot(shootSetpoint);
+    driveArm(Control.algaeManipulator.kStowAngle);
+    driveShoot(calculateSpeed(DriveSubsystem.getInstance().getPose2d(),
+                              ElevatorSubsystem.getInstance().getHeight()));
   }
   public void shootRelease(){
-    armSetSetpoint(Control.algaeManipulator.kFixedShootAngle);
-    driveArm(armSetpoint);
+    driveArm(Control.algaeManipulator.kFixedShootAngle);
+    driveShoot(calculateSpeed(DriveSubsystem.getInstance().getPose2d(),
+                              ElevatorSubsystem.getInstance().getHeight()));
   }
 
   private double calculateSpeed(Pose2d point, double height){
@@ -185,6 +173,11 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     return new RunCommand(() -> shoot.set(0.3), this);
   }
 
+  public Command algaePoop(){ return runEnd(() -> poop(), () -> stow()); }
+  public Command intakeAlgae(){ return run(() -> intakeAngle()).until(this::atArmSetPoint); }
+  public Command shootPrep(){ return run(() -> shootSpinUp()); }
+  public Command shoot(){ return run(() -> shootRelease()); }
+
 
   public boolean hasAlgae() {
     return colorSensor.getProximity() > Control.algaeManipulator.kProximityBand;
@@ -195,13 +188,13 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   public boolean atShooterSetPoint() {
     return Math.abs(shoot.getEncoder().getVelocity() - shootSetpoint) < Control.algaeManipulator.kAllowedShootError;
   }
-
   public double getArmPosition(){
     return Units.degreesToRadians(absEncoder.getPosition() * 360);
   }
   public double getSpeed(){
     return shoot.getEncoder().getVelocity();
   }
+
 
 
   public void pidReset(){

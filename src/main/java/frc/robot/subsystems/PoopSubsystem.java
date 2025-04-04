@@ -48,16 +48,23 @@ public class PoopSubsystem extends SubsystemBase{
         shoot.set(Control.coralManipulator.kStopSpeed);
     }
 
-    public boolean hasCoral(){
-        return sensor.getRange() < Control.coralManipulator.kProximityBand;
+    public Command coralPoop(){
+        return runEnd(() -> shoot(), () -> stop()).withTimeout(1);
     }
-
     public Command coralWaitIntakeCommand(){
         return new WaitUntilCommand(this::hasCoral);
     }
     public Command coralWaitShootCommand(){
         return new WaitUntilCommand(() -> !hasCoral());
     }
+
+
+
+    public boolean hasCoral(){
+        return sensor.getRange() < Control.coralManipulator.kProximityBand;
+    }
+
+
 
     private static String SUBSYSTEM_NAME = "Poop: ";
 
