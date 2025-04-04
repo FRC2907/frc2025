@@ -146,12 +146,8 @@ public class ElevatorSubsystem extends SubsystemBase {
   public double manualDown()  { setSetpoint(setpoint - Control.elevator.kManualControlFactor);
                                 return setpoint; }
   
-  public Command coralStationCommand(){
-    return runEnd(() -> driveMotors(coralStation()), () -> stop())
-      .beforeStarting(() -> pidReset(), this)
-      .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
-      .until(this::atSetpoint);
-  }
+
+
   public Command elevatorUp(){
     return runEnd(() -> elevatorRun(), () -> stop())
       .beforeStarting(() -> { pidReset(); addIndex(); }, this)
@@ -162,6 +158,28 @@ public class ElevatorSubsystem extends SubsystemBase {
     return runEnd(() -> elevatorRun(), () -> stop())
       .beforeStarting(() -> { pidReset(); subtractIndex(); }, this)
       .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
+      .until(this::atSetpoint);
+  }
+  public Command coralStationCommand(){
+    return runEnd(() -> driveMotors(coralStation()), () -> stop())
+      .beforeStarting(() -> pidReset(), this)
+      .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
+      .until(this::atSetpoint);
+  }
+  
+  public Command L1Command(){
+    return runEnd(() -> driveMotors(L1()), () -> stop())
+      .beforeStarting(() -> pidReset())
+      .until(this::atSetpoint);
+  }
+  public Command L2Command(){
+    return runEnd(() -> driveMotors(L2()), () -> stop())
+      .beforeStarting(() -> pidReset())
+      .until(this::atSetpoint);
+  }
+  public Command L3Command(){
+    return runEnd(() -> driveMotors(L3()), () -> stop())
+      .beforeStarting(() -> pidReset())
       .until(this::atSetpoint);
   }
 
@@ -175,6 +193,12 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
   public double getHeight(){
     return motor.getEncoder().getPosition() * Control.elevator.kConversionFactor + Control.elevator.kOffset;
+  }
+  public Command getReefCommand(int level){
+    if (level == 1) return L1Command();
+    if (level == 2) return L2Command();
+    if (level == 3) return L3Command();
+    return L3Command();
   }
 
   private static String SUBSYSTEM_NAME = "Elevator: ";

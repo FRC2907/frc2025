@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import frc.robot.commands.*;
-import frc.robot.commands.elevator.CoralStation;
 import frc.robot.commands.elevator.ElevatorDown;
 import frc.robot.commands.elevator.ElevatorUp;
 import frc.robot.constants.*;
@@ -64,12 +62,12 @@ public class RobotContainer {
     
     /*NamedCommands.registerCommand("Coral Poop", new CoralPoop(poopSubsystem));
     NamedCommands.registerCommand("Wait Coral Intake", poopSubsystem.coralWaitIntakeCommand());
-    NamedCommands.registerCommand("Wait Coral Shoot", poopSubsystem.coralWaitShootCommand());
+    NamedCommands.registerCommand("Wait Coral Shoot", poopSubsystem.coralWaitShootCommand());*/
 
     NamedCommands.registerCommand("Coral Station", elevatorSubsystem.coralStationCommand());
-    NamedCommands.registerCommand("L1", new L1(elevatorSubsystem).andThen(new CoralPoop(poopSubsystem)));
-    NamedCommands.registerCommand("L2", new L2(elevatorSubsystem).andThen(new CoralPoop(poopSubsystem)));
-    NamedCommands.registerCommand("L3", new L3(elevatorSubsystem).andThen(new CoralPoop(poopSubsystem)));*/
+    NamedCommands.registerCommand("L1", elevatorSubsystem.L1Command());
+    NamedCommands.registerCommand("L2", elevatorSubsystem.L2Command());
+    NamedCommands.registerCommand("L3", elevatorSubsystem.L3Command());
 
 
     autoChooser = AutoBuilder.buildAutoChooser();
