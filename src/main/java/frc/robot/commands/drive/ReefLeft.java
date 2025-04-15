@@ -33,7 +33,6 @@ public class ReefLeft extends Command {
   public void initialize() {
     Command cmd = AutoBuilder.pathfindThenFollowPath(driveSubsystem.getPathLeft(), Control.drivetrain.kPathConstraints);
     cmd.addRequirements(driveSubsystem);
-    cmd.withInterruptBehavior(InterruptionBehavior.kCancelSelf);
     cmd.schedule();
   }
 

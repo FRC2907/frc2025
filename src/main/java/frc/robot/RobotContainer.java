@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import frc.robot.commands.drive.ReefLeft;
+import frc.robot.commands.drive.ReefNearest;
+import frc.robot.commands.drive.ReefRight;
 import frc.robot.commands.elevator.ElevatorDown;
 import frc.robot.commands.elevator.ElevatorUp;
 import frc.robot.constants.*;
@@ -23,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -95,9 +99,10 @@ public class RobotContainer {
     /*
      * ALL DRIVER BINDINGS
      */
-    //new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(new ReefLeft(driveSubsystem));
-    //new Trigger(() -> Util.checkPOVRight(driver)).onTrue(new ReefRight(driveSubsystem));
-    //new JoystickButton(driver, Button.kL2.value).onTrue(new ReefNearest(driveSubsystem));
+    new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(new ReefLeft(driveSubsystem));
+    new Trigger(() -> Util.checkPOVRight(driver)).onTrue(new ReefRight(driveSubsystem));
+    new JoystickButton(driver, Button.kL2.value).onTrue(new InstantCommand(() -> AutoBuilder.pathfindThenFollowPath(driveSubsystem.getNearestPath(), Control.drivetrain.kPathConstraints)
+    .withInterruptBehavior(InterruptionBehavior.kCancelSelf).schedule()));
     new JoystickButton(driver, Button.kL1.value).whileTrue(danceDriveLeft);
     new JoystickButton(driver, Button.kR1.value).whileTrue(danceDriveRight);
     new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);

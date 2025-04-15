@@ -33,7 +33,6 @@ public class ReefNearest extends Command {
   public void initialize() {
     Command cmd = AutoBuilder.pathfindThenFollowPath(driveSubsystem.getNearestPath(), Control.drivetrain.kPathConstraints);
     cmd.addRequirements(driveSubsystem);
-    cmd.withInterruptBehavior(InterruptionBehavior.kCancelSelf);
     cmd.schedule();
   }
 

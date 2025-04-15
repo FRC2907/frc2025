@@ -71,6 +71,17 @@ public class ElevatorSubsystem extends SubsystemBase {
 
 
 
+  private void levelDisplay(){
+    for (int i = 0; i < indexMax; i++){
+      if (index != i && index != 0){
+        SmartDashboard.putBoolean("L" + i, false);
+      } else if (index == i && index != 0){
+        SmartDashboard.putBoolean("L" + i, true);
+      }
+    }
+  }
+
+
   public void stop(){
     motor.stopMotor();
   }
@@ -194,6 +205,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    levelDisplay();
     if (this.getCurrentCommand() == null){
       motor.stopMotor();
     }
