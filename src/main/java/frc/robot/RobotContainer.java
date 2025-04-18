@@ -101,8 +101,7 @@ public class RobotContainer {
      */
     new Trigger(() -> Util.checkPOVLeft(driver)).onTrue(new ReefLeft(driveSubsystem));
     new Trigger(() -> Util.checkPOVRight(driver)).onTrue(new ReefRight(driveSubsystem));
-    new JoystickButton(driver, Button.kL2.value).onTrue(new InstantCommand(() -> AutoBuilder.pathfindThenFollowPath(driveSubsystem.getNearestPath(), Control.drivetrain.kPathConstraints)
-    .withInterruptBehavior(InterruptionBehavior.kCancelSelf).schedule()));
+    new JoystickButton(driver, Button.kL2.value).onTrue(new ReefNearest(driveSubsystem));
     new JoystickButton(driver, Button.kL1.value).whileTrue(danceDriveLeft);
     new JoystickButton(driver, Button.kR1.value).whileTrue(danceDriveRight);
     new JoystickButton(driver, Button.kR2.value).whileTrue(lockDrive);

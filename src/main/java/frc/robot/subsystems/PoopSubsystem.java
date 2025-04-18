@@ -25,7 +25,7 @@ public class PoopSubsystem extends SubsystemBase{
         config = new SparkMaxConfig();
         config.smartCurrentLimit(40)
               .idleMode(IdleMode.kBrake)
-              .inverted(false);
+              .inverted(true);
         shoot.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         sensor = new TimeOfFlight(Ports.manipulator.TOF_SENSOR);

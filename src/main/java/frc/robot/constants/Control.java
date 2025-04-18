@@ -55,10 +55,10 @@ public class Control {
         public static final double kHeadingP = 40,
                                    kHeadingD = 8.5;
         //PathPlanner PID constants
-        public static final double kPPP = 18.5, //PathPlanner translational P constant
+        public static final double kPPP = 15.0, //PathPlanner translational P constant
                                    kPPI = 0.0,    //PathPlanner translational I constant
-                                   kPPD = 2.5;  //PathPlanner translational D constant
-        public static final double kPPRotP = 15.0, //PathPlanner rotational P constant
+                                   kPPD = 50.0;  //PathPlanner translational D constant
+        public static final double kPPRotP = 0.0, //PathPlanner rotational P constant 15.0
                                    kPPRotI = 0.0,   //PathPlanner rotational I constant
                                    kPPRotD = 0.0;   //PathPlanner rotational D constant
         public static final PPHolonomicDriveController PPDriveController = new PPHolonomicDriveController(

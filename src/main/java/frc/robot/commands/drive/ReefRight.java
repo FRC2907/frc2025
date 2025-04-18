@@ -25,7 +25,6 @@ public class ReefRight extends Command {
     driveSubsystem = subsystem;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(subsystem);
-    //this.withInterruptBehavior(InterruptionBehavior.kCancelSelf);
   }
 
   // Called when the command is initially scheduled.

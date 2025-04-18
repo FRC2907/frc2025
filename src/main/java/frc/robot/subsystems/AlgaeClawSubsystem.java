@@ -5,7 +5,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.ColorSensorV3;
-import com.revrobotics.spark.SparkAbsoluteEncoder;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -35,7 +35,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   private SparkMaxConfig armConfig, shootConfig;
   private static double armSetpoint, shootSetpoint;
   private static ColorSensorV3 colorSensor;
-  private SparkAbsoluteEncoder absEncoder;
+  private RelativeEncoder absEncoder;
   private ArmFeedforward feedforward;
   private ProfiledPIDController pidController;
 
@@ -43,7 +43,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     arm = new SparkMax(Ports.manipulator.ALGAE_ARM, Control.algaeManipulator.MOTOR_TYPE);
     armConfig = new SparkMaxConfig();
     armConfig.idleMode(IdleMode.kBrake)
-             .inverted(false)
+             .inverted(true)
              .smartCurrentLimit(0, 40)
              .softLimit.forwardSoftLimit(180)
                        .forwardSoftLimitEnabled(true)
@@ -82,7 +82,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
                                               Control.algaeManipulator.kConstraints);
 
 
-    absEncoder = arm.getAbsoluteEncoder();
+    absEncoder = arm.getAlternateEncoder();
     colorSensor = new ColorSensorV3(Ports.manipulator.COLOR_SENSOR);
   }
 
@@ -173,7 +173,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     return new RunCommand(() -> shoot.set(0.3), this);
   }
 
-  public Command algaePoop(){ return runEnd(() -> poop(), () -> stow()); }
+  public Command algaePoop(){ return run(() -> poop()); }
   public Command intakeAlgae(){ return run(() -> intakeAngle()).until(this::atArmSetPoint); }
   public Command shootPrep(){ return run(() -> shootSpinUp()); }
   public Command shoot(){ return run(() -> shootRelease()); }
@@ -222,6 +222,11 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    if (this.getCurrentCommand() == null){
+      arm.stopMotor();
+      shoot.stopMotor();
+      shootFollower.stopMotor();
+    }
 
     SmartDashboard.putBoolean(SUBSYSTEM_NAME + "algae", hasAlgae());
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "setpoint", armSetpoint);

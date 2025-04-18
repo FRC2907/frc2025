@@ -367,6 +367,7 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "PoseX", poseEstimator.getEstimatedPosition().getX());
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "PoseY", poseEstimator.getEstimatedPosition().getY());
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "heading", getHeadingDeg());
+    SmartDashboard.putString(SUBSYSTEM_NAME + "CurrentPath", getNearestPath().name);
     SmartDashboard.putData("field", field);
   }
 
