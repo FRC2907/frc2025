@@ -9,6 +9,8 @@ import frc.robot.commands.drive.ReefNearest;
 import frc.robot.commands.drive.ReefRight;
 import frc.robot.commands.elevator.ElevatorDown;
 import frc.robot.commands.elevator.ElevatorUp;
+import frc.robot.commands.grabAlgae.GrabAlgae;
+import frc.robot.commands.processor.ProcessorPrep;
 import frc.robot.constants.*;
 import frc.robot.subsystems.*;
 import frc.robot.util.Util;
@@ -26,7 +28,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -41,8 +42,8 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
 
   private final DriveSubsystem driveSubsystem;
-  //private final PoopSubsystem poopSubsystem;
-  //private final AlgaeClawSubsystem algaeClawSubsystem;
+  private final PoopSubsystem poopSubsystem;
+  private final AlgaeClawSubsystem algaeClawSubsystem;
   private final ElevatorSubsystem elevatorSubsystem;
 
   private RunCommand drive, lockDrive, danceDriveRight, danceDriveLeft;
@@ -60,8 +61,8 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     driveSubsystem = DriveSubsystem.getInstance();
-    //poopSubsystem = PoopSubsystem.getInstance();
-    //algaeClawSubsystem = AlgaeClawSubsystem.getInstance();
+    poopSubsystem = PoopSubsystem.getInstance();
+    algaeClawSubsystem = AlgaeClawSubsystem.getInstance();
     elevatorSubsystem = ElevatorSubsystem.getInstance();
     
     /*NamedCommands.registerCommand("Coral Poop", new CoralPoop(poopSubsystem));
@@ -113,15 +114,16 @@ public class RobotContainer {
     /*
      * ALL OPERATOR BINDINGS
      */
-    /*new JoystickButton(operator, Button.kL1.value).onTrue(new AlgaePoop(algaeClawSubsystem));
-    new JoystickButton(operator, Button.kCross.value).onTrue(new IntakeAlgaePrep(algaeClawSubsystem));
+    /*new JoystickButton(operator, Button.kL1.value).onTrue(algaeClawSubsystem.algaePoop());
+    new JoystickButton(operator, Button.kCross.value).onTrue(algaeClawSubsystem.intakeAlgae());
     new JoystickButton(operator, Button.kCircle.value).onTrue(new ProcessorPrep(algaeClawSubsystem, elevatorSubsystem));
-    new JoystickButton(operator, Button.kR2.value).onTrue(new ShootSpinUp(algaeClawSubsystem));
-    new JoystickButton(operator, Button.kSquare.value).onTrue(new ShootRelease(algaeClawSubsystem));
-    new JoystickButton(operator, Button.kL2.value).onTrue(new GrabAlgae(algaeClawSubsystem));/* */
-    //new JoystickButton(operator, Button.kR2.value).whileTrue(algaeClawSubsystem.testShoot());
-    //new Trigger(() -> Util.checkRightJoystickControl(operator, true)) .whileTrue(algaeClawSubsystem.testUp());
-    //new Trigger(() -> Util.checkRightJoystickControl(operator, false)).whileTrue(algaeClawSubsystem.testDown());
+    new JoystickButton(operator, Button.kR2.value).onTrue(algaeClawSubsystem.shootPrep());
+    new JoystickButton(operator, Button.kSquare.value).onTrue(algaeClawSubsystem.shoot());
+    new JoystickButton(operator, Button.kL2.value).onTrue(new GrabAlgae(algaeClawSubsystem));  */
+    new JoystickButton(operator, Button.kR2.value).whileTrue(algaeClawSubsystem.testShoot());
+    new JoystickButton(operator, Button.kL2.value).whileTrue(algaeClawSubsystem.testGrab());
+    new Trigger(() -> Util.checkRightJoystickControl(operator, true)) .whileTrue(algaeClawSubsystem.testUp());
+    new Trigger(() -> Util.checkRightJoystickControl(operator, false)).whileTrue(algaeClawSubsystem.testDown());
 
     new JoystickButton(operator, Button.kCircle.value).onTrue(elevatorSubsystem.reset());
     new JoystickButton(operator, Button.kTriangle.value).onTrue(elevatorSubsystem.coralStationCommand());
@@ -135,11 +137,11 @@ public class RobotContainer {
     new Trigger(() -> Util.checkLeftJoystickControl(operator, true)) .whileTrue(elevatorSubsystem.manualDown());
     new Trigger(() -> Util.checkLeftJoystickControl(operator, false)).whileTrue(elevatorSubsystem.manualUp());
 
-    //new JoystickButton(operator, Button.kR1.value).whileTrue(new CoralPoop(poopSubsystem));
+    new JoystickButton(operator, Button.kR1.value).whileTrue(poopSubsystem.coralPoop());
 
 
-    //new JoystickButton(operator, Button.kPS.value).onTrue(
-      //new InstantCommand(() -> {}, algaeClawSubsystem, elevatorSubsystem, poopSubsystem));
+    new JoystickButton(operator, Button.kPS.value).onTrue(
+      new InstantCommand(() -> {}, algaeClawSubsystem, elevatorSubsystem, poopSubsystem));
 
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,

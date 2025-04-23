@@ -11,9 +11,9 @@ public class Ports {
     }
 
     public class manipulator {
-        public static final int ALGAE_ARM = 12;
-        public static final int ALGAE_SHOOT_LEADER = 13;
-        public static final int ALGAE_SHOOT_FOLLOWER = 14;
+        public static final int ALGAE_SHOOT_LEADER = 12;
+        public static final int ALGAE_SHOOT_FOLLOWER = 13;
+        public static final int ALGAE_ARM = 14;
 
         public static final int CORAL_SHOOTER = 15;
 

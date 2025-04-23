@@ -33,8 +33,8 @@ public class ProcessorScore extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    algaeSubsystem.processorAngle();
-    algaeSubsystem.processor();
+    //algaeSubsystem.processorAngle();
+    //algaeSubsystem.processor();
     elevatorSubsystem.neutral();
   }
 

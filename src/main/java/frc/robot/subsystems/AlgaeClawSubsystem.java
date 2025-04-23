@@ -11,6 +11,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
@@ -46,20 +47,20 @@ public class AlgaeClawSubsystem extends SubsystemBase {
              .inverted(true)
              .smartCurrentLimit(0, 40)
              .softLimit.forwardSoftLimit(180)
-                       .forwardSoftLimitEnabled(true)
+                       .forwardSoftLimitEnabled(false)
                        .reverseSoftLimit(0)
-                       .reverseSoftLimitEnabled(true);
-    armConfig.closedLoop.maxMotion.maxAcceleration(2)
+                       .reverseSoftLimitEnabled(false);
+    armConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+                        .maxMotion.maxAcceleration(2)
                                   .maxVelocity(2)
                                   .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal);
     arm.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    arm.getEncoder().setPosition(0);
 
     shoot =         new SparkMax(Ports.manipulator.ALGAE_SHOOT_LEADER,   Control.algaeManipulator.MOTOR_TYPE);
     shootFollower = new SparkMax(Ports.manipulator.ALGAE_SHOOT_FOLLOWER, Control.algaeManipulator.MOTOR_TYPE);
     shootConfig = new SparkMaxConfig();
     shootConfig.idleMode(IdleMode.kBrake)
-               .inverted(false)
+               .inverted(true)
                .smartCurrentLimit(0, 40)
                .closedLoop.pidf(Control.algaeManipulator.kShootP,
                                 Control.algaeManipulator.kShootI,
@@ -82,7 +83,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
                                               Control.algaeManipulator.kConstraints);
 
 
-    absEncoder = arm.getAlternateEncoder();
+    //absEncoder = arm.getAlternateEncoder();
     colorSensor = new ColorSensorV3(Ports.manipulator.COLOR_SENSOR);
   }
 
@@ -114,7 +115,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   public void poop(){
     driveShoot(Control.algaeManipulator.kIntakeSpeed);
   }
-  public void stow(){
+  /*public void stow(){
     driveArm(Control.algaeManipulator.kStowAngle);
     driveShoot(Control.algaeManipulator.kStopSpeed);
   }
@@ -153,7 +154,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     driveArm(Control.algaeManipulator.kFixedShootAngle);
     driveShoot(calculateSpeed(DriveSubsystem.getInstance().getPose2d(),
                               ElevatorSubsystem.getInstance().getHeight()));
-  }
+  }*/
 
   private double calculateSpeed(Pose2d point, double height){
     return Math.abs(point.getX()
@@ -170,13 +171,16 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     return new RunCommand(() -> arm.set(-0.1), this);
   }
   public RunCommand testShoot(){
-    return new RunCommand(() -> shoot.set(0.3), this);
+    return new RunCommand(() -> shoot.set(0.7), this);
+  }
+  public RunCommand testGrab(){
+    return new RunCommand(() -> shoot.set(-0.15), this);
   }
 
   public Command algaePoop(){ return run(() -> poop()); }
-  public Command intakeAlgae(){ return run(() -> intakeAngle()).until(this::atArmSetPoint); }
-  public Command shootPrep(){ return run(() -> shootSpinUp()); }
-  public Command shoot(){ return run(() -> shootRelease()); }
+  //public Command intakeAlgae(){ return run(() -> intakeAngle()).until(this::atArmSetPoint); }
+  //public Command shootPrep(){ return run(() -> shootSpinUp()); }
+  //public Command shoot(){ return run(() -> shootRelease()); }
 
 
   public boolean hasAlgae() {
@@ -188,16 +192,16 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   public boolean atShooterSetPoint() {
     return Math.abs(shoot.getEncoder().getVelocity() - shootSetpoint) < Control.algaeManipulator.kAllowedShootError;
   }
-  public double getArmPosition(){
+  /*public double getArmPosition(){
     return Units.degreesToRadians(absEncoder.getPosition() * 360);
-  }
+  }*/
   public double getSpeed(){
     return shoot.getEncoder().getVelocity();
   }
 
 
 
-  public void pidReset(){
+  /*public void pidReset(){
     pidController.reset(getArmPosition());
   }
   public void driveArm(double setpoint){
@@ -212,7 +216,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
 
     SmartDashboard.putNumber("feedforwardCalculation", feedforwardCalculation);
     SmartDashboard.putNumber("pidCalculation", pidCalculation);
-  }
+  }*/
   public void driveShoot(double setpoint){
     shoot.getClosedLoopController().setReference(shootSetpoint, ControlType.kMAXMotionVelocityControl);
   }
@@ -230,7 +234,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
 
     SmartDashboard.putBoolean(SUBSYSTEM_NAME + "algae", hasAlgae());
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "setpoint", armSetpoint);
-    SmartDashboard.putNumber(SUBSYSTEM_NAME + "position", Units.radiansToDegrees(absEncoder.getPosition()));
+    //SmartDashboard.putNumber(SUBSYSTEM_NAME + "position", Units.radiansToDegrees(absEncoder.getPosition()));
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "pidSetpoint", pidController.getSetpoint().position);
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "goal", pidController.getGoal().position);
   }
