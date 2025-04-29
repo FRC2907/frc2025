@@ -109,7 +109,7 @@ public class Control {
         public static final double kAllowedShootError = 100;
         public static final double kStopSpeed = 0;
 
-        public static final double kProximityBand = 500; //TODO tune
+        public static final double kProximityBand = 175; //TODO tune
 
         public static final double kDistanceA = -0.611; //TODO tune (y=mx+b for shoot linear regression equation for distance)
         public static final double kHeightA = -0.3; //TODO tune (y=mx+b for shoot linear regression equation for height)

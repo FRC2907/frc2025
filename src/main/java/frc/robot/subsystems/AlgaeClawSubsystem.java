@@ -19,7 +19,7 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -55,6 +55,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
                                   .maxVelocity(2)
                                   .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal);
     arm.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    arm.getEncoder().setPosition(0);
 
     shoot =         new SparkMax(Ports.manipulator.ALGAE_SHOOT_LEADER,   Control.algaeManipulator.MOTOR_TYPE);
     shootFollower = new SparkMax(Ports.manipulator.ALGAE_SHOOT_FOLLOWER, Control.algaeManipulator.MOTOR_TYPE);
@@ -115,7 +116,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   public void poop(){
     driveShoot(Control.algaeManipulator.kIntakeSpeed);
   }
-  /*public void stow(){
+  public void stow(){
     driveArm(Control.algaeManipulator.kStowAngle);
     driveShoot(Control.algaeManipulator.kStopSpeed);
   }
@@ -154,7 +155,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     driveArm(Control.algaeManipulator.kFixedShootAngle);
     driveShoot(calculateSpeed(DriveSubsystem.getInstance().getPose2d(),
                               ElevatorSubsystem.getInstance().getHeight()));
-  }*/
+  }
 
   private double calculateSpeed(Pose2d point, double height){
     return Math.abs(point.getX()
@@ -173,8 +174,11 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   public RunCommand testShoot(){
     return new RunCommand(() -> shoot.set(0.7), this);
   }
+  public RunCommand stowCommand(){
+    return new RunCommand(() -> stow(), this);
+  }
   public Command testGrab(){
-    return runEnd(() -> shoot.set(-0.215), () -> shoot.set(0)).until(this::testCurrent);
+    return runEnd(() -> shoot.set(-0.215), () -> shoot.set(0)).until(this::hasAlgae);
   }
   public void grabby(){
     shoot.set(-0.215);
@@ -216,16 +220,17 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   public boolean atShooterSetPoint() {
     return Math.abs(shoot.getEncoder().getVelocity() - shootSetpoint) < Control.algaeManipulator.kAllowedShootError;
   }
-  /*public double getArmPosition(){
-    return Units.degreesToRadians(absEncoder.getPosition() * 360);
-  }*/
+  public double getArmPosition(){
+    //return Units.degreesToRadians(absEncoder.getPosition() * 360);
+    return Units.degreesToRadians(arm.getEncoder().getPosition() / Control.algaeManipulator.GEAR_RATIO * 360);
+  }
   public double getSpeed(){
     return shoot.getEncoder().getVelocity();
   }
 
 
 
-  /*public void pidReset(){
+  public void pidReset(){
     pidController.reset(getArmPosition());
   }
   public void driveArm(double setpoint){
@@ -238,9 +243,10 @@ public class AlgaeClawSubsystem extends SubsystemBase {
       pidCalculation
     );
 
-    SmartDashboard.putNumber("feedforwardCalculation", feedforwardCalculation);
-    SmartDashboard.putNumber("pidCalculation", pidCalculation);
-  }*/
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "feedforwardCalculation", feedforwardCalculation);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "pidCalculation", pidCalculation);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "pidSetpoint", pidController.getSetpoint().position);
+  }
   public void driveShoot(double setpoint){
     shoot.getClosedLoopController().setReference(setpoint, ControlType.kMAXMotionVelocityControl);
 
@@ -261,10 +267,10 @@ public class AlgaeClawSubsystem extends SubsystemBase {
 
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "shootSpeed", shoot.getEncoder().getVelocity());
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "shootFollowSpeed", shootFollower.getEncoder().getVelocity());
-    SmartDashboard.putBoolean(SUBSYSTEM_NAME + "algae", hasAlgae());
+    SmartDashboard.putBoolean(SUBSYSTEM_NAME + "hasAlgae", hasAlgae());
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "proximity", colorSensor.getProximity());
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "setpoint", armSetpoint);
     //SmartDashboard.putNumber(SUBSYSTEM_NAME + "position", Units.radiansToDegrees(absEncoder.getPosition()));
-    SmartDashboard.putNumber(SUBSYSTEM_NAME + "pidSetpoint", pidController.getSetpoint().position);
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "goal", pidController.getGoal().position);
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "current", shoot.getOutputCurrent());
   }

@@ -80,6 +80,7 @@ public class RobotContainer {
 
     kindaUgly();
     driveSubsystem.setDefaultCommand(drive);
+    //algaeClawSubsystem.setDefaultCommand(algaeClawSubsystem.stowCommand());
 
     configureBindings();
 
@@ -123,7 +124,7 @@ public class RobotContainer {
     new JoystickButton(operator, Button.kSquare.value).onTrue(algaeClawSubsystem.shoot());
     new JoystickButton(operator, Button.kL2.value).onTrue(new GrabAlgae(algaeClawSubsystem));  */
     new JoystickButton(operator, Button.kR2.value).whileTrue(algaeClawSubsystem.testPID());
-    new JoystickButton(operator, Button.kL2.value).onTrue(new TestGrab(algaeClawSubsystem));
+    new JoystickButton(operator, Button.kL2.value).onTrue(algaeClawSubsystem.testGrab());
     new Trigger(() -> Util.checkRightJoystickControl(operator, false)) .whileTrue(algaeClawSubsystem.testUp());
     new Trigger(() -> Util.checkRightJoystickControl(operator, true)).whileTrue(algaeClawSubsystem.testDown());
 
