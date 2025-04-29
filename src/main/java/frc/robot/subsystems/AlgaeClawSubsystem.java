@@ -19,7 +19,7 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -34,8 +34,8 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   private static SparkMax arm,
                           shoot, shootFollower;
   private SparkMaxConfig armConfig, shootConfig;
-  private static double armSetpoint, shootSetpoint;
-  private static ColorSensorV3 colorSensor;
+  private double armSetpoint, shootSetpoint;
+  private ColorSensorV3 colorSensor;
   private RelativeEncoder absEncoder;
   private ArmFeedforward feedforward;
   private ProfiledPIDController pidController;
@@ -66,7 +66,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
                                 Control.algaeManipulator.kShootI,
                                 Control.algaeManipulator.kShootD,
                                 Control.algaeManipulator.kShootFF)
-                          .maxMotion.allowedClosedLoopError(100)
+                          .maxMotion.allowedClosedLoopError(20)
                                     .maxVelocity(3000)
                                     .maxAcceleration(2500);
     shoot.configure(shootConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -173,16 +173,40 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   public RunCommand testShoot(){
     return new RunCommand(() -> shoot.set(0.7), this);
   }
-  public RunCommand testGrab(){
-    return new RunCommand(() -> shoot.set(-0.15), this);
+  public Command testGrab(){
+    return runEnd(() -> shoot.set(-0.215), () -> shoot.set(0)).until(this::testCurrent);
+  }
+  public void grabby(){
+    shoot.set(-0.215);
+  }
+  public void stoppy(){
+    shoot.set(0);
+  }
+  public RunCommand testIntake(){
+    return new RunCommand(() -> shoot.set(-0.3), this);
+  }
+  public RunCommand testPID(){
+    return new RunCommand(() -> driveShoot(6000), this);
   }
 
+  public Command neutral(double setpoint){
+    return run(() -> {
+      shoot.stopMotor();
+      shootFollower.stopMotor();
+      //driveArm(setpoint);
+    });
+  }
   public Command algaePoop(){ return run(() -> poop()); }
   //public Command intakeAlgae(){ return run(() -> intakeAngle()).until(this::atArmSetPoint); }
   //public Command shootPrep(){ return run(() -> shootSpinUp()); }
   //public Command shoot(){ return run(() -> shootRelease()); }
 
 
+  public boolean testCurrent(){
+    if (shoot.getOutputCurrent() > 25)
+      return true;
+    return false;
+  }
   public boolean hasAlgae() {
     return colorSensor.getProximity() > Control.algaeManipulator.kProximityBand;
   }
@@ -218,7 +242,9 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("pidCalculation", pidCalculation);
   }*/
   public void driveShoot(double setpoint){
-    shoot.getClosedLoopController().setReference(shootSetpoint, ControlType.kMAXMotionVelocityControl);
+    shoot.getClosedLoopController().setReference(setpoint, ControlType.kMAXMotionVelocityControl);
+
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "shootSetpoint", setpoint);
   }
 
   private static String SUBSYSTEM_NAME = "Algae: ";
@@ -232,11 +258,15 @@ public class AlgaeClawSubsystem extends SubsystemBase {
       shootFollower.stopMotor();
     }
 
+
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "shootSpeed", shoot.getEncoder().getVelocity());
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "shootFollowSpeed", shootFollower.getEncoder().getVelocity());
     SmartDashboard.putBoolean(SUBSYSTEM_NAME + "algae", hasAlgae());
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "setpoint", armSetpoint);
     //SmartDashboard.putNumber(SUBSYSTEM_NAME + "position", Units.radiansToDegrees(absEncoder.getPosition()));
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "pidSetpoint", pidController.getSetpoint().position);
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "goal", pidController.getGoal().position);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "current", shoot.getOutputCurrent());
   }
 
   @Override

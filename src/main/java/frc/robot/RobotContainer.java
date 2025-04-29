@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.robot.commands.TestGrab;
 import frc.robot.commands.drive.ReefLeft;
 import frc.robot.commands.drive.ReefNearest;
 import frc.robot.commands.drive.ReefRight;
@@ -114,16 +115,17 @@ public class RobotContainer {
     /*
      * ALL OPERATOR BINDINGS
      */
-    /*new JoystickButton(operator, Button.kL1.value).onTrue(algaeClawSubsystem.algaePoop());
-    new JoystickButton(operator, Button.kCross.value).onTrue(algaeClawSubsystem.intakeAlgae());
+    new JoystickButton(operator, Button.kL1.value).whileTrue(algaeClawSubsystem.algaePoop());
+    new JoystickButton(operator, Button.kCross.value).whileTrue(algaeClawSubsystem.testIntake());
+    /*Pnew JoystickButton(operator, Button.kCross.value).onTrue(algaeClawSubsystem.intakeAlgae());
     new JoystickButton(operator, Button.kCircle.value).onTrue(new ProcessorPrep(algaeClawSubsystem, elevatorSubsystem));
     new JoystickButton(operator, Button.kR2.value).onTrue(algaeClawSubsystem.shootPrep());
     new JoystickButton(operator, Button.kSquare.value).onTrue(algaeClawSubsystem.shoot());
     new JoystickButton(operator, Button.kL2.value).onTrue(new GrabAlgae(algaeClawSubsystem));  */
-    new JoystickButton(operator, Button.kR2.value).whileTrue(algaeClawSubsystem.testShoot());
-    new JoystickButton(operator, Button.kL2.value).whileTrue(algaeClawSubsystem.testGrab());
-    new Trigger(() -> Util.checkRightJoystickControl(operator, true)) .whileTrue(algaeClawSubsystem.testUp());
-    new Trigger(() -> Util.checkRightJoystickControl(operator, false)).whileTrue(algaeClawSubsystem.testDown());
+    new JoystickButton(operator, Button.kR2.value).whileTrue(algaeClawSubsystem.testPID());
+    new JoystickButton(operator, Button.kL2.value).onTrue(new TestGrab(algaeClawSubsystem));
+    new Trigger(() -> Util.checkRightJoystickControl(operator, false)) .whileTrue(algaeClawSubsystem.testUp());
+    new Trigger(() -> Util.checkRightJoystickControl(operator, true)).whileTrue(algaeClawSubsystem.testDown());
 
     new JoystickButton(operator, Button.kCircle.value).onTrue(elevatorSubsystem.reset());
     new JoystickButton(operator, Button.kTriangle.value).onTrue(elevatorSubsystem.coralStationCommand());

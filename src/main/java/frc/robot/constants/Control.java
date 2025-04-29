@@ -102,8 +102,8 @@ public class Control {
         public static final double kIntakeAngle = Units.degreesToRadians(110); //TODO find
         public static final double kProcessorAngle = Units.degreesToRadians(-40); //TODO find
 
-        public static final double kIntakeSpeed = 300; //TODO find (rpm)
-        public static final double kOuttakeSpeed = 300; //TODO find (rpm)
+        public static final double kIntakeSpeed = 1000; //TODO find (rpm)
+        public static final double kOuttakeSpeed = 1000; //TODO find (rpm)
         public static final double kGrabSpeed = 100; //TODO find (rpm)
         public static final double kFixedShootSpeed = 2000; //TODO find (rpm)
         public static final double kAllowedShootError = 100;
@@ -115,10 +115,10 @@ public class Control {
         public static final double kHeightA = -0.3; //TODO tune (y=mx+b for shoot linear regression equation for height)
         public static final double kShootB = 11.3; //TODO tune (y=mx+b for shoot linear regression equation for the base value)
 
-        public static final double kShootP = 0.001, //TODO tune
-                                   kShootI = 0, //TODO tune
-                                   kShootD = 0, //TODO tune
-                                   kShootFF = 2.114e-3; //TODO adjust
+        public static final double kShootP = 1e-5, //TODO tune
+                                   kShootI = 7e-7, //TODO tune
+                                   kShootD = 0.0115, //TODO tune
+                                   kShootFF = 0.000119; //TODO adjust 0.0010905
         public static final double kArmP = 0.11, //TODO tune
                                    kArmI = 0, //TODO tune
                                    kArmD = 0; //TODO tune
