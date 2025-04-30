@@ -96,20 +96,20 @@ public class Control {
         public static final double kAlgaeToElevatorOffset = Units.inchesToMeters(5);
 
         public static final double kStowAngle = Units.degreesToRadians(105);//TODO find
-        public static final double kGrabAngle = Units.degreesToRadians(80); //TODO find
+        public static final double kGrabAngle = Units.degreesToRadians(70); //TODO find
         public static final double kGroundGrabAngle = Units.degreesToRadians(-45); //TODO find
         public static final double kFixedShootAngle = Units.degreesToRadians(156); //TODO tune
-        public static final double kIntakeAngle = Units.degreesToRadians(110); //TODO find
+        public static final double kIntakeAngle = Units.degreesToRadians(105); //TODO find
         public static final double kProcessorAngle = Units.degreesToRadians(-40); //TODO find
 
-        public static final double kIntakeSpeed = 1000; //TODO find (rpm)
-        public static final double kOuttakeSpeed = 1000; //TODO find (rpm)
+        public static final double kIntakeSpeed = 3000; //TODO find (rpm)
+        public static final double kOuttakeSpeed = 3000; //TODO find (rpm)
         public static final double kGrabSpeed = 100; //TODO find (rpm)
         public static final double kFixedShootSpeed = 2000; //TODO find (rpm)
         public static final double kAllowedShootError = 100;
         public static final double kStopSpeed = 0;
 
-        public static final double kProximityBand = 175; //TODO tune
+        public static final double kProximityBand = 177; //TODO tune
 
         public static final double kDistanceA = -0.611; //TODO tune (y=mx+b for shoot linear regression equation for distance)
         public static final double kHeightA = -0.3; //TODO tune (y=mx+b for shoot linear regression equation for height)
@@ -119,10 +119,10 @@ public class Control {
                                    kShootI = 7e-7, //TODO tune
                                    kShootD = 0.0115, //TODO tune
                                    kShootFF = 0.000119; //TODO adjust 0.0010905
-        public static final double kArmP = 0.11, //TODO tune
+        public static final double kArmP = 17.5, //TODO tune
                                    kArmI = 0, //TODO tune
-                                   kArmD = 0; //TODO tune
-        public static final double kS = 0.3, //TODO tune
+                                   kArmD = 0.0; //TODO tune
+        public static final double kS = 0.4, //TODO tune
                                    kG = 0.35, //TODO adjust
                                    kV = 0.70, //TODO adjust (0.01 if degrees)
                                    kA = 0.01; //TODO adjust (0.00 if degrees)

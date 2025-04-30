@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import frc.robot.commands.TestGrab;
 import frc.robot.commands.drive.ReefLeft;
 import frc.robot.commands.drive.ReefNearest;
 import frc.robot.commands.drive.ReefRight;
@@ -80,7 +79,7 @@ public class RobotContainer {
 
     kindaUgly();
     driveSubsystem.setDefaultCommand(drive);
-    //algaeClawSubsystem.setDefaultCommand(algaeClawSubsystem.stowCommand());
+    algaeClawSubsystem.setDefaultCommand(algaeClawSubsystem.stowCommand());
 
     configureBindings();
 
@@ -123,12 +122,13 @@ public class RobotContainer {
     new JoystickButton(operator, Button.kR2.value).onTrue(algaeClawSubsystem.shootPrep());
     new JoystickButton(operator, Button.kSquare.value).onTrue(algaeClawSubsystem.shoot());
     new JoystickButton(operator, Button.kL2.value).onTrue(new GrabAlgae(algaeClawSubsystem));  */
+    //new JoystickButton(operator, Button.kCircle.value).whileTrue(algaeClawSubsystem.feedforwardTest());
     new JoystickButton(operator, Button.kR2.value).whileTrue(algaeClawSubsystem.testPID());
-    new JoystickButton(operator, Button.kL2.value).onTrue(algaeClawSubsystem.testGrab());
+    new JoystickButton(operator, Button.kL2.value).onTrue(new GrabAlgae(algaeClawSubsystem));
     new Trigger(() -> Util.checkRightJoystickControl(operator, false)) .whileTrue(algaeClawSubsystem.testUp());
     new Trigger(() -> Util.checkRightJoystickControl(operator, true)).whileTrue(algaeClawSubsystem.testDown());
 
-    new JoystickButton(operator, Button.kCircle.value).onTrue(elevatorSubsystem.reset());
+    //new JoystickButton(operator, Button.kCircle.value).onTrue(elevatorSubsystem.reset());
     new JoystickButton(operator, Button.kTriangle.value).onTrue(elevatorSubsystem.coralStationCommand());
     new Trigger(() -> Util.checkPOVUp(operator)).toggleOnTrue(
       new InstantCommand(() -> new ElevatorUp(elevatorSubsystem).schedule()));

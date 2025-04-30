@@ -115,17 +115,19 @@ public class AlgaeClawSubsystem extends SubsystemBase {
 
   public void poop(){
     driveShoot(Control.algaeManipulator.kIntakeSpeed);
+    shoot.set(0);
   }
   public void stow(){
     driveArm(Control.algaeManipulator.kStowAngle);
-    driveShoot(Control.algaeManipulator.kStopSpeed);
+    shoot.set(0);
   }
   public void intakeAngle(){
     driveArm(Control.algaeManipulator.kIntakeAngle);
+    shoot.set(0);
   }
   public void intake(){
     driveArm(Control.algaeManipulator.kIntakeAngle);
-    driveShoot(Control.algaeManipulator.kIntakeSpeed);
+    shoot.set(-0.25);
   }
   public void processorAngle(){
     driveArm(Control.algaeManipulator.kProcessorAngle);
@@ -140,7 +142,8 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   }
   public void grab(){
     driveArm(Control.algaeManipulator.kGrabAngle);
-    driveShoot(Control.algaeManipulator.kGrabSpeed);
+    //driveShoot(Control.algaeManipulator.kGrabSpeed);
+    shoot.set(-0.215);
   }
   public void grabGround(){
     driveArm(Control.algaeManipulator.kGroundGrabAngle);
@@ -166,7 +169,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
 
   
   public RunCommand testUp(){
-    return new RunCommand(() -> arm.set(0.1), this);
+    return new RunCommand(() -> arm.set(0.05), this);
   }
   public RunCommand testDown(){
     return new RunCommand(() -> arm.set(-0.1), this);
@@ -187,11 +190,12 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     shoot.set(0);
   }
   public RunCommand testIntake(){
-    return new RunCommand(() -> shoot.set(-0.3), this);
+    return new RunCommand(() -> shoot.set(-0.25), this);
   }
   public RunCommand testPID(){
     return new RunCommand(() -> driveShoot(6000), this);
   }
+
 
   public Command neutral(double setpoint){
     return run(() -> {
@@ -206,11 +210,6 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   //public Command shoot(){ return run(() -> shootRelease()); }
 
 
-  public boolean testCurrent(){
-    if (shoot.getOutputCurrent() > 25)
-      return true;
-    return false;
-  }
   public boolean hasAlgae() {
     return colorSensor.getProximity() > Control.algaeManipulator.kProximityBand;
   }
@@ -235,12 +234,12 @@ public class AlgaeClawSubsystem extends SubsystemBase {
   }
   public void driveArm(double setpoint){
     //setpoint = setpoint * Control.algaeManipulator.kArmConversionFactor; i don't think this is necessary???
-    double pidCalculation = pidController.calculate(getArmPosition(), armSetpoint);
+    double pidCalculation = pidController.calculate(getArmPosition(), setpoint);
     double feedforwardCalculation = feedforward.calculate(
       pidController.getSetpoint().position, pidController.getSetpoint().velocity);
     arm.setVoltage(
-      feedforwardCalculation + 
-      pidCalculation
+      //feedforwardCalculation 
+      + pidCalculation
     );
 
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "feedforwardCalculation", feedforwardCalculation);
@@ -269,7 +268,7 @@ public class AlgaeClawSubsystem extends SubsystemBase {
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "shootFollowSpeed", shootFollower.getEncoder().getVelocity());
     SmartDashboard.putBoolean(SUBSYSTEM_NAME + "hasAlgae", hasAlgae());
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "proximity", colorSensor.getProximity());
-    SmartDashboard.putNumber(SUBSYSTEM_NAME + "setpoint", armSetpoint);
+    SmartDashboard.putNumber(SUBSYSTEM_NAME + "position", getArmPosition());
     //SmartDashboard.putNumber(SUBSYSTEM_NAME + "position", Units.radiansToDegrees(absEncoder.getPosition()));
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "goal", pidController.getGoal().position);
     SmartDashboard.putNumber(SUBSYSTEM_NAME + "current", shoot.getOutputCurrent());
