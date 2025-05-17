@@ -4,12 +4,14 @@
 
 package frc.robot;
 
+import frc.robot.commands.Stow;
 import frc.robot.commands.drive.ReefLeft;
 import frc.robot.commands.drive.ReefNearest;
 import frc.robot.commands.drive.ReefRight;
 import frc.robot.commands.elevator.ElevatorDown;
 import frc.robot.commands.elevator.ElevatorUp;
 import frc.robot.commands.grabAlgae.GrabAlgae;
+import frc.robot.commands.grabAlgae.GrabAlgaeGround;
 import frc.robot.commands.processor.ProcessorPrep;
 import frc.robot.constants.*;
 import frc.robot.subsystems.*;
@@ -117,12 +119,13 @@ public class RobotContainer {
      */
     new JoystickButton(operator, Button.kL1.value).whileTrue(algaeClawSubsystem.algaePoop());
     new JoystickButton(operator, Button.kCross.value).whileTrue(algaeClawSubsystem.testIntake());
-    /*Pnew JoystickButton(operator, Button.kCross.value).onTrue(algaeClawSubsystem.intakeAlgae());
+    /*new JoystickButton(operator, Button.kCross.value).onTrue(algaeClawSubsystem.intakeAlgae());
     new JoystickButton(operator, Button.kCircle.value).onTrue(new ProcessorPrep(algaeClawSubsystem, elevatorSubsystem));
     new JoystickButton(operator, Button.kR2.value).onTrue(algaeClawSubsystem.shootPrep());
     new JoystickButton(operator, Button.kSquare.value).onTrue(algaeClawSubsystem.shoot());
     new JoystickButton(operator, Button.kL2.value).onTrue(new GrabAlgae(algaeClawSubsystem));  */
-    //new JoystickButton(operator, Button.kCircle.value).whileTrue(algaeClawSubsystem.feedforwardTest());
+    new JoystickButton(operator, Button.kCircle.value).whileTrue(algaeClawSubsystem.feedforwardTest());
+    new JoystickButton(operator, Button.kCreate.value).onTrue(new GrabAlgaeGround(algaeClawSubsystem));
     new JoystickButton(operator, Button.kR2.value).whileTrue(algaeClawSubsystem.testPID());
     new JoystickButton(operator, Button.kL2.value).onTrue(new GrabAlgae(algaeClawSubsystem));
     new Trigger(() -> Util.checkRightJoystickControl(operator, false)) .whileTrue(algaeClawSubsystem.testUp());

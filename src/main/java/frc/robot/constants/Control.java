@@ -95,7 +95,7 @@ public class Control {
         public static final double kAllowedArmError = Units.degreesToRadians(1.5); //TODO tune
         public static final double kAlgaeToElevatorOffset = Units.inchesToMeters(5);
 
-        public static final double kStowAngle = Units.degreesToRadians(105);//TODO find
+        public static final double kStowAngle = Units.degreesToRadians(95);//TODO find
         public static final double kGrabAngle = Units.degreesToRadians(70); //TODO find
         public static final double kGroundGrabAngle = Units.degreesToRadians(-45); //TODO find
         public static final double kFixedShootAngle = Units.degreesToRadians(156); //TODO tune
@@ -109,7 +109,7 @@ public class Control {
         public static final double kAllowedShootError = 100;
         public static final double kStopSpeed = 0;
 
-        public static final double kProximityBand = 177; //TODO tune
+        public static final double kProximityBand = 135; //TODO tune
 
         public static final double kDistanceA = -0.611; //TODO tune (y=mx+b for shoot linear regression equation for distance)
         public static final double kHeightA = -0.3; //TODO tune (y=mx+b for shoot linear regression equation for height)
@@ -122,8 +122,8 @@ public class Control {
         public static final double kArmP = 17.5, //TODO tune
                                    kArmI = 0, //TODO tune
                                    kArmD = 0.0; //TODO tune
-        public static final double kS = 0.4, //TODO tune
-                                   kG = 0.35, //TODO adjust
+        public static final double kS = 0.555, 
+                                   kG = 0.35, 
                                    kV = 0.70, //TODO adjust (0.01 if degrees)
                                    kA = 0.01; //TODO adjust (0.00 if degrees)
         public static final Constraints kConstraints = new Constraints(
